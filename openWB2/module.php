@@ -75,7 +75,7 @@ class openWB2 extends IPSModuleStrict
             'type'      => 'connect',
             'moduleIDs' => [
                 // MQTT-Client
-                '{EE0D345A-CF31-428A-A613-33CE98E752DD}'
+                '{C6D2AEB3-6E1F-4B2E-8E69-3A1A00246850}'
             ]
         ]);
 
