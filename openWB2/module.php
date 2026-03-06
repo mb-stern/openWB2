@@ -240,7 +240,7 @@ class openWB2 extends IPSModuleStrict
         }
     }
 
-    public function RequestAction($Ident, $Value)
+    public function RequestAction($Ident, mixed $Value): void
     {
         switch ($Ident) {
             case 'LPChargePointEnabled':
