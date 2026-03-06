@@ -81,8 +81,6 @@ class openWB2 extends IPSModuleStrict
     {
         parent::ApplyChanges();
 
-        $this->ConnectParent(self::MQTT_SERVER_GUID);
-
         $baseTopic = $this->ReadPropertyString('BaseTopic');
         if ($baseTopic === '') {
             $this->SetReceiveDataFilter('.*');
