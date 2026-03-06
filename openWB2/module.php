@@ -2,171 +2,104 @@
 
 class openWB2 extends IPSModuleStrict
 {
-    private const MQTT_CLIENT_SPLITTER_GUID = '{EE0D345A-CF31-428A-A613-33CE98E752DD}';
-    private const MQTT_CLIENT_TX = '{97475B04-67C3-A74D-C970-E9409B0EFA1D}';
-    private const MQTT_CLIENT_RX = '{DBDA9DF7-5D04-F49D-370A-2B9153D00D9B}';
+    private const MQTT_SERVER_GUID = '{C6D2AEB3-6E1F-4B2E-8E69-3A1A00246850}';
+    private const MQTT_CLIENT_SOCKET_GUID = '{043EA491-0325-4ADD-8FC2-A30C8EEB4D3F}';
 
-    public function Create(): void
+    public function Create()
     {
         parent::Create();
+
+        $this->ConnectParent(self::MQTT_SERVER_GUID);
 
         $this->RegisterPropertyString('BaseTopic', 'openWB');
         $this->RegisterPropertyInteger('ChargePointID', 0);
 
+        // Profile direkt im Modul erzeugen
         $this->RegisterProfiles();
 
-        if ($this->RegisterVariableInteger('LPSoC', 'LP SoC', '~Intensity.100', 10)) {
-            $this->SetValue('LPSoC', 0);
-        }
-        if ($this->RegisterVariableInteger('LPProSoC', 'LP Pro SoC', '~Intensity.100', 20)) {
-            $this->SetValue('LPProSoC', 0);
-        }
-        if ($this->RegisterVariableInteger('LPConfiguredCurrent', 'LP EVSE Current', 'OWB.Ampere', 30)) {
-            $this->SetValue('LPConfiguredCurrent', 0);
-        }
+        // Status / Read-Werte
+        $this->RegisterVariableInteger('LPSoC', 'LP SoC', '~Intensity.100', 10);
+        $this->RegisterVariableInteger('LPProSoC', 'LP Pro SoC', '~Intensity.100', 20);
+        $this->RegisterVariableInteger('LPConfiguredCurrent', 'LP EVSE Current', 'OWB.Ampere', 30);
+        $this->RegisterVariableFloat('LPPhaseCurrent1', 'LP Phase 1 Current', '~Ampere', 40);
+        $this->RegisterVariableFloat('LPPhaseCurrent2', 'LP Phase 2 Current', '~Ampere', 50);
+        $this->RegisterVariableFloat('LPPhaseCurrent3', 'LP Phase 3 Current', '~Ampere', 60);
 
-        if ($this->RegisterVariableFloat('LPPhaseCurrent1', 'LP Phase 1 Current', '~Ampere', 40)) {
-            $this->SetValue('LPPhaseCurrent1', 0.0);
-        }
-        if ($this->RegisterVariableFloat('LPPhaseCurrent2', 'LP Phase 2 Current', '~Ampere', 50)) {
-            $this->SetValue('LPPhaseCurrent2', 0.0);
-        }
-        if ($this->RegisterVariableFloat('LPPhaseCurrent3', 'LP Phase 3 Current', '~Ampere', 60)) {
-            $this->SetValue('LPPhaseCurrent3', 0.0);
-        }
+        $this->RegisterVariableFloat('LPVoltage1', 'LP Phase 1 Voltage', '~Volt', 70);
+        $this->RegisterVariableFloat('LPVoltage2', 'LP Phase 2 Voltage', '~Volt', 80);
+        $this->RegisterVariableFloat('LPVoltage3', 'LP Phase 3 Voltage', '~Volt', 90);
 
-        if ($this->RegisterVariableFloat('LPVoltage1', 'LP Phase 1 Voltage', '~Volt', 70)) {
-            $this->SetValue('LPVoltage1', 0.0);
-        }
-        if ($this->RegisterVariableFloat('LPVoltage2', 'LP Phase 2 Voltage', '~Volt', 80)) {
-            $this->SetValue('LPVoltage2', 0.0);
-        }
-        if ($this->RegisterVariableFloat('LPVoltage3', 'LP Phase 3 Voltage', '~Volt', 90)) {
-            $this->SetValue('LPVoltage3', 0.0);
-        }
+        $this->RegisterVariableFloat('LPPower', 'LP Charging Power', '~Power', 100);
+        $this->RegisterVariableInteger('LPPhasesInUse', 'LP Phases in Use', '', 110);
 
-        if ($this->RegisterVariableFloat('LPPower', 'LP Charging Power', '~Power', 100)) {
-            $this->SetValue('LPPower', 0.0);
-        }
-        if ($this->RegisterVariableInteger('LPPhasesInUse', 'LP Phases in Use', '', 110)) {
-            $this->SetValue('LPPhasesInUse', 0);
-        }
+        $this->RegisterVariableBoolean('LPChargeState', 'LP Charge State', 'OWB.ChargeState', 120);
+        $this->RegisterVariableBoolean('LPPlugState', 'LP Plug State', 'OWB.PlugState', 130);
 
-        if ($this->RegisterVariableBoolean('LPChargeState', 'LP Charge State', 'OWB.ChargeState', 120)) {
-            $this->SetValue('LPChargeState', false);
-        }
-        if ($this->RegisterVariableBoolean('LPPlugState', 'LP Plug State', 'OWB.PlugState', 130)) {
-            $this->SetValue('LPPlugState', false);
-        }
-        if ($this->RegisterVariableBoolean('LPChargePointEnabled', 'LP Chargepoint Enabled', 'OWB.ChargePointEnabled', 140)) {
-            $this->SetValue('LPChargePointEnabled', true);
-        }
+        // simpleAPI liefert manual_lock, im Modul soll "Enabled" erhalten bleiben:
+        // true = offen / false = gesperrt
+        $this->RegisterVariableBoolean('LPChargePointEnabled', 'LP Chargepoint Enabled', 'OWB.ChargePointEnabled', 140);
         $this->EnableAction('LPChargePointEnabled');
 
-        if ($this->RegisterVariableInteger('LPState', 'LP State', 'OWB.LPState', 150)) {
-            $this->SetValue('LPState', 0);
-        }
+        $this->RegisterVariableInteger('LPState', 'LP State', 'OWB.LPState', 150);
 
-        if ($this->RegisterVariableInteger('LPFaultState', 'LP Fault State', '', 160)) {
-            $this->SetValue('LPFaultState', 0);
-        }
-        if ($this->RegisterVariableString('LPFaultString', 'LP Fault String', '', 170)) {
-            $this->SetValue('LPFaultString', '');
-        }
-        if ($this->RegisterVariableString('LPStateString', 'LP State String', '', 180)) {
-            $this->SetValue('LPStateString', '');
-        }
-        if ($this->RegisterVariableString('LPVehicleName', 'LP Vehicle Name', '', 190)) {
-            $this->SetValue('LPVehicleName', '');
-        }
-        if ($this->RegisterVariableString('LPRFID', 'LP RFID', '', 200)) {
-            $this->SetValue('LPRFID', '');
-        }
+        $this->RegisterVariableInteger('LPFaultState', 'LP Fault State', '', 160);
+        $this->RegisterVariableString('LPFaultString', 'LP Fault String', '', 170);
+        $this->RegisterVariableString('LPStateString', 'LP State String', '', 180);
+        $this->RegisterVariableString('LPVehicleName', 'LP Vehicle Name', '', 190);
+        $this->RegisterVariableString('LPRFID', 'LP RFID', '', 200);
 
-        if ($this->RegisterVariableFloat('LPDailyImported', 'LP Daily Imported', '~Electricity', 210)) {
-            $this->SetValue('LPDailyImported', 0.0);
-        }
-        if ($this->RegisterVariableFloat('LPImported', 'LP Imported', '~Electricity', 220)) {
-            $this->SetValue('LPImported', 0.0);
-        }
+        $this->RegisterVariableFloat('LPDailyImported', 'LP Daily Imported', '~Electricity', 210);
+        $this->RegisterVariableFloat('LPImported', 'LP Imported', '~Electricity', 220);
 
-        if ($this->RegisterVariableInteger('LPCurrent', 'LP Current', 'OWB.Ampere', 300)) {
-            $this->SetValue('LPCurrent', 6);
-        }
+        // Schreibbare Parameter
+        $this->RegisterVariableInteger('LPCurrent', 'LP Current', 'OWB.Ampere', 300);
         $this->EnableAction('LPCurrent');
 
-        if ($this->RegisterVariableInteger('LPChargeMode', 'LP Charge Mode', 'OWB.ChargeMode', 310)) {
-            $this->SetValue('LPChargeMode', 0);
-        }
+        $this->RegisterVariableInteger('LPChargeMode', 'LP Charge Mode', 'OWB.ChargeMode', 310);
         $this->EnableAction('LPChargeMode');
 
-        if ($this->RegisterVariableInteger('LPChargeLimitation', 'LP Charge Limitation', 'OWB.ChargeLimitation', 320)) {
-            $this->SetValue('LPChargeLimitation', 0);
-        }
+        $this->RegisterVariableInteger('LPChargeLimitation', 'LP Charge Limitation', 'OWB.ChargeLimitation', 320);
         $this->EnableAction('LPChargeLimitation');
 
-        if ($this->RegisterVariableInteger('LPSoCToChargeTo', 'LP SoC To Charge To', '~Intensity.100', 330)) {
-            $this->SetValue('LPSoCToChargeTo', 0);
-        }
+        $this->RegisterVariableInteger('LPSoCToChargeTo', 'LP SoC To Charge To', '~Intensity.100', 330);
         $this->EnableAction('LPSoCToChargeTo');
 
-        if ($this->RegisterVariableInteger('LPEnergyToCharge', 'LP Energy To Charge', 'OWB.EnergyToCharge', 340)) {
-            $this->SetValue('LPEnergyToCharge', 1);
-        }
+        $this->RegisterVariableInteger('LPEnergyToCharge', 'LP Energy To Charge', 'OWB.EnergyToCharge', 340);
         $this->EnableAction('LPEnergyToCharge');
 
-        if ($this->RegisterVariableInteger('LPResetDirectCharge', 'LP Reset Direct Charge', 'OWB.ResetDirectCharge', 350)) {
-            $this->SetValue('LPResetDirectCharge', 1);
-        }
+        $this->RegisterVariableInteger('LPResetDirectCharge', 'LP Reset Direct Charge', 'OWB.ResetDirectCharge', 350);
         $this->EnableAction('LPResetDirectCharge');
     }
 
-    public function ApplyChanges(): void
+    public function ApplyChanges()
     {
         parent::ApplyChanges();
 
-        $baseTopic = trim($this->ReadPropertyString('BaseTopic'));
-        $cpBase = $this->GetChargePointBaseTopic();
+        $this->ConnectParent(self::MQTT_SERVER_GUID);
 
-        if ($baseTopic === '' || $cpBase === '') {
+        $baseTopic = $this->ReadPropertyString('BaseTopic');
+        if ($baseTopic === '') {
             $this->SetReceiveDataFilter('.*');
-            $this->SetSummary('openWB / ChargePoint ?');
             return;
         }
 
-        $patterns = [
-            preg_quote($cpBase, '/'),
-            preg_quote(rtrim($baseTopic, '/') . '/simpleAPI/set', '/')
-        ];
-
-        $this->SetReceiveDataFilter('.*(' . implode('|', $patterns) . ').*');
-        $this->SetSummary($cpBase);
-
-        $this->SubscribeTopics();
+        $filter = preg_quote($baseTopic . '/simpleAPI/', '/');
+        $this->SetReceiveDataFilter('.*' . $filter . '.*');
     }
 
-    public function GetCompatibleParents(): string
+    public function ReceiveData($JSONString)
     {
-        return json_encode([
-            'type'      => 'connect',
-            'moduleIds' => [self::MQTT_CLIENT_SPLITTER_GUID]
-        ]);
-    }
-
-    public function ReceiveData(string $JSONString): void
-    {
-        $packet = json_decode($JSONString, true);
-        if (!is_array($packet)) {
+        $data = json_decode($JSONString, true);
+        if (!is_array($data)) {
             return;
         }
 
-        $message = $this->ExtractTopicPayload($packet);
-        if ($message === null) {
+        if (!isset($data['Topic']) || !array_key_exists('Payload', $data)) {
             return;
         }
 
-        $topic = $message['Topic'];
-        $payload = $message['Payload'];
+        $topic = (string) $data['Topic'];
+        $payload = $data['Payload'];
 
         $cpBase = $this->GetChargePointBaseTopic();
         if ($cpBase === '') {
@@ -233,6 +166,8 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case $cpBase . '/manual_lock':
+                // simpleAPI: true = gesperrt
+                // Modul: true = offen
                 $this->SetValue('LPChargePointEnabled', !$this->ToBool($payload));
                 break;
 
@@ -263,6 +198,7 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case $cpBase . '/imported':
+                // simpleAPI-Beispiel zeigt große importierte Werte; zur Anzeige als kWh -> /1000
                 if ($this->IsNumericPayload($payload)) {
                     $this->SetValue('LPImported', ((float) $payload) / 1000);
                 }
@@ -288,7 +224,6 @@ class openWB2 extends IPSModuleStrict
                 }
                 break;
 
-            case $cpBase . '/chargecurrent':
             case $cpBase . '/charging_current':
                 if ($this->IsNumericPayload($payload)) {
                     $this->SetValue('LPCurrent', (int) round((float) $payload));
@@ -297,10 +232,11 @@ class openWB2 extends IPSModuleStrict
         }
     }
 
-    public function RequestAction(string $Ident, mixed $Value): void
+    public function RequestAction($Ident, $Value)
     {
         switch ($Ident) {
             case 'LPChargePointEnabled':
+                // true = offen, false = sperren
                 $this->PublishSetTopic(
                     'chargepoint/' . $this->ReadPropertyInteger('ChargePointID') . '/chargepoint_lock',
                     $Value ? 'false' : 'true'
@@ -345,6 +281,8 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case 'LPResetDirectCharge':
+                // Doku kennt keinen eigenen Reset-Topic.
+                // Deshalb: Limit deaktivieren + Werte zurücksetzen.
                 $this->PublishSetTopic('instant_charging_limit', 'none');
                 $this->PublishSetTopic('instant_charging_limit_soc', '0');
                 $this->PublishSetTopic('instant_charging_limit_amount', '1');
@@ -356,136 +294,8 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             default:
-                throw new InvalidArgumentException('Invalid Ident: ' . $Ident);
+                throw new Exception('Invalid Ident');
         }
-    }
-
-    private function SubscribeTopics(): void
-    {
-        $cpBase = $this->GetChargePointBaseTopic();
-        if ($cpBase === '') {
-            return;
-        }
-
-        $topics = [
-            $cpBase . '/#',
-            rtrim($this->ReadPropertyString('BaseTopic'), '/') . '/simpleAPI/#'
-        ];
-
-        foreach ($topics as $topic) {
-            $this->SendMQTTClientCommand([
-                'Function' => 'Subscribe',
-                'Topic'    => $topic
-            ]);
-        }
-    }
-
-    private function PublishSetTopic(string $relativeTopic, string $payload, bool $retain = false): void
-    {
-        $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
-        $fullTopic = $baseTopic . '/simpleAPI/set/' . ltrim($relativeTopic, '/');
-
-        $this->SendMQTTClientCommand([
-            'Function' => 'Publish',
-            'Topic'    => $fullTopic,
-            'Payload'  => $payload,
-            'Retain'   => $retain ? 1 : 0
-        ]);
-    }
-
-    private function SendMQTTClientCommand(array $command): void
-    {
-        $buffer = json_encode($command, JSON_UNESCAPED_SLASHES);
-        if ($buffer === false) {
-            return;
-        }
-
-        $data = [
-            'DataID' => self::MQTT_CLIENT_TX,
-            'Buffer' => utf8_encode($buffer)
-        ];
-
-        $this->SendDataToParent(json_encode($data, JSON_UNESCAPED_SLASHES));
-    }
-
-    private function ExtractTopicPayload(array $packet): ?array
-    {
-        if (isset($packet['Topic']) && array_key_exists('Payload', $packet)) {
-            return [
-                'Topic'   => (string) $packet['Topic'],
-                'Payload' => $packet['Payload']
-            ];
-        }
-
-        if (!isset($packet['Buffer'])) {
-            return null;
-        }
-
-        $buffer = $packet['Buffer'];
-
-        if (is_string($buffer)) {
-            $decodedCandidates = [];
-
-            $decodedCandidates[] = $buffer;
-
-            if (ctype_xdigit($buffer) && (strlen($buffer) % 2) === 0) {
-                $hex = @hex2bin($buffer);
-                if ($hex !== false) {
-                    $decodedCandidates[] = $hex;
-                }
-            }
-
-            $utf8 = @utf8_decode($buffer);
-            if (is_string($utf8) && $utf8 !== '') {
-                $decodedCandidates[] = $utf8;
-            }
-
-            foreach ($decodedCandidates as $candidate) {
-                $json = json_decode($candidate, true);
-                if (!is_array($json)) {
-                    continue;
-                }
-
-                if (isset($json['Topic']) && array_key_exists('Payload', $json)) {
-                    return [
-                        'Topic'   => (string) $json['Topic'],
-                        'Payload' => $json['Payload']
-                    ];
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private function GetChargePointBaseTopic(): string
-    {
-        $baseTopic = trim($this->ReadPropertyString('BaseTopic'));
-        $chargePointID = $this->ReadPropertyInteger('ChargePointID');
-
-        if ($baseTopic === '') {
-            return '';
-        }
-
-        return rtrim($baseTopic, '/') . '/simpleAPI/chargepoint/' . $chargePointID;
-    }
-
-    private function UpdateLPState(): void
-    {
-        $plugged = $this->GetValue('LPPlugState');
-        $charging = $this->GetValue('LPChargeState');
-
-        if (!$plugged) {
-            $this->SetValue('LPState', 0);
-            return;
-        }
-
-        if ($charging) {
-            $this->SetValue('LPState', 2);
-            return;
-        }
-
-        $this->SetValue('LPState', 1);
     }
 
     private function RegisterProfiles(): void
@@ -501,6 +311,7 @@ class openWB2 extends IPSModuleStrict
         ]);
 
         $this->RegisterProfileInteger('OWB.Ampere', 'Electricity', '', ' A', 0, 32, 1);
+
         $this->RegisterProfileInteger('OWB.EnergyToCharge', 'Electricity', '', ' kWh', 1, 50, 1);
 
         $this->RegisterProfileBooleanEx('OWB.PlugState', 'Car', '', '', [
@@ -535,6 +346,173 @@ class openWB2 extends IPSModuleStrict
         ]);
     }
 
+    private function PublishSetTopic(string $relativeTopic, string $payload, bool $retain = false): void
+    {
+        $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
+        $fullTopic = $baseTopic . '/simpleAPI/set/' . ltrim($relativeTopic, '/');
+
+        $data = [
+            'DataID'            => self::MQTT_CLIENT_SOCKET_GUID,
+            'PacketType'        => 3,
+            'QualityOfService'  => 0,
+            'Retain'            => $retain,
+            'Topic'             => $fullTopic,
+            'Payload'           => $payload
+        ];
+
+        $this->SendDataToParent(json_encode($data, JSON_UNESCAPED_SLASHES));
+    }
+
+    private function GetChargePointBaseTopic(): string
+    {
+        $baseTopic = trim($this->ReadPropertyString('BaseTopic'));
+        $chargePointID = $this->ReadPropertyInteger('ChargePointID');
+
+        if ($baseTopic === '') {
+            return '';
+        }
+
+        return rtrim($baseTopic, '/') . '/simpleAPI/chargepoint/' . $chargePointID;
+    }
+
+    private function UpdateLPState(): void
+    {
+        $plugged = $this->GetValue('LPPlugState');
+        $charging = $this->GetValue('LPChargeState');
+
+        if (!$plugged) {
+            $this->SetValue('LPState', 0);
+            return;
+        }
+
+        if ($charging) {
+            $this->SetValue('LPState', 2);
+            return;
+        }
+
+        $this->SetValue('LPState', 1);
+    }
+
+    private function ToBool($value): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        $normalized = strtolower(trim((string) $value));
+        return in_array($normalized, ['1', 'true', 'yes', 'on'], true);
+    }
+
+    private function PayloadToString($payload): string
+    {
+        if ($payload === null) {
+            return '';
+        }
+
+        if (is_scalar($payload)) {
+            $value = (string) $payload;
+            if (strtolower($value) === 'null') {
+                return '';
+            }
+            return trim($value, "\"");
+        }
+
+        return json_encode($payload, JSON_UNESCAPED_SLASHES);
+    }
+
+    private function IsNumericPayload($payload): bool
+    {
+        if (is_int($payload) || is_float($payload)) {
+            return true;
+        }
+
+        if (is_string($payload)) {
+            $test = trim($payload);
+            if ($test === '' || strtolower($test) === 'null') {
+                return false;
+            }
+            return is_numeric($test);
+        }
+
+        return false;
+    }
+
+    private function SetFloatIfNumeric(string $ident, $payload): void
+    {
+        if ($this->IsNumericPayload($payload)) {
+            $this->SetValue($ident, (float) $payload);
+        }
+    }
+
+    private function MapChargeModeStringToInt(string $value): int
+    {
+        $value = strtolower(trim($value));
+
+        switch ($value) {
+            case 'instant':
+                return 0;
+            case 'pv':
+                return 1;
+            case 'eco':
+                return 2;
+            case 'stop':
+                return 3;
+            case 'target':
+                return 4;
+            case 'scheduled_charging':
+            case 'scheduled':
+                return 5;
+            default:
+                return 6;
+        }
+    }
+
+    private function MapChargeModeIntToString(int $value): string
+    {
+        switch ($value) {
+            case 0:
+                return 'instant';
+            case 1:
+                return 'pv';
+            case 2:
+                return 'eco';
+            case 3:
+                return 'stop';
+            case 4:
+                return 'target';
+            case 5:
+                return 'scheduled_charging';
+            default:
+                return 'instant';
+        }
+    }
+
+    private function MapLimitTypeStringToInt(string $value): int
+    {
+        $value = strtolower(trim($value));
+
+        switch ($value) {
+            case 'amount':
+                return 1;
+            case 'soc':
+                return 2;
+            default:
+                return 0;
+        }
+    }
+
+    private function MapLimitTypeIntToString(int $value): string
+    {
+        switch ($value) {
+            case 1:
+                return 'amount';
+            case 2:
+                return 'soc';
+            default:
+                return 'none';
+        }
+    }
+
     private function RegisterProfileInteger(string $name, string $icon, string $prefix, string $suffix, int $min, int $max, int $step): void
     {
         if (!IPS_VariableProfileExists($name)) {
@@ -544,6 +522,18 @@ class openWB2 extends IPSModuleStrict
         IPS_SetVariableProfileIcon($name, $icon);
         IPS_SetVariableProfileText($name, $prefix, $suffix);
         IPS_SetVariableProfileValues($name, $min, $max, $step);
+    }
+
+    private function RegisterProfileFloat(string $name, string $icon, string $prefix, string $suffix, float $min, float $max, float $step, int $digits): void
+    {
+        if (!IPS_VariableProfileExists($name)) {
+            IPS_CreateVariableProfile($name, VARIABLETYPE_FLOAT);
+        }
+
+        IPS_SetVariableProfileIcon($name, $icon);
+        IPS_SetVariableProfileText($name, $prefix, $suffix);
+        IPS_SetVariableProfileValues($name, $min, $max, $step);
+        IPS_SetVariableProfileDigits($name, $digits);
     }
 
     private function RegisterProfileBooleanEx(string $name, string $icon, string $prefix, string $suffix, array $associations): void
@@ -586,102 +576,5 @@ class openWB2 extends IPSModuleStrict
                 (int) $association[3]
             );
         }
-    }
-
-    private function ToBool(mixed $value): bool
-    {
-        if (is_bool($value)) {
-            return $value;
-        }
-
-        $normalized = strtolower(trim((string) $value));
-        return in_array($normalized, ['1', 'true', 'yes', 'on'], true);
-    }
-
-    private function PayloadToString(mixed $payload): string
-    {
-        if ($payload === null) {
-            return '';
-        }
-
-        if (is_scalar($payload)) {
-            $value = (string) $payload;
-            if (strtolower($value) === 'null') {
-                return '';
-            }
-            return trim($value, "\"");
-        }
-
-        $json = json_encode($payload, JSON_UNESCAPED_SLASHES);
-        return $json === false ? '' : $json;
-    }
-
-    private function IsNumericPayload(mixed $payload): bool
-    {
-        if (is_int($payload) || is_float($payload)) {
-            return true;
-        }
-
-        if (is_string($payload)) {
-            $test = trim($payload);
-            if ($test === '' || strtolower($test) === 'null') {
-                return false;
-            }
-            return is_numeric($test);
-        }
-
-        return false;
-    }
-
-    private function SetFloatIfNumeric(string $ident, mixed $payload): void
-    {
-        if ($this->IsNumericPayload($payload)) {
-            $this->SetValue($ident, (float) $payload);
-        }
-    }
-
-    private function MapChargeModeStringToInt(string $value): int
-    {
-        return match (strtolower(trim($value))) {
-            'instant'            => 0,
-            'pv'                 => 1,
-            'eco'                => 2,
-            'stop'               => 3,
-            'target'             => 4,
-            'scheduled',
-            'scheduled_charging' => 5,
-            default              => 6
-        };
-    }
-
-    private function MapChargeModeIntToString(int $value): string
-    {
-        return match ($value) {
-            0       => 'instant',
-            1       => 'pv',
-            2       => 'eco',
-            3       => 'stop',
-            4       => 'target',
-            5       => 'scheduled_charging',
-            default => 'instant'
-        };
-    }
-
-    private function MapLimitTypeStringToInt(string $value): int
-    {
-        return match (strtolower(trim($value))) {
-            'amount' => 1,
-            'soc'    => 2,
-            default  => 0
-        };
-    }
-
-    private function MapLimitTypeIntToString(int $value): string
-    {
-        return match ($value) {
-            1       => 'amount',
-            2       => 'soc',
-            default => 'none'
-        };
     }
 }
