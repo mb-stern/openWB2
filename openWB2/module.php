@@ -91,6 +91,30 @@ class openWB2 extends IPSModuleStrict
         $this->SetReceiveDataFilter('.*' . $filter . '.*');
     }
 
+    public function GetConfigurationForm(): string
+    {
+        $form = [
+            'elements' => [
+                [
+                    'name'    => 'BaseTopic',
+                    'type'    => 'ValidationTextBox',
+                    'caption' => 'MQTT Topic'
+                ],
+                [
+                    'name'    => 'ChargePointID',
+                    'type'    => 'NumberSpinner',
+                    'caption' => 'Charging Point'
+                ]
+            ],
+            'actions' => [
+                [
+                    'type' => 'TestCenter'
+                ]
+            ]
+        ];
+
+        return json_encode($form);
+    }
     public function ReceiveData(string $JSONString): string
     {
         $data = json_decode($JSONString, true);
