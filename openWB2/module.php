@@ -135,131 +135,141 @@ class openWB2 extends IPSModuleStrict
         $topic = (string) $data['Topic'];
         $payload = $data['Payload'];
 
-        $cpBase = $this->GetChargePointBaseTopic();
-        if ($cpBase === '') {
+        $cpBases = $this->GetChargePointBaseTopics();
+        if ($cpBases === []) {
             return '';
         }
 
-        switch ($topic) {
-            case $cpBase . '/soc/soc':
-                if ($this->IsNumericPayload($payload)) {
-                    $this->SetValue('LPSoC', (int) round((float) $payload));
-                }
-                break;
+        // Debug zum Prüfen, welche Topics wirklich ankommen
+        $this->SendDebug('Topic', $topic, 0);
+        $this->SendDebug('Payload', is_scalar($payload) || $payload === null ? (string) $payload : json_encode($payload), 0);
 
-            case $cpBase . '/pro_soc':
-                if ($this->IsNumericPayload($payload)) {
-                    $this->SetValue('LPProSoC', (int) round((float) $payload));
-                }
-                break;
+        foreach ($cpBases as $cpBase) {
+            switch ($topic) {
+                case $cpBase . '/soc/soc':
+                    if ($this->IsNumericPayload($payload)) {
+                        $this->SetValue('LPSoC', (int) round((float) $payload));
+                    }
+                    return '';
 
-            case $cpBase . '/evse_current':
-                if ($this->IsNumericPayload($payload)) {
-                    $this->SetValue('LPConfiguredCurrent', (int) round((float) $payload));
-                }
-                break;
+                case $cpBase . '/pro_soc':
+                    if ($this->IsNumericPayload($payload)) {
+                        $this->SetValue('LPProSoC', (int) round((float) $payload));
+                    }
+                    return '';
 
-            case $cpBase . '/currents/1':
-                $this->SetFloatIfNumeric('LPPhaseCurrent1', $payload);
-                break;
-            case $cpBase . '/currents/2':
-                $this->SetFloatIfNumeric('LPPhaseCurrent2', $payload);
-                break;
-            case $cpBase . '/currents/3':
-                $this->SetFloatIfNumeric('LPPhaseCurrent3', $payload);
-                break;
+                case $cpBase . '/evse_current':
+                    if ($this->IsNumericPayload($payload)) {
+                        $this->SetValue('LPConfiguredCurrent', (int) round((float) $payload));
+                    }
+                    return '';
 
-            case $cpBase . '/voltages/1':
-                $this->SetFloatIfNumeric('LPVoltage1', $payload);
-                break;
-            case $cpBase . '/voltages/2':
-                $this->SetFloatIfNumeric('LPVoltage2', $payload);
-                break;
-            case $cpBase . '/voltages/3':
-                $this->SetFloatIfNumeric('LPVoltage3', $payload);
-                break;
+                case $cpBase . '/currents/1':
+                    $this->SetFloatIfNumeric('LPPhaseCurrent1', $payload);
+                    return '';
 
-            case $cpBase . '/power':
-                $this->SetFloatIfNumeric('LPPower', $payload);
-                break;
+                case $cpBase . '/currents/2':
+                    $this->SetFloatIfNumeric('LPPhaseCurrent2', $payload);
+                    return '';
 
-            case $cpBase . '/phases_in_use':
-                if ($this->IsNumericPayload($payload)) {
-                    $this->SetValue('LPPhasesInUse', (int) round((float) $payload));
-                }
-                break;
+                case $cpBase . '/currents/3':
+                    $this->SetFloatIfNumeric('LPPhaseCurrent3', $payload);
+                    return '';
 
-            case $cpBase . '/charge_state':
-                $this->SetValue('LPChargeState', $this->ToBool($payload));
-                $this->UpdateLPState();
-                break;
+                case $cpBase . '/voltages/1':
+                    $this->SetFloatIfNumeric('LPVoltage1', $payload);
+                    return '';
 
-            case $cpBase . '/plug_state':
-                $this->SetValue('LPPlugState', $this->ToBool($payload));
-                $this->UpdateLPState();
-                break;
+                case $cpBase . '/voltages/2':
+                    $this->SetFloatIfNumeric('LPVoltage2', $payload);
+                    return '';
 
-            case $cpBase . '/manual_lock':
-                $this->SetValue('LPChargePointEnabled', !$this->ToBool($payload));
-                break;
+                case $cpBase . '/voltages/3':
+                    $this->SetFloatIfNumeric('LPVoltage3', $payload);
+                    return '';
 
-            case $cpBase . '/fault_state':
-                if ($this->IsNumericPayload($payload)) {
-                    $this->SetValue('LPFaultState', (int) round((float) $payload));
-                }
-                break;
+                case $cpBase . '/power':
+                    $this->SetFloatIfNumeric('LPPower', $payload);
+                    return '';
 
-            case $cpBase . '/fault_str':
-                $this->SetValue('LPFaultString', $this->PayloadToString($payload));
-                break;
+                case $cpBase . '/phases_in_use':
+                    if ($this->IsNumericPayload($payload)) {
+                        $this->SetValue('LPPhasesInUse', (int) round((float) $payload));
+                    }
+                    return '';
 
-            case $cpBase . '/state_str':
-                $this->SetValue('LPStateString', $this->PayloadToString($payload));
-                break;
+                case $cpBase . '/charge_state':
+                    $this->SetValue('LPChargeState', $this->ToBool($payload));
+                    $this->UpdateLPState();
+                    return '';
 
-            case $cpBase . '/vehicle_name':
-                $this->SetValue('LPVehicleName', $this->PayloadToString($payload));
-                break;
+                case $cpBase . '/plug_state':
+                    $this->SetValue('LPPlugState', $this->ToBool($payload));
+                    $this->UpdateLPState();
+                    return '';
 
-            case $cpBase . '/rfid':
-                $this->SetValue('LPRFID', $this->PayloadToString($payload));
-                break;
+                case $cpBase . '/manual_lock':
+                    $this->SetValue('LPChargePointEnabled', !$this->ToBool($payload));
+                    return '';
 
-            case $cpBase . '/daily_imported':
-                $this->SetFloatIfNumeric('LPDailyImported', $payload);
-                break;
+                case $cpBase . '/fault_state':
+                    if ($this->IsNumericPayload($payload)) {
+                        $this->SetValue('LPFaultState', (int) round((float) $payload));
+                    }
+                    return '';
 
-            case $cpBase . '/imported':
-                if ($this->IsNumericPayload($payload)) {
-                    $this->SetValue('LPImported', ((float) $payload) / 1000);
-                }
-                break;
+                case $cpBase . '/fault_str':
+                    $this->SetValue('LPFaultString', $this->PayloadToString($payload));
+                    return '';
 
-            case $cpBase . '/chargemode':
-                $this->SetValue('LPChargeMode', $this->MapChargeModeStringToInt($this->PayloadToString($payload)));
-                break;
+                case $cpBase . '/state_str':
+                    $this->SetValue('LPStateString', $this->PayloadToString($payload));
+                    return '';
 
-            case $cpBase . '/instant_charging_limit':
-                $this->SetValue('LPChargeLimitation', $this->MapLimitTypeStringToInt($this->PayloadToString($payload)));
-                break;
+                case $cpBase . '/vehicle_name':
+                    $this->SetValue('LPVehicleName', $this->PayloadToString($payload));
+                    return '';
 
-            case $cpBase . '/instant_charging_limit_soc':
-                if ($this->IsNumericPayload($payload)) {
-                    $this->SetValue('LPSoCToChargeTo', (int) round((float) $payload));
-                }
-                break;
+                case $cpBase . '/rfid':
+                    $this->SetValue('LPRFID', $this->PayloadToString($payload));
+                    return '';
 
-            case $cpBase . '/instant_charging_limit_amount':
-                if ($this->IsNumericPayload($payload)) {
-                    $this->SetValue('LPEnergyToCharge', (int) round((float) $payload));
-                }
-                break;
+                case $cpBase . '/daily_imported':
+                    $this->SetFloatIfNumeric('LPDailyImported', $payload);
+                    return '';
 
-            case $cpBase . '/charging_current':
-                if ($this->IsNumericPayload($payload)) {
-                    $this->SetValue('LPCurrent', (int) round((float) $payload));
-                }
-                break;
+                case $cpBase . '/imported':
+                    if ($this->IsNumericPayload($payload)) {
+                        $this->SetValue('LPImported', ((float) $payload) / 1000);
+                    }
+                    return '';
+
+                case $cpBase . '/chargemode':
+                    $this->SetValue('LPChargeMode', $this->MapChargeModeStringToInt($this->PayloadToString($payload)));
+                    return '';
+
+                case $cpBase . '/instant_charging_limit':
+                    $this->SetValue('LPChargeLimitation', $this->MapLimitTypeStringToInt($this->PayloadToString($payload)));
+                    return '';
+
+                case $cpBase . '/instant_charging_limit_soc':
+                    if ($this->IsNumericPayload($payload)) {
+                        $this->SetValue('LPSoCToChargeTo', (int) round((float) $payload));
+                    }
+                    return '';
+
+                case $cpBase . '/instant_charging_limit_amount':
+                    if ($this->IsNumericPayload($payload)) {
+                        $this->SetValue('LPEnergyToCharge', (int) round((float) $payload));
+                    }
+                    return '';
+
+                case $cpBase . '/charging_current':
+                    if ($this->IsNumericPayload($payload)) {
+                        $this->SetValue('LPCurrent', (int) round((float) $payload));
+                    }
+                    return '';
+            }
         }
 
         return '';
@@ -396,16 +406,27 @@ class openWB2 extends IPSModuleStrict
         $this->SendDataToParent(json_encode($data, JSON_UNESCAPED_SLASHES));
     }
 
-    private function GetChargePointBaseTopic(): string
+    private function GetChargePointBaseTopics(): array
     {
         $baseTopic = trim($this->ReadPropertyString('BaseTopic'));
         $chargePointID = $this->ReadPropertyInteger('ChargePointID');
 
         if ($baseTopic === '') {
-            return '';
+            return [];
         }
 
-        return rtrim($baseTopic, '/') . '/simpleAPI/chargepoint/' . $chargePointID;
+        $base = rtrim($baseTopic, '/') . '/simpleAPI/chargepoint';
+
+        $topics = [
+            $base . '/' . $chargePointID
+        ];
+
+        // Nur für den kleinsten Ladepunkt zusätzlich die Kurzform ohne ID erlauben
+        if ($chargePointID === 0) {
+            $topics[] = $base;
+        }
+
+        return $topics;
     }
 
     private function UpdateLPState(): void
