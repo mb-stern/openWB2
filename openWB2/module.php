@@ -71,10 +71,15 @@ class openWB2 extends IPSModuleStrict
 
     public function GetCompatibleParents(): string
     {
-        return json_encode([
+        $json = json_encode([
             'type'      => 'connect',
-            'moduleIds' => ['{C6D2AEB3-6E1F-4B2E-8E69-3A1A00246850}']
+            'moduleIDs' => [
+                // MQTT-Server
+                '{C6D2AEB3-6E1F-4B2E-8E69-3A1A00246850}'
+            ]
         ]);
+
+        return ($json !== false) ? $json : '[]';
     }
 
     public function ApplyChanges(): void
