@@ -5,7 +5,7 @@ class openWB2 extends IPSModuleStrict
     private const MQTT_SERVER_GUID = '{C6D2AEB3-6E1F-4B2E-8E69-3A1A00246850}';
     private const MQTT_CLIENT_SOCKET_GUID = '{043EA491-0325-4ADD-8FC2-A30C8EEB4D3F}';
 
-    public function Create()
+    public function Create(): void
     {
         parent::Create();
 
@@ -71,7 +71,15 @@ class openWB2 extends IPSModuleStrict
         $this->EnableAction('LPResetDirectCharge');
     }
 
-    public function ApplyChanges()
+    ppublic function GetCompatibleParents(): string
+    {
+        return json_encode([
+            'type'      => 'connect',
+            'moduleIds' => ['{EE0D345A-CF31-428A-A613-33CE98E752DD}']
+        ]);
+    }
+
+    public function ApplyChanges(): void
     {
         parent::ApplyChanges();
 

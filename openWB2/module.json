@@ -6,9 +6,9 @@
     "aliases": [
         "openWB2"
     ],
-    "parentRequirements": ["{E310B701-4AE7-458E-B618-EC13A1A6F6A8}"],
-    "childRequirements": [],
-    "implemented": ["{77B31ABB-18FA-4B91-BB63-E5B2AB5588F4}"],
-    "prefix": "owb2",
+    "parentRequirements": ["{97475B04-67C3-A74D-C970-E9409B0EFA1D}"],
+  "childRequirements": [],
+  "implemented": ["{DBDA9DF7-5D04-F49D-370A-2B9153D00D9B}"],
+    "prefix": "OWB",
     "url": "https://github.com/mb-stern/Goodwe/tree/beta"
   }
