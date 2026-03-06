@@ -71,7 +71,7 @@ class openWB2 extends IPSModuleStrict
         $this->EnableAction('LPResetDirectCharge');
     }
 
-    ppublic function GetCompatibleParents(): string
+    public function GetCompatibleParents(): string
     {
         return json_encode([
             'type'      => 'connect',
