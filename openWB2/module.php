@@ -120,6 +120,7 @@ class openWB2 extends IPSModuleStrict
 
         return json_encode($form);
     }
+   
     public function ReceiveData(string $JSONString): string
     {
         $data = json_decode($JSONString, true);
@@ -199,8 +200,6 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case $cpBase . '/manual_lock':
-                // simpleAPI: true = gesperrt
-                // Modul: true = offen
                 $this->SetValue('LPChargePointEnabled', !$this->ToBool($payload));
                 break;
 
@@ -231,7 +230,6 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case $cpBase . '/imported':
-                // simpleAPI-Beispiel zeigt große importierte Werte; zur Anzeige als kWh -> /1000
                 if ($this->IsNumericPayload($payload)) {
                     $this->SetValue('LPImported', ((float) $payload) / 1000);
                 }
@@ -263,6 +261,8 @@ class openWB2 extends IPSModuleStrict
                 }
                 break;
         }
+
+        return '';
     }
 
     public function RequestAction($Ident, mixed $Value): void
