@@ -95,7 +95,7 @@ class openWB2 extends IPSModuleStrict
         $this->SetReceiveDataFilter('.*' . $filter . '.*');
     }
 
-    public function ReceiveData($JSONString)
+    public function ReceiveData(string $JSONString)
     {
         $data = json_decode($JSONString, true);
         if (!is_array($data)) {
