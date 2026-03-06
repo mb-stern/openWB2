@@ -153,9 +153,6 @@ class openWB2 extends IPSModuleStrict
         $this->SendDebug('Topic', $topic, 0);
         $this->SendDebug('Payload decoded', is_scalar($payload) || $payload === null ? (string)$payload : json_encode($payload), 0);
 
-        $this->SendDebug('Topic', $topic, 0);
-        $this->SendDebug('Payload', $payloadDebug, 0);
-
         $cpBases = $this->GetChargePointBaseTopics();
         if ($cpBases === []) {
             $this->SendDebug('ReceiveData', 'Keine ChargePoint-Basen ermittelt', 0);
