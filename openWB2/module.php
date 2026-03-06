@@ -140,7 +140,6 @@ class openWB2 extends IPSModuleStrict
         $topic = (string) $data['Topic'];
         $payload = $data['Payload'];
 
-        // MQTT Payload aus Symcon kommt hier hex-kodiert an
         if (is_string($payload)) {
             $decodedPayload = @hex2bin($payload);
             if ($decodedPayload !== false) {
@@ -148,10 +147,12 @@ class openWB2 extends IPSModuleStrict
             }
         }
 
-        $payload = is_string($payload) ? trim($payload) : $payload;
+        if (is_string($payload)) {
+            $payload = trim($payload);
+        }
 
         $this->SendDebug('Topic', $topic, 0);
-        $this->SendDebug('Payload decoded', is_scalar($payload) || $payload === null ? (string)$payload : json_encode($payload), 0);
+        $this->SendDebug('Payload', is_scalar($payload) || $payload === null ? (string) $payload : json_encode($payload), 0);
 
         $cpBases = $this->GetChargePointBaseTopics();
         if ($cpBases === []) {
