@@ -95,15 +95,15 @@ class openWB2 extends IPSModuleStrict
         $this->SetReceiveDataFilter('.*' . $filter . '.*');
     }
 
-    public function ReceiveData(string $JSONString): void
+    public function ReceiveData(string $JSONString): string
     {
         $data = json_decode($JSONString, true);
         if (!is_array($data)) {
-            return;
+            return '';
         }
 
         if (!isset($data['Topic']) || !array_key_exists('Payload', $data)) {
-            return;
+            return '';
         }
 
         $topic = (string) $data['Topic'];
@@ -111,7 +111,7 @@ class openWB2 extends IPSModuleStrict
 
         $cpBase = $this->GetChargePointBaseTopic();
         if ($cpBase === '') {
-            return;
+            return '';
         }
 
         switch ($topic) {
