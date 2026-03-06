@@ -9,8 +9,6 @@ class openWB2 extends IPSModuleStrict
     {
         parent::Create();
 
-        $this->ConnectParent(self::MQTT_SERVER_GUID);
-
         $this->RegisterPropertyString('BaseTopic', 'openWB');
         $this->RegisterPropertyInteger('ChargePointID', 0);
 
