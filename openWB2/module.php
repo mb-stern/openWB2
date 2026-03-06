@@ -550,7 +550,6 @@ class openWB2 extends IPSModuleStrict
 
         IPS_SetVariableProfileIcon($name, $icon);
         IPS_SetVariableProfileText($name, $prefix, $suffix);
-        IPS_SetVariableProfileAssociations($name, []);
 
         foreach ($associations as $association) {
             IPS_SetVariableProfileAssociation(
@@ -571,7 +570,6 @@ class openWB2 extends IPSModuleStrict
 
         IPS_SetVariableProfileIcon($name, $icon);
         IPS_SetVariableProfileText($name, $prefix, $suffix);
-        IPS_SetVariableProfileAssociations($name, []);
 
         foreach ($associations as $association) {
             IPS_SetVariableProfileAssociation(
