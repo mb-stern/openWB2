@@ -562,9 +562,19 @@ class openWB2 extends IPSModuleStrict
 
     private function SetFloatIfNumeric(string $ident, $payload): void
     {
-        if ($this->IsNumericPayload($payload)) {
-            $this->SetValue($ident, (float) $payload);
+        if (!$this->IsNumericPayload($payload)) {
+            $this->SendDebug('SetFloatIfNumeric', $ident . ' Payload nicht numerisch: ' . (string)$payload, 0);
+            return;
         }
+
+        $value = (float) $payload;
+
+        if (is_nan($value) || is_infinite($value)) {
+            $this->SendDebug('SetFloatIfNumeric', $ident . ' ungültiger Wert: ' . (string)$payload, 0);
+            return;
+        }
+
+        $this->SetValue($ident, $value);
     }
 
     private function MapChargeModeStringToInt(string $value): int
