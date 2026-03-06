@@ -123,155 +123,221 @@ class openWB2 extends IPSModuleStrict
    
     public function ReceiveData(string $JSONString): string
     {
+        $this->SendDebug('ReceiveData JSON', $JSONString, 0);
+
         $data = json_decode($JSONString, true);
         if (!is_array($data)) {
+            $this->SendDebug('ReceiveData', 'Ungültiges JSON', 0);
             return '';
         }
 
         if (!isset($data['Topic']) || !array_key_exists('Payload', $data)) {
+            $this->SendDebug('ReceiveData', 'Topic oder Payload fehlt', 0);
+            $this->SendDebug('ReceiveData Data', json_encode($data), 0);
             return '';
         }
 
         $topic = (string) $data['Topic'];
         $payload = $data['Payload'];
 
+        $payloadDebug = is_scalar($payload) || $payload === null
+            ? (string) $payload
+            : json_encode($payload);
+
+        $this->SendDebug('Topic', $topic, 0);
+        $this->SendDebug('Payload', $payloadDebug, 0);
+
         $cpBases = $this->GetChargePointBaseTopics();
         if ($cpBases === []) {
+            $this->SendDebug('ReceiveData', 'Keine ChargePoint-Basen ermittelt', 0);
             return '';
         }
 
-        // Debug zum Prüfen, welche Topics wirklich ankommen
-        $this->SendDebug('Topic', $topic, 0);
-        $this->SendDebug('Payload', is_scalar($payload) || $payload === null ? (string) $payload : json_encode($payload), 0);
-
         foreach ($cpBases as $cpBase) {
+            $this->SendDebug('Prüfe Base', $cpBase, 0);
+
             switch ($topic) {
                 case $cpBase . '/soc/soc':
+                    $this->SendDebug('Match', 'soc/soc', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('LPSoC', (int) round((float) $payload));
+                        $this->SendDebug('SetValue', 'LPSoC = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
                 case $cpBase . '/pro_soc':
+                    $this->SendDebug('Match', 'pro_soc', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('LPProSoC', (int) round((float) $payload));
+                        $this->SendDebug('SetValue', 'LPProSoC = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
                 case $cpBase . '/evse_current':
+                    $this->SendDebug('Match', 'evse_current', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('LPConfiguredCurrent', (int) round((float) $payload));
+                        $this->SendDebug('SetValue', 'LPConfiguredCurrent = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
                 case $cpBase . '/currents/1':
+                    $this->SendDebug('Match', 'currents/1', 0);
                     $this->SetFloatIfNumeric('LPPhaseCurrent1', $payload);
                     return '';
 
                 case $cpBase . '/currents/2':
+                    $this->SendDebug('Match', 'currents/2', 0);
                     $this->SetFloatIfNumeric('LPPhaseCurrent2', $payload);
                     return '';
 
                 case $cpBase . '/currents/3':
+                    $this->SendDebug('Match', 'currents/3', 0);
                     $this->SetFloatIfNumeric('LPPhaseCurrent3', $payload);
                     return '';
 
                 case $cpBase . '/voltages/1':
+                    $this->SendDebug('Match', 'voltages/1', 0);
                     $this->SetFloatIfNumeric('LPVoltage1', $payload);
                     return '';
 
                 case $cpBase . '/voltages/2':
+                    $this->SendDebug('Match', 'voltages/2', 0);
                     $this->SetFloatIfNumeric('LPVoltage2', $payload);
                     return '';
 
                 case $cpBase . '/voltages/3':
+                    $this->SendDebug('Match', 'voltages/3', 0);
                     $this->SetFloatIfNumeric('LPVoltage3', $payload);
                     return '';
 
                 case $cpBase . '/power':
+                    $this->SendDebug('Match', 'power', 0);
                     $this->SetFloatIfNumeric('LPPower', $payload);
                     return '';
 
                 case $cpBase . '/phases_in_use':
+                    $this->SendDebug('Match', 'phases_in_use', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('LPPhasesInUse', (int) round((float) $payload));
+                        $this->SendDebug('SetValue', 'LPPhasesInUse = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
                 case $cpBase . '/charge_state':
-                    $this->SetValue('LPChargeState', $this->ToBool($payload));
+                    $this->SendDebug('Match', 'charge_state', 0);
+                    $value = $this->ToBool($payload);
+                    $this->SetValue('LPChargeState', $value);
+                    $this->SendDebug('SetValue', 'LPChargeState = ' . ($value ? 'true' : 'false'), 0);
                     $this->UpdateLPState();
                     return '';
 
                 case $cpBase . '/plug_state':
-                    $this->SetValue('LPPlugState', $this->ToBool($payload));
+                    $this->SendDebug('Match', 'plug_state', 0);
+                    $value = $this->ToBool($payload);
+                    $this->SetValue('LPPlugState', $value);
+                    $this->SendDebug('SetValue', 'LPPlugState = ' . ($value ? 'true' : 'false'), 0);
                     $this->UpdateLPState();
                     return '';
 
                 case $cpBase . '/manual_lock':
-                    $this->SetValue('LPChargePointEnabled', !$this->ToBool($payload));
+                    $this->SendDebug('Match', 'manual_lock', 0);
+                    $value = !$this->ToBool($payload);
+                    $this->SetValue('LPChargePointEnabled', $value);
+                    $this->SendDebug('SetValue', 'LPChargePointEnabled = ' . ($value ? 'true' : 'false'), 0);
                     return '';
 
                 case $cpBase . '/fault_state':
+                    $this->SendDebug('Match', 'fault_state', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('LPFaultState', (int) round((float) $payload));
+                        $this->SendDebug('SetValue', 'LPFaultState = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
                 case $cpBase . '/fault_str':
-                    $this->SetValue('LPFaultString', $this->PayloadToString($payload));
+                    $this->SendDebug('Match', 'fault_str', 0);
+                    $value = $this->PayloadToString($payload);
+                    $this->SetValue('LPFaultString', $value);
+                    $this->SendDebug('SetValue', 'LPFaultString = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/state_str':
-                    $this->SetValue('LPStateString', $this->PayloadToString($payload));
+                    $this->SendDebug('Match', 'state_str', 0);
+                    $value = $this->PayloadToString($payload);
+                    $this->SetValue('LPStateString', $value);
+                    $this->SendDebug('SetValue', 'LPStateString = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/vehicle_name':
-                    $this->SetValue('LPVehicleName', $this->PayloadToString($payload));
+                    $this->SendDebug('Match', 'vehicle_name', 0);
+                    $value = $this->PayloadToString($payload);
+                    $this->SetValue('LPVehicleName', $value);
+                    $this->SendDebug('SetValue', 'LPVehicleName = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/rfid':
-                    $this->SetValue('LPRFID', $this->PayloadToString($payload));
+                    $this->SendDebug('Match', 'rfid', 0);
+                    $value = $this->PayloadToString($payload);
+                    $this->SetValue('LPRFID', $value);
+                    $this->SendDebug('SetValue', 'LPRFID = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/daily_imported':
+                    $this->SendDebug('Match', 'daily_imported', 0);
                     $this->SetFloatIfNumeric('LPDailyImported', $payload);
                     return '';
 
                 case $cpBase . '/imported':
+                    $this->SendDebug('Match', 'imported', 0);
                     if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('LPImported', ((float) $payload) / 1000);
+                        $value = ((float) $payload) / 1000;
+                        $this->SetValue('LPImported', $value);
+                        $this->SendDebug('SetValue', 'LPImported = ' . $value, 0);
                     }
                     return '';
 
                 case $cpBase . '/chargemode':
-                    $this->SetValue('LPChargeMode', $this->MapChargeModeStringToInt($this->PayloadToString($payload)));
+                    $this->SendDebug('Match', 'chargemode', 0);
+                    $value = $this->MapChargeModeStringToInt($this->PayloadToString($payload));
+                    $this->SetValue('LPChargeMode', $value);
+                    $this->SendDebug('SetValue', 'LPChargeMode = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/instant_charging_limit':
-                    $this->SetValue('LPChargeLimitation', $this->MapLimitTypeStringToInt($this->PayloadToString($payload)));
+                    $this->SendDebug('Match', 'instant_charging_limit', 0);
+                    $value = $this->MapLimitTypeStringToInt($this->PayloadToString($payload));
+                    $this->SetValue('LPChargeLimitation', $value);
+                    $this->SendDebug('SetValue', 'LPChargeLimitation = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/instant_charging_limit_soc':
+                    $this->SendDebug('Match', 'instant_charging_limit_soc', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('LPSoCToChargeTo', (int) round((float) $payload));
+                        $this->SendDebug('SetValue', 'LPSoCToChargeTo = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
                 case $cpBase . '/instant_charging_limit_amount':
+                    $this->SendDebug('Match', 'instant_charging_limit_amount', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('LPEnergyToCharge', (int) round((float) $payload));
+                        $this->SendDebug('SetValue', 'LPEnergyToCharge = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
                 case $cpBase . '/charging_current':
+                    $this->SendDebug('Match', 'charging_current', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('LPCurrent', (int) round((float) $payload));
+                        $this->SendDebug('SetValue', 'LPCurrent = ' . (int) round((float) $payload), 0);
                     }
                     return '';
             }
         }
 
+        $this->SendDebug('Kein Match', $topic, 0);
         return '';
     }
 
@@ -412,6 +478,7 @@ class openWB2 extends IPSModuleStrict
         $chargePointID = $this->ReadPropertyInteger('ChargePointID');
 
         if ($baseTopic === '') {
+            $this->SendDebug('GetChargePointBaseTopics', 'BaseTopic ist leer', 0);
             return [];
         }
 
@@ -421,10 +488,12 @@ class openWB2 extends IPSModuleStrict
             $base . '/' . $chargePointID
         ];
 
-        // Nur für den kleinsten Ladepunkt zusätzlich die Kurzform ohne ID erlauben
+        // Nur für Ladepunkt 0 zusätzlich die Kurzform ohne ID erlauben
         if ($chargePointID === 0) {
             $topics[] = $base;
         }
+
+        $this->SendDebug('GetChargePointBaseTopics', json_encode($topics), 0);
 
         return $topics;
     }
