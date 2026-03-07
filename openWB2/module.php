@@ -460,28 +460,28 @@ class openWB2 extends IPSModuleStrict
         ]);
     }
 
-    private function PublishSetTopic(string $relativeTopic, string $payload, bool $retain = false): void
+    private function PublishLegacyTopic(string $relativeTopic, string $payload, bool $retain = false): void
     {
         $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
-        $fullTopic = $baseTopic . '/simpleAPI/set/' . ltrim($relativeTopic, '/');
+        $fullTopic = $baseTopic . '/' . ltrim($relativeTopic, '/');
 
         $data = [
-            'DataID'           => self::MQTT_CLIENT_SOCKET_GUID,
+            'DataID'           => '{043EA491-0325-4ADD-8FC2-A30C8EEB4D3F}',
             'PacketType'       => 3,
             'QualityOfService' => 0,
             'Retain'           => $retain,
             'Topic'            => $fullTopic,
-            'Payload'          => $payload
+            'Payload'          => (string) $payload
         ];
 
         $json = json_encode($data, JSON_UNESCAPED_SLASHES);
 
-        $this->SendDebug('Publish Topic', $fullTopic, 0);
-        $this->SendDebug('Publish Payload', $payload, 0);
-        $this->SendDebug('Publish JSON', $json, 0);
+        $this->SendDebug('Legacy Publish Topic', $fullTopic, 0);
+        $this->SendDebug('Legacy Publish Payload', (string) $payload, 0);
+        $this->SendDebug('Legacy Publish JSON', $json, 0);
 
         $result = $this->SendDataToParent($json);
-        $this->SendDebug('Publish Result', (string) $result, 0);
+        $this->SendDebug('Legacy Publish Result', (string) $result, 0);
     }
 
     private function GetChargePointBaseTopics(): array
