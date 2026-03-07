@@ -460,10 +460,10 @@ class openWB2 extends IPSModuleStrict
         ]);
     }
 
-    private function PublishLegacyTopic(string $relativeTopic, string $payload, bool $retain = false): void
+    private function PublishSetTopic(string $relativeTopic, string $payload, bool $retain = false): void
     {
         $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
-        $fullTopic = $baseTopic . '/' . ltrim($relativeTopic, '/');
+        $fullTopic = $baseTopic . '/simpleAPI/set/' . ltrim($relativeTopic, '/');
 
         $data = [
             'DataID'           => '{043EA491-0325-4ADD-8FC2-A30C8EEB4D3F}',
@@ -476,12 +476,12 @@ class openWB2 extends IPSModuleStrict
 
         $json = json_encode($data, JSON_UNESCAPED_SLASHES);
 
-        $this->SendDebug('Legacy Publish Topic', $fullTopic, 0);
-        $this->SendDebug('Legacy Publish Payload', (string) $payload, 0);
-        $this->SendDebug('Legacy Publish JSON', $json, 0);
+        $this->SendDebug('Publish Topic', $fullTopic, 0);
+        $this->SendDebug('Publish Payload', $payload, 0);
+        $this->SendDebug('Publish JSON', $json, 0);
 
         $result = $this->SendDataToParent($json);
-        $this->SendDebug('Legacy Publish Result', (string) $result, 0);
+        $this->SendDebug('Publish Result', (string)$result, 0);
     }
 
     private function GetChargePointBaseTopics(): array
