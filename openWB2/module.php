@@ -129,7 +129,7 @@ class openWB2 extends IPSModuleStrict
    
     public function ReceiveData(string $JSONString): string
     {
-        $this->SendDebug('ReceiveData JSON', $JSONString, 0);
+        //$this->SendDebug('ReceiveData JSON', $JSONString, 0);
 
         $data = json_decode($JSONString, true);
         if (!is_array($data)) {
@@ -157,8 +157,8 @@ class openWB2 extends IPSModuleStrict
             $payload = trim($payload);
         }
 
-        $this->SendDebug('Topic', $topic, 0);
-        $this->SendDebug('Payload', is_scalar($payload) || $payload === null ? (string) $payload : json_encode($payload), 0);
+        //$this->SendDebug('Topic', $topic, 0);
+        //$this->SendDebug('Payload', is_scalar($payload) || $payload === null ? (string) $payload : json_encode($payload), 0);
 
         $cpBases = $this->GetChargePointBaseTopics();
         if ($cpBases === []) {
@@ -167,7 +167,7 @@ class openWB2 extends IPSModuleStrict
         }
 
         foreach ($cpBases as $cpBase) {
-            $this->SendDebug('Prüfe Base', $cpBase, 0);
+            //$this->SendDebug('Prüfe Base', $cpBase, 0);
 
             switch ($topic) {
                 case $cpBase . '/soc/soc':
@@ -257,6 +257,9 @@ class openWB2 extends IPSModuleStrict
                     $this->SendDebug('Match', 'manual_lock', 0);
 
                     $isLocked = $this->ToBool($payload);
+
+                    $this->SetValue('SetChargePointLock', $isLocked);
+                    $this->SendDebug('SetValue', 'SetChargePointLock = ' . ($isLocked ? 'true' : 'false'), 0);
 
                     $isEnabled = !$isLocked;
                     $this->SetValue('LPChargePointEnabled', $isEnabled);
@@ -434,7 +437,8 @@ class openWB2 extends IPSModuleStrict
 
             case 'SetChargePointLock':
                 $payload = ((bool) $Value) ? 'true' : 'false';
-                $this->PublishSetTopic($cpSetBase . '/manual_lock', $payload);
+                $this->PublishSetTopic($cpSetBase . '/chargepoint_lock', $payload);
+                $this->SetValue('SetChargePointLock', (bool) $Value);
                 break;
 
             case 'SetBatMode':
