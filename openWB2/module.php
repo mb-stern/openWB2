@@ -468,18 +468,19 @@ class openWB2 extends IPSModuleStrict
         $fullTopic = $baseTopic . '/simpleAPI/set/' . ltrim($relativeTopic, '/');
 
         $data = [
-            'DataID'           => '{043EA491-0325-4ADD-8FC2-A30C8EEB4D3F}',
+            'DataID'           => self::MQTT_CLIENT_SOCKET_GUID,
             'PacketType'       => 3,
             'QualityOfService' => 0,
             'Retain'           => $retain,
             'Topic'            => $fullTopic,
-            'Payload'          => $payload
+            'Payload'          => bin2hex($payload)
         ];
 
         $json = json_encode($data, JSON_UNESCAPED_SLASHES);
 
         $this->SendDebug('Publish Topic', $fullTopic, 0);
-        $this->SendDebug('Publish Payload', $payload, 0);
+        $this->SendDebug('Publish Payload Text', $payload, 0);
+        $this->SendDebug('Publish Payload HEX', bin2hex($payload), 0);
         $this->SendDebug('Publish JSON', $json, 0);
 
         $result = $this->SendDataToParent($json);
