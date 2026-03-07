@@ -27,14 +27,12 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterVariableFloat('LPVoltage2', 'LP Phase 2 Voltage', '~Volt', 80);
         $this->RegisterVariableFloat('LPVoltage3', 'LP Phase 3 Voltage', '~Volt', 90);
 
-        $this->RegisterVariableFloat('LPPower', 'LP Charging Power', '~Power', 100);
+        $this->RegisterVariableFloat('LPPower', 'LP Charging Power', '~Watt', 100);
         $this->RegisterVariableInteger('LPPhasesInUse', 'LP Phases in Use', '', 110);
 
         $this->RegisterVariableBoolean('LPChargeState', 'LP Charge State', 'OWB.ChargeState', 120);
         $this->RegisterVariableBoolean('LPPlugState', 'LP Plug State', 'OWB.PlugState', 130);
 
-        // simpleAPI liefert manual_lock, im Modul soll "Enabled" erhalten bleiben:
-        // true = offen / false = gesperrt
         $this->RegisterVariableBoolean('LPChargePointEnabled', 'LP Chargepoint Enabled', 'OWB.ChargePointEnabled', 140);
         $this->EnableAction('LPChargePointEnabled');
 
@@ -352,15 +350,13 @@ class openWB2 extends IPSModuleStrict
     {
         switch ($Ident) {
             case 'LPChargePointEnabled':
-            // Enabled = offen, Lock = gesperrt
-            $payload = $Value ? '0' : '1';
-
-            $this->PublishSetTopic(
-                'chargepoint/' . $this->ReadPropertyInteger('ChargePointID') . '/chargepoint_lock',
-                $payload
-            );
-            $this->SetValue('LPChargePointEnabled', (bool) $Value);
-            break;
+                // true = offen, false = sperren
+                $this->PublishSetTopic(
+                    'chargepoint/' . $this->ReadPropertyInteger('ChargePointID') . '/chargepoint_lock',
+                    $Value ? 'false' : 'true'
+                );
+                $this->SetValue('LPChargePointEnabled', (bool) $Value);
+                break;
 
             case 'LPCurrent':
                 $current = max(6, min(32, (int) $Value));
