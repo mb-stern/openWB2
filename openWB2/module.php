@@ -2,15 +2,13 @@
 
 class openWB2 extends IPSModuleStrict
 {
-    private const MQTT_SERVER_GUID = '{C6D2AEB3-6E1F-4B2E-8E69-3A1A00246850}';
-    private const MQTT_CLIENT_SOCKET_GUID = '{043EA491-0325-4ADD-8FC2-A30C8EEB4D3F}';
-
-    public function Create(): void
+   public function Create(): void
     {
         parent::Create();
 
         $this->RegisterPropertyString('BaseTopic', 'openWB');
-        $this->RegisterPropertyInteger('ChargePointID', 0);
+        $this->RegisterPropertyInteger('ChargePointID', 1);
+        $this->RegisterPropertyBoolean('UseLowestChargePointAlias', false);
 
         // Profile direkt im Modul erzeugen
         $this->RegisterProfiles();
@@ -106,7 +104,12 @@ class openWB2 extends IPSModuleStrict
                 [
                     'name'    => 'ChargePointID',
                     'type'    => 'NumberSpinner',
-                    'caption' => 'Charging Point'
+                    'caption' => 'ChargePoint ID'
+                ],
+                [
+                    'name'    => 'UseLowestChargePointAlias',
+                    'type'    => 'CheckBox',
+                    'caption' => 'Kurzform für niedrigste ChargePoint-ID verwenden'
                 ]
             ],
             'actions' => [
@@ -415,9 +418,9 @@ class openWB2 extends IPSModuleStrict
     private function GetChargePointSetBaseTopic(): string
     {
         $chargePointID = $this->ReadPropertyInteger('ChargePointID');
+        $useAlias = $this->ReadPropertyBoolean('UseLowestChargePointAlias');
 
-        // Für den ersten/kleinsten Ladepunkt dieselbe Kurzform wie beim Empfang verwenden
-        if ($chargePointID === 0) {
+        if ($useAlias) {
             return 'chargepoint';
         }
 
@@ -500,6 +503,7 @@ class openWB2 extends IPSModuleStrict
     {
         $baseTopic = trim($this->ReadPropertyString('BaseTopic'));
         $chargePointID = $this->ReadPropertyInteger('ChargePointID');
+        $useAlias = $this->ReadPropertyBoolean('UseLowestChargePointAlias');
 
         if ($baseTopic === '') {
             $this->SendDebug('GetChargePointBaseTopics', 'BaseTopic ist leer', 0);
@@ -512,14 +516,13 @@ class openWB2 extends IPSModuleStrict
             $base . '/' . $chargePointID
         ];
 
-        // Nur für Ladepunkt 0 zusätzlich die Kurzform ohne ID erlauben
-        if ($chargePointID === 0) {
+        if ($useAlias) {
             $topics[] = $base;
         }
 
         $this->SendDebug('GetChargePointBaseTopics', json_encode($topics), 0);
 
-        return $topics;
+        return array_values(array_unique($topics));
     }
 
     private function UpdateLPState(): void
