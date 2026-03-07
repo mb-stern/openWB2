@@ -665,15 +665,25 @@ class openWB2 extends IPSModuleStrict
 
         switch ($value) {
             case 'instant':
+            case 'instant_charging':
                 return 0;
+
             case 'pv':
+            case 'pv_charging':
                 return 1;
+
             case 'eco':
+            case 'eco_charging':
                 return 2;
+
             case 'stop':
                 return 3;
+
             case 'target':
                 return 4;
+
+            default:
+                return 0;
         }
     }
 
