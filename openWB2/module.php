@@ -435,7 +435,7 @@ class openWB2 extends IPSModuleStrict
                 $this->SetValue('SetMaxPriceEco', $price);
                 break;
 
-            case 'SetChargePointEnabled':
+            case 'SetChargePointLock':
                 $lp = (int) $this->ReadPropertyInteger('ChargePointID');
                 if ($lp < 0) {
                     $lp = 0;
