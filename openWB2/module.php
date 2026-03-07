@@ -518,9 +518,7 @@ class openWB2 extends IPSModuleStrict
             [1, 'PV', '', -1],
             [2, 'Eco', '', -1],
             [3, 'Stop', '', -1],
-            [4, 'Target', '', -1],
-            [5, 'Scheduled', '', -1],
-            [6, 'Unknown', '', -1]
+            [4, 'Target', '', -1]
         ]);
 
         $this->RegisterProfileFloat('OWB.Price', 'Money', '', ' CHF/kWh', 0, 10, 0.01, 2);
