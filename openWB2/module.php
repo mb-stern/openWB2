@@ -392,6 +392,37 @@ class openWB2 extends IPSModuleStrict
                     $this->SetValue('SetBatMode', $value);
                     $this->SendDebug('SetValue', 'SetBatMode = ' . $value, 0);
                     return '';
+
+                case 'SetChargePointLock':
+                    $lp = (int) $this->ReadPropertyInteger('ChargePoint');
+                    if ($lp <= 0) {
+                        $lp = 1;
+                    }
+
+                    $topic = 'openWB/set/lp/' . $lp . '/manual_lock';
+                    $payload = ((bool)$Value) ? '1' : '0';
+
+                    $data = [
+                        'DataID'           => '{043EA491-0325-4ADD-8FC2-A30C8EEB4D3F}',
+                        'PacketType'       => 3,
+                        'QualityOfService' => 0,
+                        'Retain'           => false,
+                        'Topic'            => $topic,
+                        'Payload'          => $payload
+                    ];
+
+                    $json = json_encode($data, JSON_UNESCAPED_SLASHES);
+
+                    $this->SendDebug('SetChargePointLock Topic', $topic, 0);
+                    $this->SendDebug('SetChargePointLock Payload', $payload, 0);
+
+                    $result = $this->SendDataToParent($json);
+                    $this->SendDebug('SetChargePointLock Result', var_export($result, true), 0);
+
+                    if ($result !== false) {
+                        $this->SetValue('SetChargePointLock', (bool)$Value);
+                    }
+                    break;
             }
         }
 
