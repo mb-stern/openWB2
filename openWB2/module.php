@@ -257,10 +257,9 @@ class openWB2 extends IPSModuleStrict
                     $this->SendDebug('Match', 'manual_lock', 0);
 
                     $isLocked = $this->ToBool($payload);
-                    $isEnabled = !$isLocked;
 
-                    $this->SetValue('SetChargePointLock', $isLocked);
-                    $this->SendDebug('SetValue', 'SetChargePointLock = ' . ($isLocked ? 'true' : 'false'), 0);
+                    $this->SetValue('LPChargePointEnabled', !$isLocked);
+                    $this->SendDebug('SetValue', 'LPChargePointEnabled = ' . (!$isLocked ? 'true' : 'false'), 0);
                     return '';
 
                 case $cpBase . '/fault_state':
@@ -435,9 +434,8 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case 'SetChargePointLock':
-                $payload = ((bool) $Value) ? 'false' : 'true';
+                $payload = ((bool) $Value) ? 'true' : 'false';
                 $this->PublishSetTopic($cpSetBase . '/chargepoint_lock', $payload);
-                $this->SetValue('SetChargePointLock', (bool) $Value);
                 break;
 
             case 'SetBatMode':
