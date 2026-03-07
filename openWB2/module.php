@@ -356,6 +356,42 @@ class openWB2 extends IPSModuleStrict
                         $this->SendDebug('SetValue', 'SetChargeCurrent = ' . $value, 0);
                     }
                     return '';
+
+                case $cpBase . '/minimal_pv_soc':
+                    $this->SendDebug('Match', 'minimal_pv_soc', 0);
+                    if ($this->IsNumericPayload($payload)) {
+                        $value = (int) round((float) $payload);
+                        $this->SetValue('SetMinimalPvSoc', $value);
+                        $this->SendDebug('SetValue', 'SetMinimalPvSoc = ' . $value, 0);
+                    }
+                    return '';
+
+                case $cpBase . '/minimal_permanent_current':
+                    $this->SendDebug('Match', 'minimal_permanent_current', 0);
+                    if ($this->IsNumericPayload($payload)) {
+                        $value = (int) round((float) $payload);
+                        $this->SetValue('SetMinimalPermanentCurrent', $value);
+                        $this->SendDebug('SetValue', 'SetMinimalPermanentCurrent = ' . $value, 0);
+                    }
+                    return '';
+
+                case $cpBase . '/max_price_eco':
+                    $this->SendDebug('Match', 'max_price_eco', 0);
+                    if ($this->IsNumericPayload($payload)) {
+                        $value = (float) $payload;
+                        if (!is_nan($value) && !is_infinite($value)) {
+                            $this->SetValue('SetMaxPriceEco', $value);
+                            $this->SendDebug('SetValue', 'SetMaxPriceEco = ' . $value, 0);
+                        }
+                    }
+                    return '';
+
+                case rtrim($this->ReadPropertyString('BaseTopic'), '/') . '/simpleAPI/bat_mode':
+                    $this->SendDebug('Match', 'bat_mode', 0);
+                    $value = $this->MapBatModeStringToInt($this->PayloadToString($payload));
+                    $this->SetValue('SetBatMode', $value);
+                    $this->SendDebug('SetValue', 'SetBatMode = ' . $value, 0);
+                    return '';
             }
         }
 
