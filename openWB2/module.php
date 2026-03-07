@@ -435,7 +435,11 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case 'SetChargePointLock':
+                $this->SendDebug('LOCK RAW VALUE', var_export($Value, true), 0);
+
                 $payload = ((bool) $Value) ? 'true' : 'false';
+                $this->SendDebug('LOCK BUILT PAYLOAD', $payload, 0);
+
                 $this->PublishSetTopic($cpSetBase . '/chargepoint_lock', $payload);
                 $this->SetValue('SetChargePointLock', (bool) $Value);
                 break;
