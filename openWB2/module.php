@@ -436,31 +436,27 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case 'SetChargePointLock':
-                $lp = (int) $this->ReadPropertyInteger('ChargePointID');
-                if ($lp < 1) {
-                    $lp = 1;
-                }
 
-                $topic = 'openWB/set/lp/' . $lp . '/ChargePointEnabled';
-                $payload = ((bool) $Value) ? '1' : '0';
+                $lp = (int) $this->ReadPropertyInteger('ChargePointID');
+
+                $topic = 'openWB/simpleAPI/set/chargepoint/' . $lp . '/manual_lock';
+                $payload = ((bool)$Value) ? 'true' : 'false';
+
+                $this->SendDebug('Test Topic', $topic, 0);
+                $this->SendDebug('Test Payload', $payload, 0);
 
                 $data = [
-                    'DataID'           => '{043EA491-0325-4ADD-8FC2-A30C8EEB4D3F}',
-                    'PacketType'       => 3,
+                    'DataID' => '{043EA491-0325-4ADD-8FC2-A30C8EEB4D3F}',
+                    'PacketType' => 3,
                     'QualityOfService' => 0,
-                    'Retain'           => false,
-                    'Topic'            => $topic,
-                    'Payload'          => $payload
+                    'Retain' => false,
+                    'Topic' => $topic,
+                    'Payload' => $payload
                 ];
 
                 $json = json_encode($data, JSON_UNESCAPED_SLASHES);
 
-                $this->SendDebug('SetChargePointLock Topic', $topic, 0);
-                $this->SendDebug('SetChargePointLock Payload', $payload, 0);
-                $this->SendDebug('SetChargePointLock JSON', $json, 0);
-
-                $result = $this->SendDataToParent($json);
-                $this->SendDebug('SetChargePointLock Result', var_export($result, true), 0);
+                $this->SendDataToParent($json);
 
                 break;
 
