@@ -674,11 +674,6 @@ class openWB2 extends IPSModuleStrict
                 return 3;
             case 'target':
                 return 4;
-            case 'scheduled_charging':
-            case 'scheduled':
-                return 5;
-            default:
-                return 6;
         }
     }
 
