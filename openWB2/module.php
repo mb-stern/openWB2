@@ -437,8 +437,8 @@ class openWB2 extends IPSModuleStrict
 
             case 'SetChargePointLock':
                 $lp = (int) $this->ReadPropertyInteger('ChargePointID');
-                if ($lp < 0) {
-                    $lp = 0;
+                if ($lp < 1) {
+                    $lp = 1;
                 }
 
                 $topic = 'openWB/set/lp/' . $lp . '/ChargePointEnabled';
@@ -455,16 +455,20 @@ class openWB2 extends IPSModuleStrict
 
                 $json = json_encode($data, JSON_UNESCAPED_SLASHES);
 
-                $this->SendDebug('SetChargePointEnabled Topic', $topic, 0);
-                $this->SendDebug('SetChargePointEnabled Payload', $payload, 0);
-                $this->SendDebug('SetChargePointEnabled JSON', $json, 0);
+                $this->SendDebug('SetChargePointLock Topic', $topic, 0);
+                $this->SendDebug('SetChargePointLock Payload', $payload, 0);
+                $this->SendDebug('SetChargePointLock JSON', $json, 0);
 
                 $result = $this->SendDataToParent($json);
-                $this->SendDebug('SetChargePointEnabled Result', var_export($result, true), 0);
+                $this->SendDebug('SetChargePointLock Result', var_export($result, true), 0);
 
-                if ($result !== false) {
-                    $this->SetValue('SetChargePointEnabled', (bool) $Value);
+                $varID = @IPS_GetObjectIDByIdent('SetChargePointLock', $this->InstanceID);
+                if ($varID !== false) {
+                    SetValueBoolean($varID, (bool)$Value);
+                } else {
+                    $this->SendDebug('SetChargePointLock', 'Ident SetChargePointLock nicht gefunden', 0);
                 }
+
                 break;
 
             case 'SetBatMode':
