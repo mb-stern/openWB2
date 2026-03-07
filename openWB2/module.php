@@ -258,9 +258,6 @@ class openWB2 extends IPSModuleStrict
 
                     $isLocked = $this->ToBool($payload);
 
-                    $this->SetValue('SetChargePointLock', $isLocked);
-                    $this->SendDebug('SetValue', 'SetChargePointLock = ' . ($isLocked ? 'true' : 'false'), 0);
-
                     $isEnabled = !$isLocked;
                     $this->SetValue('LPChargePointEnabled', $isEnabled);
                     $this->SendDebug('SetValue', 'LPChargePointEnabled = ' . ($isEnabled ? 'true' : 'false'), 0);
@@ -401,6 +398,9 @@ class openWB2 extends IPSModuleStrict
 
     public function RequestAction($Ident, mixed $Value): void
     {
+
+        $this->SendDebug('RequestAction', $Ident . ' = ' . var_export($Value, true), 0);
+        
         $cpSetBase = $this->GetChargePointSetBaseTopic();
 
         switch ($Ident) {
