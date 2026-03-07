@@ -462,13 +462,6 @@ class openWB2 extends IPSModuleStrict
                 $result = $this->SendDataToParent($json);
                 $this->SendDebug('SetChargePointLock Result', var_export($result, true), 0);
 
-                $varID = @IPS_GetObjectIDByIdent('SetChargePointLock', $this->InstanceID);
-                if ($varID !== false) {
-                    SetValueBoolean($varID, (bool)$Value);
-                } else {
-                    $this->SendDebug('SetChargePointLock', 'Ident SetChargePointLock nicht gefunden', 0);
-                }
-
                 break;
 
             case 'SetBatMode':
