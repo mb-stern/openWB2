@@ -514,11 +514,11 @@ class openWB2 extends IPSModuleStrict
         ]);
 
         $this->RegisterProfileIntegerEx('OWB.ChargeMode', 'Car', '', '', [
-            [0, 'Instant', '', -1],
+            [0, 'Sofort', '', -1],
             [1, 'PV', '', -1],
             [2, 'Eco', '', -1],
             [3, 'Stop', '', -1],
-            [4, 'Target', '', -1]
+            [4, 'Ziel', '', -1]
         ]);
 
         $this->RegisterProfileFloat('OWB.Price', 'Money', '', ' CHF/kWh', 0, 10, 0.01, 2);
