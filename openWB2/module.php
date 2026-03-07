@@ -473,14 +473,13 @@ class openWB2 extends IPSModuleStrict
             'QualityOfService' => 0,
             'Retain'           => $retain,
             'Topic'            => $fullTopic,
-            'Payload'          => bin2hex($payload)
+            'Payload'          => $payload
         ];
 
         $json = json_encode($data, JSON_UNESCAPED_SLASHES);
 
         $this->SendDebug('Publish Topic', $fullTopic, 0);
-        $this->SendDebug('Publish Payload Text', $payload, 0);
-        $this->SendDebug('Publish Payload HEX', strtoupper(bin2hex($payload)), 0);
+        $this->SendDebug('Publish Payload', $payload, 0);
         $this->SendDebug('Publish JSON', $json, 0);
 
         $result = $this->SendDataToParent($json);
