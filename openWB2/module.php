@@ -129,7 +129,7 @@ class openWB2 extends IPSModuleStrict
    
     public function ReceiveData(string $JSONString): string
     {
-        //$this->SendDebug('ReceiveData JSON', $JSONString, 0);
+        $this->SendDebug('ReceiveData JSON', $JSONString, 0);
 
         $data = json_decode($JSONString, true);
         if (!is_array($data)) {
@@ -157,8 +157,8 @@ class openWB2 extends IPSModuleStrict
             $payload = trim($payload);
         }
 
-        //$this->SendDebug('Topic', $topic, 0);
-        //$this->SendDebug('Payload', is_scalar($payload) || $payload === null ? (string) $payload : json_encode($payload), 0);
+        $this->SendDebug('Topic', $topic, 0);
+        $this->SendDebug('Payload', is_scalar($payload) || $payload === null ? (string) $payload : json_encode($payload), 0);
 
         $cpBases = $this->GetChargePointBaseTopics();
         if ($cpBases === []) {
@@ -167,7 +167,7 @@ class openWB2 extends IPSModuleStrict
         }
 
         foreach ($cpBases as $cpBase) {
-            //$this->SendDebug('Prüfe Base', $cpBase, 0);
+            $this->SendDebug('Prüfe Base', $cpBase, 0);
 
             switch ($topic) {
                 case $cpBase . '/soc/soc':
@@ -255,7 +255,12 @@ class openWB2 extends IPSModuleStrict
 
                 case $cpBase . '/manual_lock':
                     $this->SendDebug('Match', 'manual_lock', 0);
+
                     $isLocked = $this->ToBool($payload);
+
+                    $this->SetValue('SetChargePointLock', $isLocked);
+                    $this->SendDebug('SetValue', 'SetChargePointLock = ' . ($isLocked ? 'true' : 'false'), 0);
+
                     $isEnabled = !$isLocked;
                     $this->SetValue('LPChargePointEnabled', $isEnabled);
                     $this->SendDebug('SetValue', 'LPChargePointEnabled = ' . ($isEnabled ? 'true' : 'false'), 0);
@@ -396,8 +401,6 @@ class openWB2 extends IPSModuleStrict
 
     public function RequestAction($Ident, mixed $Value): void
     {
-        $this->SendDebug('RequestAction', $Ident . ' = ' . var_export($Value, true), 0);
-
         $cpSetBase = $this->GetChargePointSetBaseTopic();
 
         switch ($Ident) {
@@ -446,19 +449,19 @@ class openWB2 extends IPSModuleStrict
 
             case 'SetInstantChargingLimit':
                 $limitType = $this->MapLimitTypeIntToString((int) $Value);
-                $this->PublishSetTopic($cpSetBase . '/instant_charging_limit', $limitType);
+                $this->PublishSetTopic('instant_charging_limit', $limitType);
                 $this->SetValue('SetInstantChargingLimit', (int) $Value);
                 break;
 
             case 'SetInstantChargingLimitSoc':
                 $soc = max(0, min(100, (int) $Value));
-                $this->PublishSetTopic($cpSetBase . '/instant_charging_limit_soc', (string) $soc);
+                $this->PublishSetTopic('instant_charging_limit_soc', (string) $soc);
                 $this->SetValue('SetInstantChargingLimitSoc', $soc);
                 break;
 
             case 'SetInstantChargingLimitAmount':
                 $energy = max(1, min(50, (int) $Value));
-                $this->PublishSetTopic($cpSetBase . '/instant_charging_limit_amount', (string) $energy);
+                $this->PublishSetTopic('instant_charging_limit_amount', (string) $energy);
                 $this->SetValue('SetInstantChargingLimitAmount', $energy);
                 break;
 
