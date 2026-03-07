@@ -348,11 +348,13 @@ class openWB2 extends IPSModuleStrict
 
     public function RequestAction($Ident, mixed $Value): void
     {
+        $cpSetBase = $this->GetChargePointSetBaseTopic();
+
         switch ($Ident) {
             case 'LPChargePointEnabled':
                 // true = offen, false = sperren
                 $this->PublishSetTopic(
-                    'chargepoint/' . $this->ReadPropertyInteger('ChargePointID') . '/chargepoint_lock',
+                    $cpSetBase . '/chargepoint_lock',
                     $Value ? 'false' : 'true'
                 );
                 $this->SetValue('LPChargePointEnabled', (bool) $Value);
@@ -361,7 +363,7 @@ class openWB2 extends IPSModuleStrict
             case 'LPCurrent':
                 $current = max(6, min(32, (int) $Value));
                 $this->PublishSetTopic(
-                    'chargepoint/' . $this->ReadPropertyInteger('ChargePointID') . '/chargecurrent',
+                    $cpSetBase . '/chargecurrent',
                     (string) $current
                 );
                 $this->SetValue('LPCurrent', $current);
@@ -370,7 +372,7 @@ class openWB2 extends IPSModuleStrict
             case 'LPChargeMode':
                 $modeString = $this->MapChargeModeIntToString((int) $Value);
                 $this->PublishSetTopic(
-                    'chargepoint/' . $this->ReadPropertyInteger('ChargePointID') . '/chargemode',
+                    $cpSetBase . '/chargemode',
                     $modeString
                 );
                 $this->SetValue('LPChargeMode', (int) $Value);
@@ -395,8 +397,6 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case 'LPResetDirectCharge':
-                // Doku kennt keinen eigenen Reset-Topic.
-                // Deshalb: Limit deaktivieren + Werte zurücksetzen.
                 $this->PublishSetTopic('instant_charging_limit', 'none');
                 $this->PublishSetTopic('instant_charging_limit_soc', '0');
                 $this->PublishSetTopic('instant_charging_limit_amount', '1');
@@ -410,6 +410,18 @@ class openWB2 extends IPSModuleStrict
             default:
                 throw new Exception('Invalid Ident');
         }
+    }
+
+    private function GetChargePointSetBaseTopic(): string
+    {
+        $chargePointID = $this->ReadPropertyInteger('ChargePointID');
+
+        // Für den ersten/kleinsten Ladepunkt dieselbe Kurzform wie beim Empfang verwenden
+        if ($chargePointID === 0) {
+            return 'chargepoint';
+        }
+
+        return 'chargepoint/' . $chargePointID;
     }
 
     private function RegisterProfiles(): void
