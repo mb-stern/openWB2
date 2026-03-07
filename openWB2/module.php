@@ -435,9 +435,10 @@ class openWB2 extends IPSModuleStrict
                 $this->SetValue('SetMaxPriceEco', $price);
                 break;
 
-            ccase 'SetChargePointLock':
+            case 'SetChargePointLock':
                 $payload = ((bool) $Value) ? 'true' : 'false';
-                $this->PublishSetTopic($cpSetBase . '/manual_lock', $payload);
+                $this->PublishSetTopic($cpSetBase . '/chargepoint_lock', $payload);
+                $this->SetValue('SetChargePointLock', (bool) $Value);
                 break;
 
             case 'SetBatMode':
