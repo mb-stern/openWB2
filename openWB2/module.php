@@ -352,13 +352,15 @@ class openWB2 extends IPSModuleStrict
     {
         switch ($Ident) {
             case 'LPChargePointEnabled':
-                // true = offen, false = sperren
-                $this->PublishSetTopic(
-                    'chargepoint/' . $this->ReadPropertyInteger('ChargePointID') . '/chargepoint_lock',
-                    $Value ? 'false' : 'true'
-                );
-                $this->SetValue('LPChargePointEnabled', (bool) $Value);
-                break;
+            // Enabled = offen, Lock = gesperrt
+            $payload = $Value ? '0' : '1';
+
+            $this->PublishSetTopic(
+                'chargepoint/' . $this->ReadPropertyInteger('ChargePointID') . '/chargepoint_lock',
+                $payload
+            );
+            $this->SetValue('LPChargePointEnabled', (bool) $Value);
+            break;
 
             case 'LPCurrent':
                 $current = max(6, min(32, (int) $Value));
