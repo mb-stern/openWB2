@@ -468,19 +468,22 @@ class openWB2 extends IPSModuleStrict
         $fullTopic = $baseTopic . '/simpleAPI/set/' . ltrim($relativeTopic, '/');
 
         $data = [
-            'DataID'           => self::MQTT_CLIENT_SOCKET_GUID,
+            'DataID'           => '{7F7632D9-FA40-4F38-8DEA-C83CD4325A32}',
             'PacketType'       => 3,
             'QualityOfService' => 0,
             'Retain'           => $retain,
             'Topic'            => $fullTopic,
-            'Payload'          => strtoupper(bin2hex($payload))
+            'Payload'          => $payload
         ];
+
+        $json = json_encode($data, JSON_UNESCAPED_SLASHES);
 
         $this->SendDebug('Publish Topic', $fullTopic, 0);
         $this->SendDebug('Publish Payload', $payload, 0);
-        $this->SendDebug('Publish Payload HEX', strtoupper(bin2hex($payload)), 0);
+        $this->SendDebug('Publish JSON', $json, 0);
 
-        $this->SendDataToParent(json_encode($data, JSON_UNESCAPED_SLASHES));
+        $result = $this->SendDataToParent($json);
+        $this->SendDebug('Publish Result', (string) $result, 0);
     }
 
     private function GetChargePointBaseTopics(): array
