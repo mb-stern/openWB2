@@ -412,7 +412,7 @@ class openWB2 extends IPSModuleStrict
 
             case 'SetChargeCurrent':
                 $current = max(6, min(32, (int) $Value));
-                $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
+                $this->PublishSetTopic($cpSetBase . '/charging_current', (string) $current);
                 $this->SetValue('SetChargeCurrent', $current);
                 break;
 
@@ -436,9 +436,9 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case 'SetChargePointLock':
-                $payload = ((bool) $Value) ? 'true' : 'false';
-                $this->PublishSetTopic($cpSetBase . '/chargepoint_lock', $payload);
-                $this->SetValue('SetChargePointLock', (bool) $Value);
+                $payload = ((bool)$Value) ? 'true' : 'false';
+                $this->PublishSetTopic($cpSetBase . '/manual_lock', $payload);
+                $this->SetValue('SetChargePointLock', (bool)$Value);
                 break;
 
             case 'SetBatMode':
