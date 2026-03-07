@@ -31,7 +31,6 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterVariableBoolean('LPPlugState', 'LP Plug State', 'OWB.PlugState', 130);
 
         $this->RegisterVariableBoolean('LPChargePointEnabled', 'LP Chargepoint Enabled', 'OWB.ChargePointEnabled', 140);
-        $this->EnableAction('LPChargePointEnabled');
 
         $this->RegisterVariableInteger('LPState', 'LP State', 'OWB.LPState', 150);
 
@@ -314,38 +313,41 @@ class openWB2 extends IPSModuleStrict
                 case $cpBase . '/chargemode':
                     $this->SendDebug('Match', 'chargemode', 0);
                     $value = $this->MapChargeModeStringToInt($this->PayloadToString($payload));
-                    $this->SetValue('LPChargeMode', $value);
-                    $this->SendDebug('SetValue', 'LPChargeMode = ' . $value, 0);
+                    $this->SetValue('SetChargeMode', $value);
+                    $this->SendDebug('SetValue', 'SetChargeMode = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/instant_charging_limit':
                     $this->SendDebug('Match', 'instant_charging_limit', 0);
                     $value = $this->MapLimitTypeStringToInt($this->PayloadToString($payload));
-                    $this->SetValue('LPChargeLimitation', $value);
-                    $this->SendDebug('SetValue', 'LPChargeLimitation = ' . $value, 0);
+                    $this->SetValue('SetInstantChargingLimit', $value);
+                    $this->SendDebug('SetValue', 'SetInstantChargingLimit = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/instant_charging_limit_soc':
                     $this->SendDebug('Match', 'instant_charging_limit_soc', 0);
                     if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('LPSoCToChargeTo', (int) round((float) $payload));
-                        $this->SendDebug('SetValue', 'LPSoCToChargeTo = ' . (int) round((float) $payload), 0);
+                        $value = (int) round((float) $payload);
+                        $this->SetValue('SetInstantChargingLimitSoc', $value);
+                        $this->SendDebug('SetValue', 'SetInstantChargingLimitSoc = ' . $value, 0);
                     }
                     return '';
 
                 case $cpBase . '/instant_charging_limit_amount':
                     $this->SendDebug('Match', 'instant_charging_limit_amount', 0);
                     if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('LPEnergyToCharge', (int) round((float) $payload));
-                        $this->SendDebug('SetValue', 'LPEnergyToCharge = ' . (int) round((float) $payload), 0);
+                        $value = (int) round((float) $payload);
+                        $this->SetValue('SetInstantChargingLimitAmount', $value);
+                        $this->SendDebug('SetValue', 'SetInstantChargingLimitAmount = ' . $value, 0);
                     }
                     return '';
 
                 case $cpBase . '/charging_current':
                     $this->SendDebug('Match', 'charging_current', 0);
                     if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('LPCurrent', (int) round((float) $payload));
-                        $this->SendDebug('SetValue', 'LPCurrent = ' . (int) round((float) $payload), 0);
+                        $value = (int) round((float) $payload);
+                        $this->SetValue('SetChargeCurrent', $value);
+                        $this->SendDebug('SetValue', 'SetChargeCurrent = ' . $value, 0);
                     }
                     return '';
             }
