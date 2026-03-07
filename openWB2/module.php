@@ -7,8 +7,7 @@ class openWB2 extends IPSModuleStrict
         parent::Create();
 
         $this->RegisterPropertyString('BaseTopic', 'openWB');
-        $this->RegisterPropertyInteger('ChargePointID', 1);
-        $this->RegisterPropertyBoolean('UseLowestChargePointAlias', false);
+        $this->RegisterPropertyInteger('ChargePointID', 0);
 
         // Profile direkt im Modul erzeugen
         $this->RegisterProfiles();
@@ -104,12 +103,7 @@ class openWB2 extends IPSModuleStrict
                 [
                     'name'    => 'ChargePointID',
                     'type'    => 'NumberSpinner',
-                    'caption' => 'ChargePoint ID'
-                ],
-                [
-                    'name'    => 'UseLowestChargePointAlias',
-                    'type'    => 'CheckBox',
-                    'caption' => 'Kurzform für niedrigste ChargePoint-ID verwenden'
+                    'caption' => 'Charging Point'
                 ]
             ],
             'actions' => [
@@ -418,9 +412,9 @@ class openWB2 extends IPSModuleStrict
     private function GetChargePointSetBaseTopic(): string
     {
         $chargePointID = $this->ReadPropertyInteger('ChargePointID');
-        $useAlias = $this->ReadPropertyBoolean('UseLowestChargePointAlias');
 
-        if ($useAlias) {
+        // Für den ersten/kleinsten Ladepunkt dieselbe Kurzform wie beim Empfang verwenden
+        if ($chargePointID === 0) {
             return 'chargepoint';
         }
 
@@ -503,7 +497,6 @@ class openWB2 extends IPSModuleStrict
     {
         $baseTopic = trim($this->ReadPropertyString('BaseTopic'));
         $chargePointID = $this->ReadPropertyInteger('ChargePointID');
-        $useAlias = $this->ReadPropertyBoolean('UseLowestChargePointAlias');
 
         if ($baseTopic === '') {
             $this->SendDebug('GetChargePointBaseTopics', 'BaseTopic ist leer', 0);
@@ -516,13 +509,14 @@ class openWB2 extends IPSModuleStrict
             $base . '/' . $chargePointID
         ];
 
-        if ($useAlias) {
+        // Nur für Ladepunkt 0 zusätzlich die Kurzform ohne ID erlauben
+        if ($chargePointID === 0) {
             $topics[] = $base;
         }
 
         $this->SendDebug('GetChargePointBaseTopics', json_encode($topics), 0);
 
-        return array_values(array_unique($topics));
+        return $topics;
     }
 
     private function UpdateLPState(): void
