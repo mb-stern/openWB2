@@ -44,24 +44,36 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterVariableFloat('LPDailyImported', 'LP Daily Imported', '~Electricity', 210);
         $this->RegisterVariableFloat('LPImported', 'LP Imported', '~Electricity', 220);
 
-        // Schreibbare Parameter
-        $this->RegisterVariableInteger('LPCurrent', 'LP Current', 'OWB.Ampere', 300);
-        $this->EnableAction('LPCurrent');
+        // Schreibbare Parameter gemäß simpleAPI Set-Topics
+        $this->RegisterVariableInteger('SetChargeMode', 'Set Charge Mode', 'OWB.ChargeMode', 300);
+        $this->EnableAction('SetChargeMode');
 
-        $this->RegisterVariableInteger('LPChargeMode', 'LP Charge Mode', 'OWB.ChargeMode', 310);
-        $this->EnableAction('LPChargeMode');
+        $this->RegisterVariableInteger('SetChargeCurrent', 'Set Charge Current', 'OWB.Ampere', 310);
+        $this->EnableAction('SetChargeCurrent');
 
-        $this->RegisterVariableInteger('LPChargeLimitation', 'LP Charge Limitation', 'OWB.ChargeLimitation', 320);
-        $this->EnableAction('LPChargeLimitation');
+        $this->RegisterVariableInteger('SetMinimalPvSoc', 'Set Minimal PV SoC', '~Intensity.100', 320);
+        $this->EnableAction('SetMinimalPvSoc');
 
-        $this->RegisterVariableInteger('LPSoCToChargeTo', 'LP SoC To Charge To', '~Intensity.100', 330);
-        $this->EnableAction('LPSoCToChargeTo');
+        $this->RegisterVariableInteger('SetMinimalPermanentCurrent', 'Set Minimal Permanent Current', 'OWB.Ampere', 330);
+        $this->EnableAction('SetMinimalPermanentCurrent');
 
-        $this->RegisterVariableInteger('LPEnergyToCharge', 'LP Energy To Charge', 'OWB.EnergyToCharge', 340);
-        $this->EnableAction('LPEnergyToCharge');
+        $this->RegisterVariableFloat('SetMaxPriceEco', 'Set Max Price Eco', 'OWB.Price', 340);
+        $this->EnableAction('SetMaxPriceEco');
 
-        $this->RegisterVariableInteger('LPResetDirectCharge', 'LP Reset Direct Charge', 'OWB.ResetDirectCharge', 350);
-        $this->EnableAction('LPResetDirectCharge');
+        $this->RegisterVariableBoolean('SetChargePointLock', 'Set Chargepoint Lock', '~Switch', 350);
+        $this->EnableAction('SetChargePointLock');
+
+        $this->RegisterVariableInteger('SetBatMode', 'Set Battery Mode', 'OWB.BatMode', 360);
+        $this->EnableAction('SetBatMode');
+
+        $this->RegisterVariableInteger('SetInstantChargingLimit', 'Set Instant Charging Limit', 'OWB.ChargeLimitation', 370);
+        $this->EnableAction('SetInstantChargingLimit');
+
+        $this->RegisterVariableInteger('SetInstantChargingLimitSoc', 'Set Instant Charging Limit SoC', '~Intensity.100', 380);
+        $this->EnableAction('SetInstantChargingLimitSoc');
+
+        $this->RegisterVariableInteger('SetInstantChargingLimitAmount', 'Set Instant Charging Limit Amount', 'OWB.EnergyToCharge', 390);
+        $this->EnableAction('SetInstantChargingLimitAmount');
     }
 
     public function GetCompatibleParents(): string
@@ -348,60 +360,65 @@ class openWB2 extends IPSModuleStrict
         $cpSetBase = $this->GetChargePointSetBaseTopic();
 
         switch ($Ident) {
-            case 'LPChargePointEnabled':
-                // true = offen, false = sperren
-                $this->PublishSetTopic(
-                    $cpSetBase . '/chargepoint_lock',
-                    $Value ? 'false' : 'true'
-                );
-                $this->SetValue('LPChargePointEnabled', (bool) $Value);
-                break;
-
-            case 'LPCurrent':
-                $current = max(6, min(32, (int) $Value));
-                $this->PublishSetTopic(
-                    $cpSetBase . '/chargecurrent',
-                    (string) $current
-                );
-                $this->SetValue('LPCurrent', $current);
-                break;
-
-            case 'LPChargeMode':
+            case 'SetChargeMode':
                 $modeString = $this->MapChargeModeIntToString((int) $Value);
-                $this->PublishSetTopic(
-                    $cpSetBase . '/chargemode',
-                    $modeString
-                );
-                $this->SetValue('LPChargeMode', (int) $Value);
+                $this->PublishSetTopic($cpSetBase . '/chargemode', $modeString);
+                $this->SetValue('SetChargeMode', (int) $Value);
                 break;
 
-            case 'LPChargeLimitation':
+            case 'SetChargeCurrent':
+                $current = max(6, min(32, (int) $Value));
+                $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
+                $this->SetValue('SetChargeCurrent', $current);
+                break;
+
+            case 'SetMinimalPvSoc':
+                $soc = max(0, min(100, (int) $Value));
+                $this->PublishSetTopic($cpSetBase . '/minimal_pv_soc', (string) $soc);
+                $this->SetValue('SetMinimalPvSoc', $soc);
+                break;
+
+            case 'SetMinimalPermanentCurrent':
+                $current = max(6, min(32, (int) $Value));
+                $this->PublishSetTopic($cpSetBase . '/minimal_permanent_current', (string) $current);
+                $this->SetValue('SetMinimalPermanentCurrent', $current);
+                break;
+
+            case 'SetMaxPriceEco':
+                $price = max(0, (float) $Value);
+                $payload = number_format($price, 2, '.', '');
+                $this->PublishSetTopic($cpSetBase . '/max_price_eco', $payload);
+                $this->SetValue('SetMaxPriceEco', $price);
+                break;
+
+            case 'SetChargePointLock':
+                $payload = ((bool) $Value) ? 'true' : 'false';
+                $this->PublishSetTopic($cpSetBase . '/chargepoint_lock', $payload);
+                $this->SetValue('SetChargePointLock', (bool) $Value);
+                break;
+
+            case 'SetBatMode':
+                $batMode = $this->MapBatModeIntToString((int) $Value);
+                $this->PublishSetTopic('bat_mode', $batMode);
+                $this->SetValue('SetBatMode', (int) $Value);
+                break;
+
+            case 'SetInstantChargingLimit':
                 $limitType = $this->MapLimitTypeIntToString((int) $Value);
                 $this->PublishSetTopic('instant_charging_limit', $limitType);
-                $this->SetValue('LPChargeLimitation', (int) $Value);
+                $this->SetValue('SetInstantChargingLimit', (int) $Value);
                 break;
 
-            case 'LPSoCToChargeTo':
+            case 'SetInstantChargingLimitSoc':
                 $soc = max(0, min(100, (int) $Value));
                 $this->PublishSetTopic('instant_charging_limit_soc', (string) $soc);
-                $this->SetValue('LPSoCToChargeTo', $soc);
+                $this->SetValue('SetInstantChargingLimitSoc', $soc);
                 break;
 
-            case 'LPEnergyToCharge':
+            case 'SetInstantChargingLimitAmount':
                 $energy = max(1, min(50, (int) $Value));
                 $this->PublishSetTopic('instant_charging_limit_amount', (string) $energy);
-                $this->SetValue('LPEnergyToCharge', $energy);
-                break;
-
-            case 'LPResetDirectCharge':
-                $this->PublishSetTopic('instant_charging_limit', 'none');
-                $this->PublishSetTopic('instant_charging_limit_soc', '0');
-                $this->PublishSetTopic('instant_charging_limit_amount', '1');
-
-                $this->SetValue('LPChargeLimitation', 0);
-                $this->SetValue('LPSoCToChargeTo', 0);
-                $this->SetValue('LPEnergyToCharge', 1);
-                $this->SetValue('LPResetDirectCharge', 1);
+                $this->SetValue('SetInstantChargingLimitAmount', $energy);
                 break;
 
             default:
@@ -412,12 +429,6 @@ class openWB2 extends IPSModuleStrict
     private function GetChargePointSetBaseTopic(): string
     {
         $chargePointID = $this->ReadPropertyInteger('ChargePointID');
-
-        // Für den ersten/kleinsten Ladepunkt dieselbe Kurzform wie beim Empfang verwenden
-        if ($chargePointID === 0) {
-            return 'chargepoint';
-        }
-
         return 'chargepoint/' . $chargePointID;
     }
 
@@ -466,6 +477,14 @@ class openWB2 extends IPSModuleStrict
             [4, 'Target', '', -1],
             [5, 'Scheduled', '', -1],
             [6, 'Unknown', '', -1]
+        ]);
+
+        $this->RegisterProfileFloat('OWB.Price', 'Money', '', ' CHF/kWh', 0, 10, 0.01, 2);
+
+        $this->RegisterProfileIntegerEx('OWB.BatMode', 'Battery', '', '', [
+            [0, 'Min SoC Bat Mode', '', -1],
+            [1, 'EV Mode', '', -1],
+            [2, 'Bat Mode', '', -1]
         ]);
     }
 
@@ -662,6 +681,20 @@ class openWB2 extends IPSModuleStrict
                 return 'soc';
             default:
                 return 'none';
+        }
+    }
+
+    private function MapBatModeIntToString(int $value): string
+    {
+        switch ($value) {
+            case 0:
+                return 'min_soc_bat_mode';
+            case 1:
+                return 'ev_mode';
+            case 2:
+                return 'bat_mode';
+            default:
+                return 'ev_mode';
         }
     }
 
