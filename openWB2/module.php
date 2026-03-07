@@ -401,6 +401,8 @@ class openWB2 extends IPSModuleStrict
 
     public function RequestAction($Ident, mixed $Value): void
     {
+        $this->SendDebug('RequestAction', $Ident . ' = ' . var_export($Value, true), 0);
+
         $cpSetBase = $this->GetChargePointSetBaseTopic();
 
         switch ($Ident) {
@@ -449,19 +451,19 @@ class openWB2 extends IPSModuleStrict
 
             case 'SetInstantChargingLimit':
                 $limitType = $this->MapLimitTypeIntToString((int) $Value);
-                $this->PublishSetTopic('instant_charging_limit', $limitType);
+                $this->PublishSetTopic($cpSetBase . '/instant_charging_limit', $limitType);
                 $this->SetValue('SetInstantChargingLimit', (int) $Value);
                 break;
 
             case 'SetInstantChargingLimitSoc':
                 $soc = max(0, min(100, (int) $Value));
-                $this->PublishSetTopic('instant_charging_limit_soc', (string) $soc);
+                $this->PublishSetTopic($cpSetBase . '/instant_charging_limit_soc', (string) $soc);
                 $this->SetValue('SetInstantChargingLimitSoc', $soc);
                 break;
 
             case 'SetInstantChargingLimitAmount':
                 $energy = max(1, min(50, (int) $Value));
-                $this->PublishSetTopic('instant_charging_limit_amount', (string) $energy);
+                $this->PublishSetTopic($cpSetBase . '/instant_charging_limit_amount', (string) $energy);
                 $this->SetValue('SetInstantChargingLimitAmount', $energy);
                 break;
 
