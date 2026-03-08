@@ -548,7 +548,7 @@ class openWB2 extends IPSModuleStrict
             'QualityOfService' => 0,
             'Retain'           => $retain,
             'Topic'            => $fullTopic,
-            'Payload'          => (string)$payload
+            'Payload'          => bin2hex($payload)
         ];
 
         $json = json_encode($data, JSON_UNESCAPED_SLASHES);
