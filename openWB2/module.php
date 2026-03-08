@@ -42,7 +42,6 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterVariableInteger('PhasesInUse', 'Verwendete Phasen', '', 110);
         $this->RegisterVariableBoolean('ChargeState', 'Ladestatus', 'OWB.ChargeState', 120);
         $this->RegisterVariableBoolean('PlugState', 'Stecker Status', 'OWB.PlugState', 130);
-        $this->RegisterVariableBoolean('ChargePointEnabled', 'Ladepunkt sperren', 'OWB.ChargePointEnabled', 140);
         $this->RegisterVariableInteger('State', 'Status', 'OWB.LPState', 150);
         
         $this->RegisterVariableInteger('FaultState', 'Fehlerstatus', '', 160);
