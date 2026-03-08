@@ -136,8 +136,9 @@ class openWB2 extends IPSModuleStrict
         }
 
         $baseTopic = rtrim($baseTopic, '/');
-        $filter = preg_quote($baseTopic . '/', '/');
-        $this->SetReceiveDataFilter('.*' . $filter . '.*');
+
+        $filter = '.*"Topic":"' . preg_quote($baseTopic, '/') . '\/.*';
+        $this->SetReceiveDataFilter($filter);
     }
 
     public function GetConfigurationForm(): string
