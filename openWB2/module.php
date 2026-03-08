@@ -1,6 +1,6 @@
 <?php
 
-class Ladepunkt extends IPSModuleStrict
+class openWB2 extends IPSModuleStrict
 {
    public function Create(): void
     {
