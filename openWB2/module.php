@@ -129,11 +129,11 @@ class openWB2 extends IPSModuleStrict
    
     public function ReceiveData(string $JSONString): string
     {
-        $this->SendDebug('ReceiveData JSON', $JSONString, 0);
+        //$this->SendDebug('ReceiveData JSON', $JSONString, 0);
 
         $data = json_decode($JSONString, true);
         if (!is_array($data)) {
-            $this->SendDebug('ReceiveData', 'Ungültiges JSON', 0);
+            //$this->SendDebug('ReceiveData', 'Ungültiges JSON', 0);
             return '';
         }
 
@@ -157,8 +157,8 @@ class openWB2 extends IPSModuleStrict
             $payload = trim($payload);
         }
 
-        $this->SendDebug('Topic', $topic, 0);
-        $this->SendDebug('Payload', is_scalar($payload) || $payload === null ? (string) $payload : json_encode($payload), 0);
+        //$this->SendDebug('Topic', $topic, 0);
+        //$this->SendDebug('Payload', is_scalar($payload) || $payload === null ? (string) $payload : json_encode($payload), 0);
 
         $cpBases = $this->GetChargePointBaseTopics();
         if ($cpBases === []) {
@@ -167,7 +167,7 @@ class openWB2 extends IPSModuleStrict
         }
 
         foreach ($cpBases as $cpBase) {
-            $this->SendDebug('Prüfe Base', $cpBase, 0);
+            //$this->SendDebug('Prüfe Base', $cpBase, 0);
 
             switch ($topic) {
                 case $cpBase . '/soc/soc':
