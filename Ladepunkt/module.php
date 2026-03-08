@@ -260,7 +260,7 @@ class Ladepunkt extends IPSModuleStrict
                 case $cpBase . '/fault_state':
                     //$this->SendDebug('Match', 'fault_state', 0);
                     if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('LPFaultState', (int) round((float) $payload));
+                        $this->SetValue('FaultState', (int) round((float) $payload));
                         //$this->SendDebug('SetValue', 'LPFaultState = ' . (int) round((float) $payload), 0);
                     }
                     return '';
@@ -575,20 +575,20 @@ class Ladepunkt extends IPSModuleStrict
 
     private function UpdateLPState(): void
     {
-        $plugged = $this->GetValue('LPPlugState');
-        $charging = $this->GetValue('LPChargeState');
+        $plugged = $this->GetValue('PlugState');
+        $charging = $this->GetValue('ChargeState');
 
         if (!$plugged) {
-            $this->SetValue('LPState', 0);
+            $this->SetValue('State', 0);
             return;
         }
 
         if ($charging) {
-            $this->SetValue('LPState', 2);
+            $this->SetValue('State', 2);
             return;
         }
 
-        $this->SetValue('LPState', 1);
+        $this->SetValue('State', 1);
     }
 
     private function ToBool($value): bool
