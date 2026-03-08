@@ -327,7 +327,7 @@ class openWB2 extends IPSModuleStrict
                     }
                     return '';
 
-                                    case $cpBase . '/soc':
+                case $cpBase . '/soc':
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('SoC', (int) round((float) $payload));
                     }
