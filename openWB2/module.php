@@ -224,17 +224,6 @@ class openWB2 extends IPSModuleStrict
             //$this->SendDebug('Prüfe Base', $cpBase, 0);
 
             switch ($topic) {
-                case $baseTopic . '/vehicle/template/charge_template/' . $templateId:
-                    $value = trim((string) $payload);
-                    $this->SetBuffer('ChargeTemplateJSON', $value);
-                    $this->SendDebug('ChargeTemplate', $value, 0);
-
-                    $data = json_decode($value, true);
-                    if (is_array($data) && isset($data['chargemode']['instant_charging']['phases_to_use'])) {
-                        $this->SetValue('PhasesToUse', (int) $data['chargemode']['instant_charging']['phases_to_use']);
-                    }
-                    return '';
-            
                 case $cpBase . '/soc/soc':
                     //$this->SendDebug('Match', 'soc/soc', 0);
                     if ($this->IsNumericPayload($payload)) {
