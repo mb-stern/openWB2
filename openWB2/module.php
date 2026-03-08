@@ -171,228 +171,228 @@ class openWB2 extends IPSModuleStrict
 
             switch ($topic) {
                 case $cpBase . '/soc/soc':
-                    $this->SendDebug('Match', 'soc/soc', 0);
+                    //$this->SendDebug('Match', 'soc/soc', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('LPSoC', (int) round((float) $payload));
-                        $this->SendDebug('SetValue', 'LPSoC = ' . (int) round((float) $payload), 0);
+                        //$this->SendDebug('SetValue', 'LPSoC = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
                 case $cpBase . '/pro_soc':
-                    $this->SendDebug('Match', 'pro_soc', 0);
+                    //$this->SendDebug('Match', 'pro_soc', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('LPProSoC', (int) round((float) $payload));
-                        $this->SendDebug('SetValue', 'LPProSoC = ' . (int) round((float) $payload), 0);
+                        //$this->SendDebug('SetValue', 'LPProSoC = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
                 case $cpBase . '/evse_current':
-                    $this->SendDebug('Match', 'evse_current', 0);
+                    //$this->SendDebug('Match', 'evse_current', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('LPConfiguredCurrent', (int) round((float) $payload));
-                        $this->SendDebug('SetValue', 'LPConfiguredCurrent = ' . (int) round((float) $payload), 0);
+                        //$this->SendDebug('SetValue', 'LPConfiguredCurrent = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
                 case $cpBase . '/currents/1':
-                    $this->SendDebug('Match', 'currents/1', 0);
+                    //$this->SendDebug('Match', 'currents/1', 0);
                     $this->SetFloatIfNumeric('LPPhaseCurrent1', $payload);
                     return '';
 
                 case $cpBase . '/currents/2':
-                    $this->SendDebug('Match', 'currents/2', 0);
+                    //$this->SendDebug('Match', 'currents/2', 0);
                     $this->SetFloatIfNumeric('LPPhaseCurrent2', $payload);
                     return '';
 
                 case $cpBase . '/currents/3':
-                    $this->SendDebug('Match', 'currents/3', 0);
+                    //$this->SendDebug('Match', 'currents/3', 0);
                     $this->SetFloatIfNumeric('LPPhaseCurrent3', $payload);
                     return '';
 
                 case $cpBase . '/voltages/1':
-                    $this->SendDebug('Match', 'voltages/1', 0);
+                    //$this->SendDebug('Match', 'voltages/1', 0);
                     $this->SetFloatIfNumeric('LPVoltage1', $payload);
                     return '';
 
                 case $cpBase . '/voltages/2':
-                    $this->SendDebug('Match', 'voltages/2', 0);
+                    //$this->SendDebug('Match', 'voltages/2', 0);
                     $this->SetFloatIfNumeric('LPVoltage2', $payload);
                     return '';
 
                 case $cpBase . '/voltages/3':
-                    $this->SendDebug('Match', 'voltages/3', 0);
+                    //$this->SendDebug('Match', 'voltages/3', 0);
                     $this->SetFloatIfNumeric('LPVoltage3', $payload);
                     return '';
 
                 case $cpBase . '/power':
-                    $this->SendDebug('Match', 'power', 0);
+                    //$this->SendDebug('Match', 'power', 0);
                     $this->SetFloatIfNumeric('LPPower', $payload);
                     return '';
 
                 case $cpBase . '/phases_in_use':
-                    $this->SendDebug('Match', 'phases_in_use', 0);
+                    //$this->SendDebug('Match', 'phases_in_use', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('LPPhasesInUse', (int) round((float) $payload));
-                        $this->SendDebug('SetValue', 'LPPhasesInUse = ' . (int) round((float) $payload), 0);
+                        //$this->SendDebug('SetValue', 'LPPhasesInUse = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
                 case $cpBase . '/charge_state':
-                    $this->SendDebug('Match', 'charge_state', 0);
+                    //$this->SendDebug('Match', 'charge_state', 0);
                     $value = $this->ToBool($payload);
                     $this->SetValue('LPChargeState', $value);
-                    $this->SendDebug('SetValue', 'LPChargeState = ' . ($value ? 'true' : 'false'), 0);
+                    //$this->SendDebug('SetValue', 'LPChargeState = ' . ($value ? 'true' : 'false'), 0);
                     $this->UpdateLPState();
                     return '';
 
                 case $cpBase . '/plug_state':
-                    $this->SendDebug('Match', 'plug_state', 0);
+                    //$this->SendDebug('Match', 'plug_state', 0);
                     $value = $this->ToBool($payload);
                     $this->SetValue('LPPlugState', $value);
-                    $this->SendDebug('SetValue', 'LPPlugState = ' . ($value ? 'true' : 'false'), 0);
+                    //$this->SendDebug('SetValue', 'LPPlugState = ' . ($value ? 'true' : 'false'), 0);
                     $this->UpdateLPState();
                     return '';
 
                 case $cpBase . '/manual_lock':
-                    $this->SendDebug('Match', 'manual_lock', 0);
+                    //$this->SendDebug('Match', 'manual_lock', 0);
 
                     $isLocked = $this->ToBool($payload);
                     $isEnabled = !$isLocked;
 
                     $this->SetValue('SetChargePointLock', $isLocked);
-                    $this->SendDebug('SetValue', 'SetChargePointLock = ' . ($isLocked ? 'true' : 'false'), 0);
+                    //$this->SendDebug('SetValue', 'SetChargePointLock = ' . ($isLocked ? 'true' : 'false'), 0);
                     return '';
 
                 case $cpBase . '/fault_state':
-                    $this->SendDebug('Match', 'fault_state', 0);
+                    //$this->SendDebug('Match', 'fault_state', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('LPFaultState', (int) round((float) $payload));
-                        $this->SendDebug('SetValue', 'LPFaultState = ' . (int) round((float) $payload), 0);
+                        //$this->SendDebug('SetValue', 'LPFaultState = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
                 case $cpBase . '/fault_str':
-                    $this->SendDebug('Match', 'fault_str', 0);
+                    //$this->SendDebug('Match', 'fault_str', 0);
                     $value = $this->PayloadToString($payload);
                     $this->SetValue('LPFaultString', $value);
-                    $this->SendDebug('SetValue', 'LPFaultString = ' . $value, 0);
+                    //$this->SendDebug('SetValue', 'LPFaultString = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/state_str':
-                    $this->SendDebug('Match', 'state_str', 0);
+                    //$this->SendDebug('Match', 'state_str', 0);
                     $value = $this->PayloadToString($payload);
                     $this->SetValue('LPStateString', $value);
-                    $this->SendDebug('SetValue', 'LPStateString = ' . $value, 0);
+                    //$this->SendDebug('SetValue', 'LPStateString = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/vehicle_name':
-                    $this->SendDebug('Match', 'vehicle_name', 0);
+                    //$this->SendDebug('Match', 'vehicle_name', 0);
                     $value = $this->PayloadToString($payload);
                     $this->SetValue('LPVehicleName', $value);
-                    $this->SendDebug('SetValue', 'LPVehicleName = ' . $value, 0);
+                    //$this->SendDebug('SetValue', 'LPVehicleName = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/rfid':
-                    $this->SendDebug('Match', 'rfid', 0);
+                    //$this->SendDebug('Match', 'rfid', 0);
                     $value = $this->PayloadToString($payload);
                     $this->SetValue('LPRFID', $value);
-                    $this->SendDebug('SetValue', 'LPRFID = ' . $value, 0);
+                    //$this->SendDebug('SetValue', 'LPRFID = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/daily_imported':
-                    $this->SendDebug('Match', 'daily_imported', 0);
+                    //$this->SendDebug('Match', 'daily_imported', 0);
                     $this->SetFloatIfNumeric('LPDailyImported', $payload);
                     return '';
 
                 case $cpBase . '/imported':
-                    $this->SendDebug('Match', 'imported', 0);
+                    //$this->SendDebug('Match', 'imported', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $value = ((float) $payload) / 1000;
                         $this->SetValue('LPImported', $value);
-                        $this->SendDebug('SetValue', 'LPImported = ' . $value, 0);
+                        //$this->SendDebug('SetValue', 'LPImported = ' . $value, 0);
                     }
                     return '';
 
                 case $cpBase . '/chargemode':
-                    $this->SendDebug('Match', 'chargemode', 0);
+                    //$this->SendDebug('Match', 'chargemode', 0);
                     $value = $this->MapChargeModeStringToInt($this->PayloadToString($payload));
                     $this->SetValue('SetChargeMode', $value);
-                    $this->SendDebug('SetValue', 'SetChargeMode = ' . $value, 0);
+                    //$this->SendDebug('SetValue', 'SetChargeMode = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/instant_charging_limit':
-                    $this->SendDebug('Match', 'instant_charging_limit', 0);
+                    //$this->SendDebug('Match', 'instant_charging_limit', 0);
                     $value = $this->MapLimitTypeStringToInt($this->PayloadToString($payload));
                     $this->SetValue('SetInstantChargingLimit', $value);
-                    $this->SendDebug('SetValue', 'SetInstantChargingLimit = ' . $value, 0);
+                    //$this->SendDebug('SetValue', 'SetInstantChargingLimit = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/instant_charging_limit_soc':
-                    $this->SendDebug('Match', 'instant_charging_limit_soc', 0);
+                    //$this->SendDebug('Match', 'instant_charging_limit_soc', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $value = (int) round((float) $payload);
                         $this->SetValue('SetInstantChargingLimitSoc', $value);
-                        $this->SendDebug('SetValue', 'SetInstantChargingLimitSoc = ' . $value, 0);
+                        //$this->SendDebug('SetValue', 'SetInstantChargingLimitSoc = ' . $value, 0);
                     }
                     return '';
 
                 case $cpBase . '/instant_charging_limit_amount':
-                    $this->SendDebug('Match', 'instant_charging_limit_amount', 0);
+                    //$this->SendDebug('Match', 'instant_charging_limit_amount', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $value = (int) round((float) $payload);
                         $this->SetValue('SetInstantChargingLimitAmount', $value);
-                        $this->SendDebug('SetValue', 'SetInstantChargingLimitAmount = ' . $value, 0);
+                        //$this->SendDebug('SetValue', 'SetInstantChargingLimitAmount = ' . $value, 0);
                     }
                     return '';
 
                 case $cpBase . '/charging_current':
-                    $this->SendDebug('Match', 'charging_current', 0);
+                    //$this->SendDebug('Match', 'charging_current', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $value = (int) round((float) $payload);
                         $this->SetValue('SetChargeCurrent', $value);
-                        $this->SendDebug('SetValue', 'SetChargeCurrent = ' . $value, 0);
+                        //$this->SendDebug('SetValue', 'SetChargeCurrent = ' . $value, 0);
                     }
                     return '';
 
                 case $cpBase . '/minimal_pv_soc':
-                    $this->SendDebug('Match', 'minimal_pv_soc', 0);
+                    //$this->SendDebug('Match', 'minimal_pv_soc', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $value = (int) round((float) $payload);
                         $this->SetValue('SetMinimalPvSoc', $value);
-                        $this->SendDebug('SetValue', 'SetMinimalPvSoc = ' . $value, 0);
+                        //$this->SendDebug('SetValue', 'SetMinimalPvSoc = ' . $value, 0);
                     }
                     return '';
 
                 case $cpBase . '/minimal_permanent_current':
-                    $this->SendDebug('Match', 'minimal_permanent_current', 0);
+                    //$this->SendDebug('Match', 'minimal_permanent_current', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $value = (int) round((float) $payload);
                         $this->SetValue('SetMinimalPermanentCurrent', $value);
-                        $this->SendDebug('SetValue', 'SetMinimalPermanentCurrent = ' . $value, 0);
+                        //$this->SendDebug('SetValue', 'SetMinimalPermanentCurrent = ' . $value, 0);
                     }
                     return '';
 
                 case $cpBase . '/max_price_eco':
-                    $this->SendDebug('Match', 'max_price_eco', 0);
+                    //$this->SendDebug('Match', 'max_price_eco', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $value = (float) $payload;
                         if (!is_nan($value) && !is_infinite($value)) {
                             $this->SetValue('SetMaxPriceEco', $value);
-                            $this->SendDebug('SetValue', 'SetMaxPriceEco = ' . $value, 0);
+                            //$this->SendDebug('SetValue', 'SetMaxPriceEco = ' . $value, 0);
                         }
                     }
                     return '';
 
                 case rtrim($this->ReadPropertyString('BaseTopic'), '/') . '/simpleAPI/bat_mode':
-                    $this->SendDebug('Match', 'bat_mode', 0);
+                    //$this->SendDebug('Match', 'bat_mode', 0);
                     $value = $this->MapBatModeStringToInt($this->PayloadToString($payload));
                     $this->SetValue('SetBatMode', $value);
-                    $this->SendDebug('SetValue', 'SetBatMode = ' . $value, 0);
+                    //$this->SendDebug('SetValue', 'SetBatMode = ' . $value, 0);
                     return '';
             }
         }
 
-        $this->SendDebug('Kein Match', $topic, 0);
+        //$this->SendDebug('Kein Match', $topic, 0);
         return '';
     }
 
