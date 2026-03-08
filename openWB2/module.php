@@ -589,14 +589,22 @@ class openWB2 extends IPSModuleStrict
         }
 
         if (is_scalar($payload)) {
-            $value = (string) $payload;
+            $value = (string)$payload;
+
             if (strtolower($value) === 'null') {
                 return '';
             }
+
+            // JSON-Unicode dekodieren
+            $decoded = json_decode('"' . addslashes($value) . '"');
+            if (is_string($decoded)) {
+                return $decoded;
+            }
+
             return trim($value, "\"");
         }
 
-        return json_encode($payload, JSON_UNESCAPED_SLASHES);
+        return json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     private function IsNumericPayload($payload): bool
