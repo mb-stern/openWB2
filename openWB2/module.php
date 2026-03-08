@@ -14,8 +14,8 @@ class openWB2 extends IPSModuleStrict
 
         // Status / Read-Werte
         $this->RegisterVariableInteger('SoC', 'SoC', '~Intensity.100', 10);
-        $this->RegisterVariableString('SocTimestamp', 'Pro-SoC Zeitstempel', '', 15);
         $this->RegisterVariableInteger('ProSoC', 'Pro-SoC', '~Intensity.100', 20);
+        $this->RegisterVariableString('SocTimestamp', 'Pro-SoC Zeitstempel', '', 25);
         
         $this->RegisterVariableInteger('ConfiguredCurrent', 'EVSE Aktuell', 'OWB.Ampere', 30);
         
