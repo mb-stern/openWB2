@@ -167,7 +167,7 @@ class openWB2 extends IPSModuleStrict
                 case $cpBase . '/soc/soc':
                     //$this->SendDebug('Match', 'soc/soc', 0);
                     if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('LPSoC', (int) round((float) $payload));
+                        $this->SetValue('SoC', (int) round((float) $payload));
                         //$this->SendDebug('SetValue', 'LPSoC = ' . (int) round((float) $payload), 0);
                     }
                     return '';
@@ -175,7 +175,7 @@ class openWB2 extends IPSModuleStrict
                 case $cpBase . '/pro_soc':
                     //$this->SendDebug('Match', 'pro_soc', 0);
                     if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('LPProSoC', (int) round((float) $payload));
+                        $this->SetValue('ProSoC', (int) round((float) $payload));
                         //$this->SendDebug('SetValue', 'LPProSoC = ' . (int) round((float) $payload), 0);
                     }
                     return '';
@@ -183,50 +183,50 @@ class openWB2 extends IPSModuleStrict
                 case $cpBase . '/evse_current':
                     //$this->SendDebug('Match', 'evse_current', 0);
                     if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('LPConfiguredCurrent', (int) round((float) $payload));
+                        $this->SetValue('ConfiguredCurrent', (int) round((float) $payload));
                         //$this->SendDebug('SetValue', 'LPConfiguredCurrent = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
                 case $cpBase . '/currents/1':
                     //$this->SendDebug('Match', 'currents/1', 0);
-                    $this->SetFloatIfNumeric('LPPhaseCurrent1', $payload);
+                    $this->SetFloatIfNumeric('PhaseCurrent1', $payload);
                     return '';
 
                 case $cpBase . '/currents/2':
                     //$this->SendDebug('Match', 'currents/2', 0);
-                    $this->SetFloatIfNumeric('LPPhaseCurrent2', $payload);
+                    $this->SetFloatIfNumeric('PhaseCurrent2', $payload);
                     return '';
 
                 case $cpBase . '/currents/3':
                     //$this->SendDebug('Match', 'currents/3', 0);
-                    $this->SetFloatIfNumeric('LPPhaseCurrent3', $payload);
+                    $this->SetFloatIfNumeric('PhaseCurrent3', $payload);
                     return '';
 
                 case $cpBase . '/voltages/1':
                     //$this->SendDebug('Match', 'voltages/1', 0);
-                    $this->SetFloatIfNumeric('LPVoltage1', $payload);
+                    $this->SetFloatIfNumeric('Voltage1', $payload);
                     return '';
 
                 case $cpBase . '/voltages/2':
                     //$this->SendDebug('Match', 'voltages/2', 0);
-                    $this->SetFloatIfNumeric('LPVoltage2', $payload);
+                    $this->SetFloatIfNumeric('Voltage2', $payload);
                     return '';
 
                 case $cpBase . '/voltages/3':
                     //$this->SendDebug('Match', 'voltages/3', 0);
-                    $this->SetFloatIfNumeric('LPVoltage3', $payload);
+                    $this->SetFloatIfNumeric('Voltage3', $payload);
                     return '';
 
                 case $cpBase . '/power':
                     //$this->SendDebug('Match', 'power', 0);
-                    $this->SetFloatIfNumeric('LPPower', $payload);
+                    $this->SetFloatIfNumeric('Power', $payload);
                     return '';
 
                 case $cpBase . '/phases_in_use':
                     //$this->SendDebug('Match', 'phases_in_use', 0);
                     if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('LPPhasesInUse', (int) round((float) $payload));
+                        $this->SetValue('PhasesInUse', (int) round((float) $payload));
                         //$this->SendDebug('SetValue', 'LPPhasesInUse = ' . (int) round((float) $payload), 0);
                     }
                     return '';
@@ -234,7 +234,7 @@ class openWB2 extends IPSModuleStrict
                 case $cpBase . '/charge_state':
                     //$this->SendDebug('Match', 'charge_state', 0);
                     $value = $this->ToBool($payload);
-                    $this->SetValue('LPChargeState', $value);
+                    $this->SetValue('ChargeState', $value);
                     //$this->SendDebug('SetValue', 'LPChargeState = ' . ($value ? 'true' : 'false'), 0);
                     $this->UpdateLPState();
                     return '';
@@ -242,7 +242,7 @@ class openWB2 extends IPSModuleStrict
                 case $cpBase . '/plug_state':
                     //$this->SendDebug('Match', 'plug_state', 0);
                     $value = $this->ToBool($payload);
-                    $this->SetValue('LPPlugState', $value);
+                    $this->SetValue('PlugState', $value);
                     //$this->SendDebug('SetValue', 'LPPlugState = ' . ($value ? 'true' : 'false'), 0);
                     $this->UpdateLPState();
                     return '';
@@ -268,41 +268,41 @@ class openWB2 extends IPSModuleStrict
                 case $cpBase . '/fault_str':
                     //$this->SendDebug('Match', 'fault_str', 0);
                     $value = $this->PayloadToString($payload);
-                    $this->SetValue('LPFaultString', $value);
+                    $this->SetValue('FaultString', $value);
                     //$this->SendDebug('SetValue', 'LPFaultString = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/state_str':
                     //$this->SendDebug('Match', 'state_str', 0);
                     $value = $this->PayloadToString($payload);
-                    $this->SetValue('LPStateString', $value);
+                    $this->SetValue('StateString', $value);
                     //$this->SendDebug('SetValue', 'LPStateString = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/vehicle_name':
                     //$this->SendDebug('Match', 'vehicle_name', 0);
                     $value = $this->PayloadToString($payload);
-                    $this->SetValue('LPVehicleName', $value);
+                    $this->SetValue('VehicleName', $value);
                     //$this->SendDebug('SetValue', 'LPVehicleName = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/rfid':
                     //$this->SendDebug('Match', 'rfid', 0);
                     $value = $this->PayloadToString($payload);
-                    $this->SetValue('LPRFID', $value);
+                    $this->SetValue('RFID', $value);
                     //$this->SendDebug('SetValue', 'LPRFID = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/daily_imported':
                     //$this->SendDebug('Match', 'daily_imported', 0);
-                    $this->SetFloatIfNumeric('LPDailyImported', $payload);
+                    $this->SetFloatIfNumeric('DailyImported', $payload);
                     return '';
 
                 case $cpBase . '/imported':
                     //$this->SendDebug('Match', 'imported', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $value = ((float) $payload) / 1000;
-                        $this->SetValue('LPImported', $value);
+                        $this->SetValue('Imported', $value);
                         //$this->SendDebug('SetValue', 'LPImported = ' . $value, 0);
                     }
                     return '';
