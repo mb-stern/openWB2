@@ -13,7 +13,7 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterProfiles();
 
         // Status / Read-Werte
-        $this->RegisterVariableInteger('SoC', 'SoC', '~Intensity.100', 10);
+        $this->RegisterVariableInteger('EV-SoC', 'SoC', '~Intensity.100', 10);
         $this->RegisterVariableInteger('ProSoC', 'Pro-SoC', '~Intensity.100', 20);
         $this->RegisterVariableString('SocTimestamp', 'Pro-SoC Zeitstempel', '', 25);
         
@@ -201,7 +201,7 @@ class openWB2 extends IPSModuleStrict
             //$this->SendDebug('Prüfe Base', $cpBase, 0);
 
             switch ($topic) {
-                case $cpBase . '/soc':
+                case $cpBase . '/soc/soc':
                     //$this->SendDebug('Match', 'soc/soc', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('SoC', (int) round((float) $payload));
@@ -504,7 +504,7 @@ class openWB2 extends IPSModuleStrict
             }
         }
 
-        //$this->SendDebug('Kein Match', $topic, 0);
+        $this->SendDebug('Kein Match', $topic, 0);
         return '';
     }
 
