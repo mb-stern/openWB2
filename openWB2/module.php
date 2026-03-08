@@ -8,6 +8,7 @@ class openWB2 extends IPSModuleStrict
 
         $this->RegisterPropertyString('BaseTopic', 'openWB');
         $this->RegisterPropertyInteger('ChargePointID', 0);
+        $this->RegisterPropertyInteger('ChargeTemplateID', 0);
 
         // Profile erzeugen
         $this->RegisterProfiles();
@@ -104,6 +105,11 @@ class openWB2 extends IPSModuleStrict
 
         $this->RegisterVariableInteger('SetInstantChargingLimitAmount', 'Energie Limit', 'OWB.EnergyToCharge', 390);
         $this->EnableAction('SetInstantChargingLimitAmount');
+
+        // Phasenumschaltung
+
+        $this->RegisterVariableInteger('PhasesToUse', 'Phasen Sofortladen', 'OWB.PhasesToUse', 315);
+        $this->EnableAction('PhasesToUse');
     }
 
     public function GetCompatibleParents(): string
@@ -123,13 +129,14 @@ class openWB2 extends IPSModuleStrict
     {
         parent::ApplyChanges();
 
-        $baseTopic = $this->ReadPropertyString('BaseTopic');
+        $baseTopic = trim($this->ReadPropertyString('BaseTopic'));
         if ($baseTopic === '') {
             $this->SetReceiveDataFilter('.*');
             return;
         }
 
-        $filter = preg_quote($baseTopic . '/simpleAPI/', '/');
+        $baseTopic = rtrim($baseTopic, '/');
+        $filter = preg_quote($baseTopic . '/', '/');
         $this->SetReceiveDataFilter('.*' . $filter . '.*');
     }
 
@@ -145,7 +152,12 @@ class openWB2 extends IPSModuleStrict
                 [
                     'name'    => 'ChargePointID',
                     'type'    => 'NumberSpinner',
-                    'caption' => 'Charging Point'
+                    'caption' => 'CLadepunkt ID'
+                ],
+                [
+                    'name'    => 'ChargeTemplateID',
+                    'type'    => 'NumberSpinner',
+                    'caption' => 'Ladepunkt-Profil ID'
                 ]
             ],
             'actions' => [
@@ -162,18 +174,6 @@ class openWB2 extends IPSModuleStrict
     {
         //$this->SendDebug('ReceiveData JSON', $JSONString, 0);
 
-        $data = json_decode($JSONString, true);
-        if (!is_array($data)) {
-            //$this->SendDebug('ReceiveData', 'Ungültiges JSON', 0);
-            return '';
-        }
-
-        if (!isset($data['Topic']) || !array_key_exists('Payload', $data)) {
-            $this->SendDebug('ReceiveData', 'Topic oder Payload fehlt', 0);
-            $this->SendDebug('ReceiveData Data', json_encode($data), 0);
-            return '';
-        }
-
         $topic = (string) $data['Topic'];
         $payload = $data['Payload'];
 
@@ -188,6 +188,21 @@ class openWB2 extends IPSModuleStrict
             $payload = trim($payload);
         }
 
+        $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
+        $templateId = (int) $this->ReadPropertyInteger('ChargeTemplateID');
+
+        if ($topic === $baseTopic . '/vehicle/template/charge_template/' . $templateId) {
+            $value = trim((string) $payload);
+            $this->SetBuffer('ChargeTemplateJSON', $value);
+            $this->SendDebug('ChargeTemplate', $value, 0);
+
+            $templateData = json_decode($value, true);
+            if (is_array($templateData) && isset($templateData['chargemode']['instant_charging']['phases_to_use'])) {
+                $this->SetValue('PhasesToUse', (int) $templateData['chargemode']['instant_charging']['phases_to_use']);
+            }
+            return '';
+        }
+
         //$this->SendDebug('Topic', $topic, 0);
         //$this->SendDebug('Payload', is_scalar($payload) || $payload === null ? (string) $payload : json_encode($payload), 0);
 
@@ -197,10 +212,36 @@ class openWB2 extends IPSModuleStrict
             return '';
         }
 
+        $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
+        $templateId = (int) $this->ReadPropertyInteger('ChargeTemplateID');
+
+        if ($topic === $baseTopic . '/vehicle/template/charge_template/' . $templateId) {
+            $value = trim((string) $payload);
+            $this->SetBuffer('ChargeTemplateJSON', $value);
+            $this->SendDebug('ChargeTemplate', $value, 0);
+
+            $templateData = json_decode($value, true);
+            if (is_array($templateData) && isset($templateData['chargemode']['instant_charging']['phases_to_use'])) {
+                $this->SetValue('PhasesToUse', (int) $templateData['chargemode']['instant_charging']['phases_to_use']);
+            }
+            return '';
+        }
+        
         foreach ($cpBases as $cpBase) {
             //$this->SendDebug('Prüfe Base', $cpBase, 0);
 
             switch ($topic) {
+                case $baseTopic . '/vehicle/template/charge_template/' . $templateId:
+                    $value = trim((string) $payload);
+                    $this->SetBuffer('ChargeTemplateJSON', $value);
+                    $this->SendDebug('ChargeTemplate', $value, 0);
+
+                    $data = json_decode($value, true);
+                    if (is_array($data) && isset($data['chargemode']['instant_charging']['phases_to_use'])) {
+                        $this->SetValue('PhasesToUse', (int) $data['chargemode']['instant_charging']['phases_to_use']);
+                    }
+                    return '';
+            
                 case $cpBase . '/soc/soc':
                     //$this->SendDebug('Match', 'soc/soc', 0);
                     if ($this->IsNumericPayload($payload)) {
@@ -515,6 +556,15 @@ class openWB2 extends IPSModuleStrict
         $cpSetBase = $this->GetChargePointSetBaseTopic();
 
         switch ($Ident) {
+            case 'PhasesToUse':
+                $Value = (int) $Value;
+                if (in_array($Value, [1, 3], true)) {
+                    if ($this->UpdatePhasesInChargeTemplate($Value)) {
+                        $this->SetValue('PhasesToUse', $Value);
+                    }
+                }
+                break;
+
             case 'SetChargeMode':
                 $modeString = $this->MapChargeModeIntToString((int) $Value);
                 $this->PublishSetTopic($cpSetBase . '/chargemode', $modeString);
@@ -590,6 +640,11 @@ class openWB2 extends IPSModuleStrict
 
     private function RegisterProfiles(): void
     {
+    $this->RegisterProfileIntegerEx('OWB.PhasesToUse', 'Electricity', '', '', [
+            [1, '1 Phase', '', -1],
+            [3, 'Maximum', '', -1]
+        ]);
+
         $this->RegisterProfileIntegerEx('OWB.ChargeLimitation', 'Power', '', '', [
             [0, 'Aus', '', -1],
             [1, 'Energie', '', -1],
@@ -645,6 +700,7 @@ class openWB2 extends IPSModuleStrict
     }
 
     private function PublishSetTopic(string $relativeTopic, string $payload, bool $retain = false): void
+    //Diese funktion ist zum aller Topics ausser Ladeprofil/Phasenumschaltung
     {
         $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
         $fullTopic = $baseTopic . '/simpleAPI/set/' . ltrim($relativeTopic, '/');
@@ -666,6 +722,25 @@ class openWB2 extends IPSModuleStrict
 
         $result = $this->SendDataToParent($json);
         $this->SendDebug('Publish Result', (string)$result, 0);
+    }
+
+    private function MQTTCommand(string $relativeTopic, string $payload, bool $retain = false): void
+    //Diese funktion ist nur zum senden des Topics für das Ladeprofil/Phasenumschaltung
+    {
+        $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
+        $fullTopic = $baseTopic . '/' . ltrim($relativeTopic, '/');
+
+        $data = [
+            'DataID'           => '{043EA491-0325-4ADD-8FC2-A30C8EEB4D3F}',
+            'PacketType'       => 3,
+            'QualityOfService' => 0,
+            'Retain'           => $retain,
+            'Topic'            => $fullTopic,
+            'Payload'          => bin2hex($payload)
+        ];
+
+        $json = json_encode($data, JSON_UNESCAPED_SLASHES);
+        $this->SendDataToParent($json);
     }
 
     private function GetChargePointBaseTopics(): array
@@ -692,6 +767,42 @@ class openWB2 extends IPSModuleStrict
         //$this->SendDebug('GetChargePointBaseTopics', json_encode($topics), 0);
 
         return $topics;
+    }
+
+    private function UpdatePhasesInChargeTemplate(int $phases): bool
+    {
+        $json = $this->GetBuffer('ChargeTemplateJSON');
+        if ($json === '') {
+            $this->SendDebug(__FUNCTION__, 'Kein ChargeTemplate im Buffer vorhanden', 0);
+            return false;
+        }
+
+        $data = json_decode($json, true);
+        if (!is_array($data)) {
+            $this->SendDebug(__FUNCTION__, 'ChargeTemplate JSON ungültig', 0);
+            return false;
+        }
+
+        if (!isset($data['chargemode']['instant_charging'])) {
+            $this->SendDebug(__FUNCTION__, 'instant_charging im Template nicht gefunden', 0);
+            return false;
+        }
+
+        $data['chargemode']['instant_charging']['phases_to_use'] = $phases;
+
+        $payload = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if ($payload === false) {
+            $this->SendDebug(__FUNCTION__, 'JSON Encode fehlgeschlagen', 0);
+            return false;
+        }
+
+        $chargePointId = (int) $this->ReadPropertyInteger('ChargePointID');
+        $topic = 'set/chargepoint/' . $chargePointId . '/set/charge_template';
+
+        $this->MQTTCommand($topic, $payload);
+        $this->SendDebug(__FUNCTION__, 'Gesendet an ' . $topic . ': ' . $payload, 0);
+
+        return true;
     }
 
     private function UpdateLPState(): void
