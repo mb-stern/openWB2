@@ -559,7 +559,7 @@ class openWB2 extends IPSModuleStrict
         $chargePointID = $this->ReadPropertyInteger('ChargePointID');
 
         if ($baseTopic === '') {
-            $this->SendDebug('GetChargePointBaseTopics', 'BaseTopic ist leer', 0);
+            //$this->SendDebug('GetChargePointBaseTopics', 'BaseTopic ist leer', 0);
             return [];
         }
 
@@ -574,7 +574,7 @@ class openWB2 extends IPSModuleStrict
             $topics[] = $base;
         }
 
-        $this->SendDebug('GetChargePointBaseTopics', json_encode($topics), 0);
+        //$this->SendDebug('GetChargePointBaseTopics', json_encode($topics), 0);
 
         return $topics;
     }
