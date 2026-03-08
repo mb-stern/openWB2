@@ -729,19 +729,23 @@ class openWB2 extends IPSModuleStrict
         }
 
         if (is_scalar($payload)) {
-            $value = (string)$payload;
+            $value = trim((string)$payload);
 
-            if (strtolower($value) === 'null') {
+            if ($value === '' || strtolower($value) === 'null') {
                 return '';
             }
 
-            // JSON-Unicode dekodieren
-            $decoded = json_decode('"' . addslashes($value) . '"');
+            $decoded = json_decode($value, true);
             if (is_string($decoded)) {
                 return $decoded;
             }
 
-            return trim($value, "\"");
+            $decoded = json_decode('"' . addslashes(trim($value, '"')) . '"', true);
+            if (is_string($decoded)) {
+                return $decoded;
+            }
+
+            return trim($value, '"');
         }
 
         return json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
