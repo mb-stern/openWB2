@@ -38,7 +38,7 @@ class openWB2 extends IPSModuleStrict
 
         // Schreibbare Parameter gemäß simpleAPI Set-Topics
 
-        $this->RegisterVariableBoolean('SetChargePointLock', 'Ladepunkt aktiviert', 'OWB.ChargePointEnabled', 290);
+        $this->RegisterVariableBoolean('SetChargePointLock', 'Ladepunkt sperren', 'OWB.ChargePointEnabled', 290);
         $this->EnableAction('SetChargePointLock');
 
         $this->RegisterVariableInteger('SetChargeMode', 'Lademodus', 'OWB.ChargeMode', 300);
@@ -410,7 +410,7 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case 'SetChargePointLock':
-                $payload = ((bool) $Value) ? 'false' : 'true';
+                $payload = ((bool) $Value) ? 'true' : 'false';
                 $this->PublishSetTopic($cpSetBase . '/chargepoint_lock', $payload);
                 $this->SetValue('SetChargePointLock', (bool) $Value);
                 break;
