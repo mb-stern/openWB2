@@ -45,8 +45,9 @@ class openWB2 extends IPSModuleStrict
         
         $this->RegisterVariableInteger('FaultState', 'Fehlerstatus', '', 160);
         $this->RegisterVariableString('FaultString', 'Fehlertext', '', 170);
+        $this->RegisterVariableString('ErrorTimestamp', 'Fehler Zeitstempel', '', 175);
         $this->RegisterVariableString('StateString', 'Statustext', '', 180);
-        $this->RegisterVariableString('ErrorTimestamp', 'Fehler Zeitstempel', '', 185);
+    
 
         $this->RegisterVariableString('VehicleName', 'Fahrzeug Name', '', 190);
         
