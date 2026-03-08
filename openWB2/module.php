@@ -327,12 +327,6 @@ class openWB2 extends IPSModuleStrict
                     }
                     return '';
 
-                case $cpBase . '/soc':
-                    if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('SoC', (int) round((float) $payload));
-                    }
-                    return '';
-
                 case $cpBase . '/rfid_timestamp':
                     $this->SetValue('RFIDTimestamp', $this->PayloadToString($payload));
                     return '';
