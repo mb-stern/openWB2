@@ -19,13 +19,21 @@ class openWB2 extends IPSModuleStrict
         
         $this->RegisterVariableInteger('ConfiguredCurrent', 'EVSE Aktuell', 'OWB.Ampere', 30);
         
-        $this->RegisterVariableFloat('PhaseCurrent1', 'Phase 1 Aktuell', '~Ampere', 40);
-        $this->RegisterVariableFloat('PhaseCurrent2', 'Phase 2 Aktuell', '~Ampere', 50);
-        $this->RegisterVariableFloat('PhaseCurrent3', 'Phase 3 Aktuell', '~Ampere', 60);
+        $this->RegisterVariableFloat('PhaseCurrent1', 'Strom Phase 1', '~Ampere', 40);
+        $this->RegisterVariableFloat('PhaseCurrent2', 'Strom Phase 2', '~Ampere', 41);
+        $this->RegisterVariableFloat('PhaseCurrent3', 'Strom Phase 3', '~Ampere', 42);
         
-        $this->RegisterVariableFloat('Voltage1', 'Phase 1 Spannung', '~Volt', 70);
-        $this->RegisterVariableFloat('Voltage2', 'Phase 2 Spannung', '~Volt', 80);
-        $this->RegisterVariableFloat('Voltage3', 'Phase 3 Spannung', '~Volt', 90);
+        $this->RegisterVariableFloat('Voltage1', 'Spannung Phase 1', '~Volt', 50);
+        $this->RegisterVariableFloat('Voltage2', 'Spannung Phase 2', '~Volt', 51);
+        $this->RegisterVariableFloat('Voltage3', 'Spannung Phase 3', '~Volt', 52);
+
+        $this->RegisterVariableFloat('PowerL1', 'Leistung Phase 1', 'OWB.Watt', 60);
+        $this->RegisterVariableFloat('PowerL2', 'Leistung Phase 2', 'OWB.Watt', 61);
+        $this->RegisterVariableFloat('PowerL3', 'Leistung Phase 3', 'OWB.Watt', 62);
+
+        $this->RegisterVariableFloat('PowerFactor1', 'Leistungsfaktor Phase 1', '', 70);
+        $this->RegisterVariableFloat('PowerFactor2', 'Leistungsfaktor Phase 2', '', 71);
+        $this->RegisterVariableFloat('PowerFactor3', 'Leistungsfaktor Phase 3', '', 72);
         
         $this->RegisterVariableFloat('Power', 'Ladeleistung', 'OWB.Watt', 100);
         
@@ -51,15 +59,7 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterVariableFloat('Imported', 'Energie Gesamt', '~Electricity', 220);
         $this->RegisterVariableFloat('Exported', 'Energie Gesamt Export', '~Electricity', 225);
 
-        $this->RegisterVariableFloat('PowerL1', 'Leistung Phase 1', 'OWB.Watt', 230);
-        $this->RegisterVariableFloat('PowerL2', 'Leistung Phase 2', 'OWB.Watt', 231);
-        $this->RegisterVariableFloat('PowerL3', 'Leistung Phase 3', 'OWB.Watt', 232);
-
         $this->RegisterVariableFloat('Frequency', 'Frequenz', '~Hertz', 233);
-
-        $this->RegisterVariableFloat('PowerFactor1', 'Leistungsfaktor Phase 1', '', 234);
-        $this->RegisterVariableFloat('PowerFactor2', 'Leistungsfaktor Phase 2', '', 235);
-        $this->RegisterVariableFloat('PowerFactor3', 'Leistungsfaktor Phase 3', '', 236);
 
         $this->RegisterVariableString('SerialNumber', 'Seriennummer', '', 237);
         $this->RegisterVariableString('VehicleID', 'Fahrzeug ID', '', 238);
