@@ -174,6 +174,17 @@ class openWB2 extends IPSModuleStrict
     {
         //$this->SendDebug('ReceiveData JSON', $JSONString, 0);
 
+        $data = json_decode($JSONString, true);
+        if (!is_array($data)) {
+            return '';
+        }
+
+        if (!isset($data['Topic']) || !array_key_exists('Payload', $data)) {
+            $this->SendDebug('ReceiveData', 'Topic oder Payload fehlt', 0);
+            $this->SendDebug('ReceiveData Data', json_encode($data), 0);
+            return '';
+        }
+
         $topic = (string) $data['Topic'];
         $payload = $data['Payload'];
 
@@ -203,30 +214,12 @@ class openWB2 extends IPSModuleStrict
             return '';
         }
 
-        //$this->SendDebug('Topic', $topic, 0);
-        //$this->SendDebug('Payload', is_scalar($payload) || $payload === null ? (string) $payload : json_encode($payload), 0);
-
         $cpBases = $this->GetChargePointBaseTopics();
         if ($cpBases === []) {
             $this->SendDebug('ReceiveData', 'Keine ChargePoint-Basen ermittelt', 0);
             return '';
         }
 
-        $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
-        $templateId = (int) $this->ReadPropertyInteger('ChargeTemplateID');
-
-        if ($topic === $baseTopic . '/vehicle/template/charge_template/' . $templateId) {
-            $value = trim((string) $payload);
-            $this->SetBuffer('ChargeTemplateJSON', $value);
-            $this->SendDebug('ChargeTemplate', $value, 0);
-
-            $templateData = json_decode($value, true);
-            if (is_array($templateData) && isset($templateData['chargemode']['instant_charging']['phases_to_use'])) {
-                $this->SetValue('PhasesToUse', (int) $templateData['chargemode']['instant_charging']['phases_to_use']);
-            }
-            return '';
-        }
-        
         foreach ($cpBases as $cpBase) {
             //$this->SendDebug('Prüfe Base', $cpBase, 0);
 
