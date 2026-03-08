@@ -462,7 +462,7 @@ class openWB2 extends IPSModuleStrict
             [1, 'Reset', '', -1]
         ]);
 
-        $this->RegisterProfileInteger('OWB.Ampere', 'Electricity', '', ' A', 0, 32, 1);
+        $this->RegisterProfileInteger('OWB.Ampere', 'Electricity', '', ' A', 6, 16, 1);
 
         $this->RegisterProfileInteger('OWB.EnergyToCharge', 'Electricity', '', ' kWh', 1, 50, 1);
 
