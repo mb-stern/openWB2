@@ -534,13 +534,21 @@ class openWB2 extends IPSModuleStrict
         $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
         $fullTopic = $baseTopic . '/simpleAPI/set/' . ltrim($relativeTopic, '/');
 
+        $parentId = IPS_GetInstance($this->InstanceID)['ConnectionID'] ?? 0;
+        $this->SendDebug('ParentID', (string)$parentId, 0);
+
+        if ($parentId === 0) {
+            $this->SendDebug('Publish Error', 'Kein Parent verbunden', 0);
+            return;
+        }
+
         $data = [
             'DataID'           => '{043EA491-0325-4ADD-8FC2-A30C8EEB4D3F}',
             'PacketType'       => 3,
             'QualityOfService' => 0,
             'Retain'           => $retain,
             'Topic'            => $fullTopic,
-            'Payload'          => strval($payload)
+            'Payload'          => (string)$payload
         ];
 
         $json = json_encode($data, JSON_UNESCAPED_SLASHES);
@@ -550,7 +558,9 @@ class openWB2 extends IPSModuleStrict
         $this->SendDebug('Publish JSON', $json, 0);
 
         $result = $this->SendDataToParent($json);
-        $this->SendDebug('Publish Result', (string)$result, 0);
+
+        $this->SendDebug('Publish Result Raw', var_export($result, true), 0);
+        $this->SendDebug('Publish Result Type', gettype($result), 0);
     }
 
     private function GetChargePointBaseTopics(): array
