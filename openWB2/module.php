@@ -295,7 +295,8 @@ class openWB2 extends IPSModuleStrict
 
                 case $cpBase . '/daily_imported':
                     //$this->SendDebug('Match', 'daily_imported', 0);
-                    $this->SetFloatIfNumeric('DailyImported', $payload);
+                    $value = ((float) $payload) / 1000;
+                    $this->SetFloatIfNumeric('DailyImported', $value);
                     return '';
 
                 case $cpBase . '/imported':
