@@ -470,9 +470,9 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case 'SetPhases':
-                $phases = ((int) $Value === 1) ? 1 : 3;
-                $this->PublishNativeTopic($this->GetNativeChargePointSetBaseTopic() . '/phases', (string) $phases);
-                $this->SetValue('SetPhases', $phases);
+                $phases = ((int) $Value === 1) ? '1' : '3';
+                $this->PublishNativeTopic('config/set/u1p3p/sofortPhases', $phases);
+                $this->SetValue('SetPhases', (int)$phases);
                 break;
 
             default:
@@ -785,7 +785,7 @@ class openWB2 extends IPSModuleStrict
     private function PublishNativeTopic(string $relativeTopic, string $payload, bool $retain = false): void
     {
         $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
-        $fullTopic = $baseTopic . '/set/' . ltrim($relativeTopic, '/');
+        $fullTopic = $baseTopic . '/' . ltrim($relativeTopic, '/');
 
         $data = [
             'DataID'           => '{043EA491-0325-4ADD-8FC2-A30C8EEB4D3F}',
