@@ -22,7 +22,7 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterVariableFloat('Voltage1', 'Phase 1 Spannung', '~Volt', 70);
         $this->RegisterVariableFloat('Voltage2', 'Phase 2 Spannung', '~Volt', 80);
         $this->RegisterVariableFloat('Voltage3', 'Phase 3 Spannung', '~Volt', 90);
-        $this->RegisterVariableFloat('Power', 'Ladeleistung', '~Watt', 100);
+        $this->RegisterVariableFloat('Power', 'Ladeleistung', 'OWB.Watt', 100);
         $this->RegisterVariableInteger('PhasesInUse', 'Verwendete Phasen', '', 110);
         $this->RegisterVariableBoolean('ChargeState', 'Ladestatus', 'OWB.ChargeState', 120);
         $this->RegisterVariableBoolean('PlugState', 'Stecker Status', 'OWB.PlugState', 130);
@@ -463,6 +463,8 @@ class openWB2 extends IPSModuleStrict
         ]);
 
         $this->RegisterProfileInteger('OWB.Ampere', 'Electricity', '', ' A', 6, 16, 1);
+
+        $this->RegisterProfileInteger('OWB.Watt', 'Electricity', '', ' W', 0, 0, 1);
 
         $this->RegisterProfileInteger('OWB.EnergyToCharge', 'Electricity', '', ' kWh', 1, 50, 1);
 
