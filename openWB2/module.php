@@ -73,6 +73,11 @@ class openWB2 extends IPSModuleStrict
 
         $this->RegisterVariableInteger('SetInstantChargingLimitAmount', 'Set Instant Charging Limit Amount', 'OWB.EnergyToCharge', 390);
         $this->EnableAction('SetInstantChargingLimitAmount');
+
+        // Schreibbare Parameter ausserhalb der simpleAPI Topics
+
+        $this->RegisterVariableInteger('SetPhases', 'Set Phases', 'OWB.Phases', 400);
+        $this->EnableAction('SetPhases');
     }
 
     public function GetCompatibleParents(): string
@@ -464,6 +469,12 @@ class openWB2 extends IPSModuleStrict
                 $this->SetValue('SetInstantChargingLimitAmount', $energy);
                 break;
 
+            case 'SetPhases':
+                $phases = ((int) $Value === 1) ? 1 : 3;
+                $this->PublishNativeTopic($this->GetNativeChargePointSetBaseTopic() . '/phases', (string) $phases);
+                $this->SetValue('SetPhases', $phases);
+                break;
+
             default:
                 throw new Exception('Invalid Ident');
         }
@@ -527,20 +538,17 @@ class openWB2 extends IPSModuleStrict
             [1, 'EV Mode', '', -1],
             [2, 'Bat Mode', '', -1]
         ]);
+
+        $this->RegisterProfileIntegerEx('OWB.Phases', 'Power', '', '', [
+            [1, '1 Phase', '', -1],
+            [3, 'Maximum', '', -1]
+        ]);
     }
 
     private function PublishSetTopic(string $relativeTopic, string $payload, bool $retain = false): void
     {
         $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
         $fullTopic = $baseTopic . '/simpleAPI/set/' . ltrim($relativeTopic, '/');
-
-        $parentId = IPS_GetInstance($this->InstanceID)['ConnectionID'] ?? 0;
-        $this->SendDebug('ParentID', (string)$parentId, 0);
-
-        if ($parentId === 0) {
-            $this->SendDebug('Publish Error', 'Kein Parent verbunden', 0);
-            return;
-        }
 
         $data = [
             'DataID'           => '{043EA491-0325-4ADD-8FC2-A30C8EEB4D3F}',
@@ -555,12 +563,10 @@ class openWB2 extends IPSModuleStrict
 
         $this->SendDebug('Publish Topic', $fullTopic, 0);
         $this->SendDebug('Publish Payload', $payload, 0);
-        $this->SendDebug('Publish JSON', $json, 0);
+        //$this->SendDebug('Publish JSON', $json, 0);
 
         $result = $this->SendDataToParent($json);
-
-        $this->SendDebug('Publish Result Raw', var_export($result, true), 0);
-        $this->SendDebug('Publish Result Type', gettype($result), 0);
+        //$this->SendDebug('Publish Result', (string)$result, 0);
     }
 
     private function GetChargePointBaseTopics(): array
@@ -752,6 +758,50 @@ class openWB2 extends IPSModuleStrict
             default:
                 return 'ev_mode';
         }
+    }
+
+    private function MapBatModeStringToInt(string $value): int
+    {
+        $value = strtolower(trim($value));
+
+        switch ($value) {
+            case 'min_soc_bat_mode':
+                return 0;
+            case 'ev_mode':
+                return 1;
+            case 'bat_mode':
+                return 2;
+            default:
+                return 1;
+        }
+    }
+
+    private function GetNativeChargePointSetBaseTopic(): string
+    {
+        $chargePointID = $this->ReadPropertyInteger('ChargePointID');
+        return 'lp/' . $chargePointID;
+    }
+
+    private function PublishNativeTopic(string $relativeTopic, string $payload, bool $retain = false): void
+    {
+        $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
+        $fullTopic = $baseTopic . '/set/' . ltrim($relativeTopic, '/');
+
+        $data = [
+            'DataID'           => '{043EA491-0325-4ADD-8FC2-A30C8EEB4D3F}',
+            'PacketType'       => 3,
+            'QualityOfService' => 0,
+            'Retain'           => $retain,
+            'Topic'            => $fullTopic,
+            'Payload'          => bin2hex($payload)
+        ];
+
+        $json = json_encode($data, JSON_UNESCAPED_SLASHES);
+
+        $this->SendDebug('Publish Native Topic', $fullTopic, 0);
+        $this->SendDebug('Publish Native Payload', $payload, 0);
+
+        $this->SendDataToParent($json);
     }
 
     private function RegisterProfileInteger(string $name, string $icon, string $prefix, string $suffix, int $min, int $max, int $step): void
