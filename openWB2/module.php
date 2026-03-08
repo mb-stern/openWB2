@@ -13,65 +13,59 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterProfiles();
 
         // Status / Read-Werte
-        $this->RegisterVariableInteger('LPSoC', 'LP SoC', '~Intensity.100', 10);
-        $this->RegisterVariableInteger('LPProSoC', 'LP Pro SoC', '~Intensity.100', 20);
-        $this->RegisterVariableInteger('LPConfiguredCurrent', 'LP EVSE Current', 'OWB.Ampere', 30);
-        $this->RegisterVariableFloat('LPPhaseCurrent1', 'LP Phase 1 Current', '~Ampere', 40);
-        $this->RegisterVariableFloat('LPPhaseCurrent2', 'LP Phase 2 Current', '~Ampere', 50);
-        $this->RegisterVariableFloat('LPPhaseCurrent3', 'LP Phase 3 Current', '~Ampere', 60);
-
-        $this->RegisterVariableFloat('LPVoltage1', 'LP Phase 1 Voltage', '~Volt', 70);
-        $this->RegisterVariableFloat('LPVoltage2', 'LP Phase 2 Voltage', '~Volt', 80);
-        $this->RegisterVariableFloat('LPVoltage3', 'LP Phase 3 Voltage', '~Volt', 90);
-
-        $this->RegisterVariableFloat('LPPower', 'LP Charging Power', '~Watt', 100);
-        $this->RegisterVariableInteger('LPPhasesInUse', 'LP Phases in Use', '', 110);
-
-        $this->RegisterVariableBoolean('LPChargeState', 'LP Charge State', 'OWB.ChargeState', 120);
-        $this->RegisterVariableBoolean('LPPlugState', 'LP Plug State', 'OWB.PlugState', 130);
-
-        $this->RegisterVariableBoolean('LPChargePointEnabled', 'LP Chargepoint Enabled', 'OWB.ChargePointEnabled', 140);
-
-        $this->RegisterVariableInteger('LPState', 'LP State', 'OWB.LPState', 150);
-
-        $this->RegisterVariableInteger('LPFaultState', 'LP Fault State', '', 160);
-        $this->RegisterVariableString('LPFaultString', 'LP Fault String', '', 170);
-        $this->RegisterVariableString('LPStateString', 'LP State String', '', 180);
-        $this->RegisterVariableString('LPVehicleName', 'LP Vehicle Name', '', 190);
-        $this->RegisterVariableString('LPRFID', 'LP RFID', '', 200);
-
-        $this->RegisterVariableFloat('LPDailyImported', 'LP Daily Imported', '~Electricity', 210);
-        $this->RegisterVariableFloat('LPImported', 'LP Imported', '~Electricity', 220);
+        $this->RegisterVariableInteger('SoC', 'SoC', '~Intensity.100', 10);
+        $this->RegisterVariableInteger('ProSoC', 'Pro SoC', '~Intensity.100', 20);
+        $this->RegisterVariableInteger('ConfiguredCurrent', 'EVSE Aktuell', 'OWB.Ampere', 30);
+        $this->RegisterVariableFloat('PhaseCurrent1', 'Phase 1 Aktuell', '~Ampere', 40);
+        $this->RegisterVariableFloat('PhaseCurrent2', 'Phase 2 Aktuell', '~Ampere', 50);
+        $this->RegisterVariableFloat('PhaseCurrent3', 'Phase 3 Aktuell', '~Ampere', 60);
+        $this->RegisterVariableFloat('Voltage1', 'Phase 1 Spannung', '~Volt', 70);
+        $this->RegisterVariableFloat('Voltage2', 'Phase 2 Spannung', '~Volt', 80);
+        $this->RegisterVariableFloat('Voltage3', 'Phase 3 Spannung', '~Volt', 90);
+        $this->RegisterVariableFloat('Power', 'Ladeleistung', '~Watt', 100);
+        $this->RegisterVariableInteger('PhasesInUse', 'Verwendete Phasen', '', 110);
+        $this->RegisterVariableBoolean('ChargeState', 'Ladestatus', 'OWB.ChargeState', 120);
+        $this->RegisterVariableBoolean('PlugState', 'Stecker Status', 'OWB.PlugState', 130);
+        $this->RegisterVariableBoolean('ChargePointEnabled', 'Ladepunkt sperren', 'OWB.ChargePointEnabled', 140);
+        $this->RegisterVariableInteger('State', 'Status', 'OWB.LPState', 150);
+        $this->RegisterVariableInteger('FaultState', 'Fehlerstatus', '', 160);
+        $this->RegisterVariableString('FaultString', 'Fehlertext', '', 170);
+        $this->RegisterVariableString('StateString', 'Statustext', '', 180);
+        $this->RegisterVariableString('VehicleName', 'Fahrzeug Name', '', 190);
+        $this->RegisterVariableString('RFID', 'RFID', '', 200);
+        $this->RegisterVariableFloat('DailyImported', 'Energie Tag', '~Electricity', 210);
+        $this->RegisterVariableFloat('Imported', 'Energie Gesamt', '~Electricity', 220);
 
         // Schreibbare Parameter gemäß simpleAPI Set-Topics
-        $this->RegisterVariableInteger('SetChargeMode', 'Set Charge Mode', 'OWB.ChargeMode', 300);
-        $this->EnableAction('SetChargeMode');
 
-        $this->RegisterVariableInteger('SetChargeCurrent', 'Set Charge Current', 'OWB.Ampere', 310);
-        $this->EnableAction('SetChargeCurrent');
-
-        $this->RegisterVariableInteger('SetMinimalPvSoc', 'Set Minimal PV SoC', '~Intensity.100', 320);
-        $this->EnableAction('SetMinimalPvSoc');
-
-        $this->RegisterVariableInteger('SetMinimalPermanentCurrent', 'Set Minimal Permanent Current', 'OWB.Ampere', 330);
-        $this->EnableAction('SetMinimalPermanentCurrent');
-
-        $this->RegisterVariableFloat('SetMaxPriceEco', 'Set Max Price Eco', 'OWB.Price', 340);
-        $this->EnableAction('SetMaxPriceEco');
-
-        $this->RegisterVariableBoolean('SetChargePointLock', 'Set Chargepoint Lock', '~Switch', 350);
+        $this->RegisterVariableBoolean('SetChargePointLock', 'Ladepunkt sperren', 'OWB.ChargePointEnabled', 290);
         $this->EnableAction('SetChargePointLock');
 
-        $this->RegisterVariableInteger('SetBatMode', 'Set Battery Mode', 'OWB.BatMode', 360);
+        $this->RegisterVariableInteger('SetChargeMode', 'Lademodus', 'OWB.ChargeMode', 300);
+        $this->EnableAction('SetChargeMode');
+
+        $this->RegisterVariableInteger('SetChargeCurrent', 'Stromstärke', 'OWB.Ampere', 310);
+        $this->EnableAction('SetChargeCurrent');
+
+        $this->RegisterVariableInteger('SetMinimalPvSoc', 'Mindes-SoC für das Fahrzeug', '~Intensity.100', 320);
+        $this->EnableAction('SetMinimalPvSoc');
+
+        $this->RegisterVariableInteger('SetMinimalPermanentCurrent', 'Minimaler Dauerstrom', 'OWB.Ampere', 330);
+        $this->EnableAction('SetMinimalPermanentCurrent');
+
+        $this->RegisterVariableFloat('SetMaxPriceEco', 'Höchstpreis Eco', 'OWB.Price', 340);
+        $this->EnableAction('SetMaxPriceEco');
+
+        $this->RegisterVariableInteger('SetBatMode', 'Ladepriorität', 'OWB.BatMode', 360);
         $this->EnableAction('SetBatMode');
 
-        $this->RegisterVariableInteger('SetInstantChargingLimit', 'Set Instant Charging Limit', 'OWB.ChargeLimitation', 370);
+        $this->RegisterVariableInteger('SetInstantChargingLimit', 'Begrenzung', 'OWB.ChargeLimitation', 370);
         $this->EnableAction('SetInstantChargingLimit');
 
-        $this->RegisterVariableInteger('SetInstantChargingLimitSoc', 'Set Instant Charging Limit SoC', '~Intensity.100', 380);
+        $this->RegisterVariableInteger('SetInstantChargingLimitSoc', 'SoC-Limit für das Fahrzeug', '~Intensity.100', 380);
         $this->EnableAction('SetInstantChargingLimitSoc');
 
-        $this->RegisterVariableInteger('SetInstantChargingLimitAmount', 'Set Instant Charging Limit Amount', 'OWB.EnergyToCharge', 390);
+        $this->RegisterVariableInteger('SetInstantChargingLimitAmount', 'Energie Limit', 'OWB.EnergyToCharge', 390);
         $this->EnableAction('SetInstantChargingLimitAmount');
     }
 
@@ -173,7 +167,7 @@ class openWB2 extends IPSModuleStrict
                 case $cpBase . '/soc/soc':
                     //$this->SendDebug('Match', 'soc/soc', 0);
                     if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('LPSoC', (int) round((float) $payload));
+                        $this->SetValue('SoC', (int) round((float) $payload));
                         //$this->SendDebug('SetValue', 'LPSoC = ' . (int) round((float) $payload), 0);
                     }
                     return '';
@@ -181,7 +175,7 @@ class openWB2 extends IPSModuleStrict
                 case $cpBase . '/pro_soc':
                     //$this->SendDebug('Match', 'pro_soc', 0);
                     if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('LPProSoC', (int) round((float) $payload));
+                        $this->SetValue('ProSoC', (int) round((float) $payload));
                         //$this->SendDebug('SetValue', 'LPProSoC = ' . (int) round((float) $payload), 0);
                     }
                     return '';
@@ -189,127 +183,117 @@ class openWB2 extends IPSModuleStrict
                 case $cpBase . '/evse_current':
                     //$this->SendDebug('Match', 'evse_current', 0);
                     if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('LPConfiguredCurrent', (int) round((float) $payload));
+                        $this->SetValue('ConfiguredCurrent', (int) round((float) $payload));
                         //$this->SendDebug('SetValue', 'LPConfiguredCurrent = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
                 case $cpBase . '/currents/1':
                     //$this->SendDebug('Match', 'currents/1', 0);
-                    $this->SetFloatIfNumeric('LPPhaseCurrent1', $payload);
+                    $this->SetFloatIfNumeric('PhaseCurrent1', $payload);
                     return '';
 
                 case $cpBase . '/currents/2':
                     //$this->SendDebug('Match', 'currents/2', 0);
-                    $this->SetFloatIfNumeric('LPPhaseCurrent2', $payload);
+                    $this->SetFloatIfNumeric('PhaseCurrent2', $payload);
                     return '';
 
                 case $cpBase . '/currents/3':
                     //$this->SendDebug('Match', 'currents/3', 0);
-                    $this->SetFloatIfNumeric('LPPhaseCurrent3', $payload);
+                    $this->SetFloatIfNumeric('PhaseCurrent3', $payload);
                     return '';
 
                 case $cpBase . '/voltages/1':
                     //$this->SendDebug('Match', 'voltages/1', 0);
-                    $this->SetFloatIfNumeric('LPVoltage1', $payload);
+                    $this->SetFloatIfNumeric('Voltage1', $payload);
                     return '';
 
                 case $cpBase . '/voltages/2':
                     //$this->SendDebug('Match', 'voltages/2', 0);
-                    $this->SetFloatIfNumeric('LPVoltage2', $payload);
+                    $this->SetFloatIfNumeric('Voltage2', $payload);
                     return '';
 
                 case $cpBase . '/voltages/3':
                     //$this->SendDebug('Match', 'voltages/3', 0);
-                    $this->SetFloatIfNumeric('LPVoltage3', $payload);
+                    $this->SetFloatIfNumeric('Voltage3', $payload);
                     return '';
 
                 case $cpBase . '/power':
                     //$this->SendDebug('Match', 'power', 0);
-                    $this->SetFloatIfNumeric('LPPower', $payload);
+                    $this->SetFloatIfNumeric('Power', $payload);
                     return '';
 
                 case $cpBase . '/phases_in_use':
                     //$this->SendDebug('Match', 'phases_in_use', 0);
                     if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('LPPhasesInUse', (int) round((float) $payload));
-                        //$this->SendDebug('SetValue', 'LPPhasesInUse = ' . (int) round((float) $payload), 0);
+                        $this->SetValue('PhasesInUse', (int) round((float) $payload));
                     }
                     return '';
 
                 case $cpBase . '/charge_state':
                     //$this->SendDebug('Match', 'charge_state', 0);
                     $value = $this->ToBool($payload);
-                    $this->SetValue('LPChargeState', $value);
-                    //$this->SendDebug('SetValue', 'LPChargeState = ' . ($value ? 'true' : 'false'), 0);
+                    $this->SetValue('ChargeState', $value);
+        
                     $this->UpdateLPState();
                     return '';
 
                 case $cpBase . '/plug_state':
                     //$this->SendDebug('Match', 'plug_state', 0);
                     $value = $this->ToBool($payload);
-                    $this->SetValue('LPPlugState', $value);
-                    //$this->SendDebug('SetValue', 'LPPlugState = ' . ($value ? 'true' : 'false'), 0);
+                    $this->SetValue('PlugState', $value);
                     $this->UpdateLPState();
                     return '';
 
                 case $cpBase . '/manual_lock':
                     //$this->SendDebug('Match', 'manual_lock', 0);
-
                     $isLocked = $this->ToBool($payload);
                     $isEnabled = !$isLocked;
-
                     $this->SetValue('SetChargePointLock', $isLocked);
-                    //$this->SendDebug('SetValue', 'SetChargePointLock = ' . ($isLocked ? 'true' : 'false'), 0);
                     return '';
 
                 case $cpBase . '/fault_state':
                     //$this->SendDebug('Match', 'fault_state', 0);
                     if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('LPFaultState', (int) round((float) $payload));
-                        //$this->SendDebug('SetValue', 'LPFaultState = ' . (int) round((float) $payload), 0);
+                        $this->SetValue('FaultState', (int) round((float) $payload));
                     }
                     return '';
 
                 case $cpBase . '/fault_str':
                     //$this->SendDebug('Match', 'fault_str', 0);
                     $value = $this->PayloadToString($payload);
-                    $this->SetValue('LPFaultString', $value);
-                    //$this->SendDebug('SetValue', 'LPFaultString = ' . $value, 0);
+                    $this->SetValue('FaultString', $value);
                     return '';
 
                 case $cpBase . '/state_str':
                     //$this->SendDebug('Match', 'state_str', 0);
                     $value = $this->PayloadToString($payload);
-                    $this->SetValue('LPStateString', $value);
-                    //$this->SendDebug('SetValue', 'LPStateString = ' . $value, 0);
+                    $this->SetValue('StateString', $value);
                     return '';
 
                 case $cpBase . '/vehicle_name':
                     //$this->SendDebug('Match', 'vehicle_name', 0);
                     $value = $this->PayloadToString($payload);
-                    $this->SetValue('LPVehicleName', $value);
-                    //$this->SendDebug('SetValue', 'LPVehicleName = ' . $value, 0);
+                    $this->SetValue('VehicleName', $value);
                     return '';
 
                 case $cpBase . '/rfid':
                     //$this->SendDebug('Match', 'rfid', 0);
                     $value = $this->PayloadToString($payload);
-                    $this->SetValue('LPRFID', $value);
-                    //$this->SendDebug('SetValue', 'LPRFID = ' . $value, 0);
+                    $this->SetValue('RFID', $value);
                     return '';
 
                 case $cpBase . '/daily_imported':
                     //$this->SendDebug('Match', 'daily_imported', 0);
-                    $this->SetFloatIfNumeric('LPDailyImported', $payload);
+                    $value = ((float) $payload) / 1000;
+                    $this->SetValue('DailyImported', $value);
                     return '';
 
                 case $cpBase . '/imported':
                     //$this->SendDebug('Match', 'imported', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $value = ((float) $payload) / 1000;
-                        $this->SetValue('LPImported', $value);
-                        //$this->SendDebug('SetValue', 'LPImported = ' . $value, 0);
+                        $this->SetValue('Imported', $value);
                     }
                     return '';
 
@@ -317,14 +301,12 @@ class openWB2 extends IPSModuleStrict
                     //$this->SendDebug('Match', 'chargemode', 0);
                     $value = $this->MapChargeModeStringToInt($this->PayloadToString($payload));
                     $this->SetValue('SetChargeMode', $value);
-                    //$this->SendDebug('SetValue', 'SetChargeMode = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/instant_charging_limit':
                     //$this->SendDebug('Match', 'instant_charging_limit', 0);
                     $value = $this->MapLimitTypeStringToInt($this->PayloadToString($payload));
                     $this->SetValue('SetInstantChargingLimit', $value);
-                    //$this->SendDebug('SetValue', 'SetInstantChargingLimit = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/instant_charging_limit_soc':
@@ -332,7 +314,6 @@ class openWB2 extends IPSModuleStrict
                     if ($this->IsNumericPayload($payload)) {
                         $value = (int) round((float) $payload);
                         $this->SetValue('SetInstantChargingLimitSoc', $value);
-                        //$this->SendDebug('SetValue', 'SetInstantChargingLimitSoc = ' . $value, 0);
                     }
                     return '';
 
@@ -341,7 +322,6 @@ class openWB2 extends IPSModuleStrict
                     if ($this->IsNumericPayload($payload)) {
                         $value = (int) round((float) $payload);
                         $this->SetValue('SetInstantChargingLimitAmount', $value);
-                        //$this->SendDebug('SetValue', 'SetInstantChargingLimitAmount = ' . $value, 0);
                     }
                     return '';
 
@@ -350,7 +330,6 @@ class openWB2 extends IPSModuleStrict
                     if ($this->IsNumericPayload($payload)) {
                         $value = (int) round((float) $payload);
                         $this->SetValue('SetChargeCurrent', $value);
-                        //$this->SendDebug('SetValue', 'SetChargeCurrent = ' . $value, 0);
                     }
                     return '';
 
@@ -359,7 +338,6 @@ class openWB2 extends IPSModuleStrict
                     if ($this->IsNumericPayload($payload)) {
                         $value = (int) round((float) $payload);
                         $this->SetValue('SetMinimalPvSoc', $value);
-                        //$this->SendDebug('SetValue', 'SetMinimalPvSoc = ' . $value, 0);
                     }
                     return '';
 
@@ -368,7 +346,6 @@ class openWB2 extends IPSModuleStrict
                     if ($this->IsNumericPayload($payload)) {
                         $value = (int) round((float) $payload);
                         $this->SetValue('SetMinimalPermanentCurrent', $value);
-                        //$this->SendDebug('SetValue', 'SetMinimalPermanentCurrent = ' . $value, 0);
                     }
                     return '';
 
@@ -378,7 +355,6 @@ class openWB2 extends IPSModuleStrict
                         $value = (float) $payload;
                         if (!is_nan($value) && !is_infinite($value)) {
                             $this->SetValue('SetMaxPriceEco', $value);
-                            //$this->SendDebug('SetValue', 'SetMaxPriceEco = ' . $value, 0);
                         }
                     }
                     return '';
@@ -387,7 +363,6 @@ class openWB2 extends IPSModuleStrict
                     //$this->SendDebug('Match', 'bat_mode', 0);
                     $value = $this->MapBatModeStringToInt($this->PayloadToString($payload));
                     $this->SetValue('SetBatMode', $value);
-                    //$this->SendDebug('SetValue', 'SetBatMode = ' . $value, 0);
                     return '';
             }
         }
@@ -478,9 +453,9 @@ class openWB2 extends IPSModuleStrict
     private function RegisterProfiles(): void
     {
         $this->RegisterProfileIntegerEx('OWB.ChargeLimitation', 'Power', '', '', [
-            [0, 'Off', '', -1],
-            [1, 'kWh charge', '', -1],
-            [2, 'SoC charge', '', -1]
+            [0, 'Aus', '', -1],
+            [1, 'Energie', '', -1],
+            [2, 'EV-SoC', '', -1]
         ]);
 
         $this->RegisterProfileIntegerEx('OWB.ResetDirectCharge', 'Power', '', '', [
@@ -492,24 +467,24 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterProfileInteger('OWB.EnergyToCharge', 'Electricity', '', ' kWh', 1, 50, 1);
 
         $this->RegisterProfileBooleanEx('OWB.PlugState', 'Car', '', '', [
-            [false, 'Free', '', 0xFF0000],
-            [true, 'Plugged', '', 0x00FF00]
+            [false, 'Frei', '', 0xFF0000],
+            [true, 'Gesteckt', '', 0x00FF00]
         ]);
 
         $this->RegisterProfileBooleanEx('OWB.ChargeState', 'Car', '', '', [
-            [false, 'Off', '', 0xFF0000],
-            [true, 'Charge', '', 0x00FF00]
+            [false, 'Aus', '', 0xFF0000],
+            [true, 'Laden', '', 0x00FF00]
         ]);
 
         $this->RegisterProfileBooleanEx('OWB.ChargePointEnabled', 'Car', '', '', [
-            [false, 'Locked', '', 0xFF0000],
-            [true, 'Open', '', 0x00FF00]
+            [false, 'Nein', '', 0x00FF00],
+            [true, 'Ja', '', 0xFF0000]
         ]);
 
         $this->RegisterProfileIntegerEx('OWB.LPState', 'Information', '', '', [
-            [0, 'Free', '', 0x00FF00],
-            [1, 'Blocked', '', 0xFFFF00],
-            [2, 'Charge', '', 0xFF0000]
+            [0, 'Frei', '', 0x00FF00],
+            [1, 'Blockiert', '', 0xFFFF00],
+            [2, 'Laden', '', 0xFF0000]
         ]);
 
         $this->RegisterProfileIntegerEx('OWB.ChargeMode', 'Car', '', '', [
@@ -523,9 +498,9 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterProfileFloat('OWB.Price', 'Money', '', ' CHF/kWh', 0, 10, 0.01, 2);
 
         $this->RegisterProfileIntegerEx('OWB.BatMode', 'Battery', '', '', [
-            [0, 'Min SoC Bat Mode', '', -1],
-            [1, 'EV Mode', '', -1],
-            [2, 'Bat Mode', '', -1]
+            [0, 'Nach SoC des Speichers', '', -1],
+            [1, 'Fahrzeug', '', -1],
+            [2, 'Speicher', '', -1]
         ]);
     }
 
@@ -550,7 +525,7 @@ class openWB2 extends IPSModuleStrict
         //$this->SendDebug('Publish JSON', $json, 0);
 
         $result = $this->SendDataToParent($json);
-        //$this->SendDebug('Publish Result', (string)$result, 0);
+        $this->SendDebug('Publish Result', (string)$result, 0);
     }
 
     private function GetChargePointBaseTopics(): array
@@ -581,20 +556,20 @@ class openWB2 extends IPSModuleStrict
 
     private function UpdateLPState(): void
     {
-        $plugged = $this->GetValue('LPPlugState');
-        $charging = $this->GetValue('LPChargeState');
+        $plugged = $this->GetValue('PlugState');
+        $charging = $this->GetValue('ChargeState');
 
         if (!$plugged) {
-            $this->SetValue('LPState', 0);
+            $this->SetValue('State', 0);
             return;
         }
 
         if ($charging) {
-            $this->SetValue('LPState', 2);
+            $this->SetValue('State', 2);
             return;
         }
 
-        $this->SetValue('LPState', 1);
+        $this->SetValue('State', 1);
     }
 
     private function ToBool($value): bool
@@ -741,6 +716,22 @@ class openWB2 extends IPSModuleStrict
                 return 'bat_mode';
             default:
                 return 'ev_mode';
+        }
+    }
+
+    private function MapBatModeStringToInt(string $value): int
+    {
+        $value = strtolower(trim($value));
+
+        switch ($value) {
+            case 'min_soc_bat_mode':
+                return 0;
+            case 'ev_mode':
+                return 1;
+            case 'bat_mode':
+                return 2;
+            default:
+                return 1;
         }
     }
 
