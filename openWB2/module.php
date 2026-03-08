@@ -719,6 +719,22 @@ class openWB2 extends IPSModuleStrict
         }
     }
 
+    private function MapBatModeStringToInt(string $value): int
+    {
+        $value = strtolower(trim($value));
+
+        switch ($value) {
+            case 'min_soc_bat_mode':
+                return 0;
+            case 'ev_mode':
+                return 1;
+            case 'bat_mode':
+                return 2;
+            default:
+                return 1;
+        }
+    }
+
     private function RegisterProfileInteger(string $name, string $icon, string $prefix, string $suffix, int $min, int $max, int $step): void
     {
         if (!IPS_VariableProfileExists($name)) {
