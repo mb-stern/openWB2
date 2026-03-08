@@ -33,8 +33,8 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterVariableString('StateString', 'Statustext', '', 180);
         $this->RegisterVariableString('VehicleName', 'Fahrzeug Name', '', 190);
         $this->RegisterVariableString('RFID', 'RFID', '', 200);
-        $this->RegisterVariableFloat('DailyImported', 'Import Tag', '~Electricity', 210);
-        $this->RegisterVariableFloat('Imported', 'Import Gesamt', '~Electricity', 220);
+        $this->RegisterVariableFloat('DailyImported', 'Energie Tag', '~Electricity', 210);
+        $this->RegisterVariableFloat('Imported', 'Energie Gesamt', '~Electricity', 220);
 
         // Schreibbare Parameter gemäß simpleAPI Set-Topics
 
