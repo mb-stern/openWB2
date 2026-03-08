@@ -293,24 +293,28 @@ class openWB2 extends IPSModuleStrict
                 case $cpBase . '/fault_str':
                     //$this->SendDebug('Match', 'fault_str', 0);
                     $value = $this->PayloadToString($payload);
+                    $value = json_decode('"' . addslashes($value) . '"');
                     $this->SetValue('FaultString', $value);
                     return '';
 
                 case $cpBase . '/state_str':
                     //$this->SendDebug('Match', 'state_str', 0);
                     $value = $this->PayloadToString($payload);
+                    $value = json_decode('"' . addslashes($value) . '"');
                     $this->SetValue('StateString', $value);
                     return '';
 
                 case $cpBase . '/vehicle_name':
                     //$this->SendDebug('Match', 'vehicle_name', 0);
                     $value = $this->PayloadToString($payload);
+                    $value = json_decode('"' . addslashes($value) . '"');
                     $this->SetValue('VehicleName', $value);
                     return '';
 
                 case $cpBase . '/rfid':
                     //$this->SendDebug('Match', 'rfid', 0);
                     $value = $this->PayloadToString($payload);
+                    $value = json_decode('"' . addslashes($value) . '"');
                     $this->SetValue('RFID', $value);
                     return '';
 
