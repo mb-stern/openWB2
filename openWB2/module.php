@@ -26,7 +26,7 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterVariableInteger('PhasesInUse', 'Verwendete Phasen', '', 110);
         $this->RegisterVariableBoolean('ChargeState', 'Ladestatus', 'OWB.ChargeState', 120);
         $this->RegisterVariableBoolean('PlugState', 'Stecker Status', 'OWB.PlugState', 130);
-        $this->RegisterVariableBoolean('ChargePointEnabled', 'Chargepoint Sperren', 'OWB.ChargePointEnabled', 140);
+        $this->RegisterVariableBoolean('ChargePointEnabled', 'Ladepunkt sperren', 'OWB.ChargePointEnabled', 140);
         $this->RegisterVariableInteger('State', 'Status', 'OWB.LPState', 150);
         $this->RegisterVariableInteger('FaultState', 'Fehlerstatus', '', 160);
         $this->RegisterVariableString('FaultString', 'Fehlertext', '', 170);
@@ -38,34 +38,34 @@ class openWB2 extends IPSModuleStrict
 
         // Schreibbare Parameter gemäß simpleAPI Set-Topics
 
-        $this->RegisterVariableBoolean('SetChargePointLock', 'Set Chargepoint Lock', '~Switch', 290);
+        $this->RegisterVariableBoolean('SetChargePointLock', 'Ladepunkt sperren', '~Switch', 290);
         $this->EnableAction('SetChargePointLock');
 
-        $this->RegisterVariableInteger('SetChargeMode', 'Set Charge Mode', 'OWB.ChargeMode', 300);
+        $this->RegisterVariableInteger('SetChargeMode', 'Lademodus', 'OWB.ChargeMode', 300);
         $this->EnableAction('SetChargeMode');
 
-        $this->RegisterVariableInteger('SetChargeCurrent', 'Set Charge Current', 'OWB.Ampere', 310);
+        $this->RegisterVariableInteger('SetChargeCurrent', 'Stromstärke', 'OWB.Ampere', 310);
         $this->EnableAction('SetChargeCurrent');
 
-        $this->RegisterVariableInteger('SetMinimalPvSoc', 'Set Minimal PV SoC', '~Intensity.100', 320);
+        $this->RegisterVariableInteger('SetMinimalPvSoc', 'Mindes-SoC für das Fahrzeug', '~Intensity.100', 320);
         $this->EnableAction('SetMinimalPvSoc');
 
-        $this->RegisterVariableInteger('SetMinimalPermanentCurrent', 'Set Minimal Permanent Current', 'OWB.Ampere', 330);
+        $this->RegisterVariableInteger('SetMinimalPermanentCurrent', 'Minimaler Dauerstrom', 'OWB.Ampere', 330);
         $this->EnableAction('SetMinimalPermanentCurrent');
 
-        $this->RegisterVariableFloat('SetMaxPriceEco', 'Set Max Price Eco', 'OWB.Price', 340);
+        $this->RegisterVariableFloat('SetMaxPriceEco', 'Höchstpreis Eco', 'OWB.Price', 340);
         $this->EnableAction('SetMaxPriceEco');
 
-        $this->RegisterVariableInteger('SetBatMode', 'Set Battery Mode', 'OWB.BatMode', 360);
+        $this->RegisterVariableInteger('SetBatMode', 'Ladepriorität', 'OWB.BatMode', 360);
         $this->EnableAction('SetBatMode');
 
-        $this->RegisterVariableInteger('SetInstantChargingLimit', 'Set Instant Charging Limit', 'OWB.ChargeLimitation', 370);
+        $this->RegisterVariableInteger('SetInstantChargingLimit', 'Begrenzung', 'OWB.ChargeLimitation', 370);
         $this->EnableAction('SetInstantChargingLimit');
 
-        $this->RegisterVariableInteger('SetInstantChargingLimitSoc', 'Set Instant Charging Limit SoC', '~Intensity.100', 380);
+        $this->RegisterVariableInteger('SetInstantChargingLimitSoc', 'SoC-Limit für das Fahrzeug', '~Intensity.100', 380);
         $this->EnableAction('SetInstantChargingLimitSoc');
 
-        $this->RegisterVariableInteger('SetInstantChargingLimitAmount', 'Set Instant Charging Limit Amount', 'OWB.EnergyToCharge', 390);
+        $this->RegisterVariableInteger('SetInstantChargingLimitAmount', 'Energie Limit', 'OWB.EnergyToCharge', 390);
         $this->EnableAction('SetInstantChargingLimitAmount');
     }
 
@@ -473,8 +473,8 @@ class openWB2 extends IPSModuleStrict
     {
         $this->RegisterProfileIntegerEx('OWB.ChargeLimitation', 'Power', '', '', [
             [0, 'Aus', '', -1],
-            [1, 'kWh laden', '', -1],
-            [2, 'SoC laden', '', -1]
+            [1, 'Energie', '', -1],
+            [2, 'EV-SoC', '', -1]
         ]);
 
         $this->RegisterProfileIntegerEx('OWB.ResetDirectCharge', 'Power', '', '', [
@@ -517,9 +517,9 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterProfileFloat('OWB.Price', 'Money', '', ' CHF/kWh', 0, 10, 0.01, 2);
 
         $this->RegisterProfileIntegerEx('OWB.BatMode', 'Battery', '', '', [
-            [0, 'Min SoC Bat Mode', '', -1],
-            [1, 'EV Mode', '', -1],
-            [2, 'Bat Mode', '', -1]
+            [0, 'Nach SoC des Speichers', '', -1],
+            [1, 'Fahrzeug', '', -1],
+            [2, 'Speicher', '', -1]
         ]);
     }
 
