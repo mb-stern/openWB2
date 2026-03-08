@@ -13,28 +13,28 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterProfiles();
 
         // Status / Read-Werte
-        $this->RegisterVariableInteger('SoC', 'LP SoC', '~Intensity.100', 10);
-        $this->RegisterVariableInteger('ProSoC', 'LP Pro SoC', '~Intensity.100', 20);
-        $this->RegisterVariableInteger('ConfiguredCurrent', 'LP EVSE Current', 'OWB.Ampere', 30);
-        $this->RegisterVariableFloat('PhaseCurrent1', 'LP Phase 1 Current', '~Ampere', 40);
-        $this->RegisterVariableFloat('PhaseCurrent2', 'LP Phase 2 Current', '~Ampere', 50);
-        $this->RegisterVariableFloat('PhaseCurrent3', 'LP Phase 3 Current', '~Ampere', 60);
-        $this->RegisterVariableFloat('Voltage1', 'LP Phase 1 Voltage', '~Volt', 70);
-        $this->RegisterVariableFloat('Voltage2', 'LP Phase 2 Voltage', '~Volt', 80);
-        $this->RegisterVariableFloat('Voltage3', 'LP Phase 3 Voltage', '~Volt', 90);
-        $this->RegisterVariableFloat('Power', 'LP Charging Power', '~Watt', 100);
-        $this->RegisterVariableInteger('PhasesInUse', 'LP Phases in Use', '', 110);
-        $this->RegisterVariableBoolean('ChargeState', 'LP Charge State', 'OWB.ChargeState', 120);
-        $this->RegisterVariableBoolean('PlugState', 'LP Plug State', 'OWB.PlugState', 130);
-        $this->RegisterVariableBoolean('ChargePointEnabled', 'LP Chargepoint Enabled', 'OWB.ChargePointEnabled', 140);
-        $this->RegisterVariableInteger('State', 'LP State', 'OWB.LPState', 150);
-        $this->RegisterVariableInteger('FaultState', 'LP Fault State', '', 160);
-        $this->RegisterVariableString('FaultString', 'LP Fault String', '', 170);
-        $this->RegisterVariableString('StateString', 'LP State String', '', 180);
-        $this->RegisterVariableString('VehicleName', 'LP Vehicle Name', '', 190);
-        $this->RegisterVariableString('RFID', 'LP RFID', '', 200);
-        $this->RegisterVariableFloat('DailyImported', 'LP Daily Imported', '~Electricity', 210);
-        $this->RegisterVariableFloat('Imported', 'LP Imported', '~Electricity', 220);
+        $this->RegisterVariableInteger('SoC', 'SoC', '~Intensity.100', 10);
+        $this->RegisterVariableInteger('ProSoC', 'Pro SoC', '~Intensity.100', 20);
+        $this->RegisterVariableInteger('ConfiguredCurrent', 'EVSE Aktuell', 'OWB.Ampere', 30);
+        $this->RegisterVariableFloat('PhaseCurrent1', 'Phase 1 Aktuell', '~Ampere', 40);
+        $this->RegisterVariableFloat('PhaseCurrent2', 'Phase 2 Aktuell', '~Ampere', 50);
+        $this->RegisterVariableFloat('PhaseCurrent3', 'Phase 3 Aktuell', '~Ampere', 60);
+        $this->RegisterVariableFloat('Voltage1', 'Phase 1 Spannung', '~Volt', 70);
+        $this->RegisterVariableFloat('Voltage2', 'Phase 2 Spannung', '~Volt', 80);
+        $this->RegisterVariableFloat('Voltage3', 'Phase 3 Spannung', '~Volt', 90);
+        $this->RegisterVariableFloat('Power', 'Ladeleistung', '~Watt', 100);
+        $this->RegisterVariableInteger('PhasesInUse', 'Verwendete Phasen', '', 110);
+        $this->RegisterVariableBoolean('ChargeState', 'Ladestatus', 'OWB.ChargeState', 120);
+        $this->RegisterVariableBoolean('PlugState', 'Stecker Status', 'OWB.PlugState', 130);
+        $this->RegisterVariableBoolean('ChargePointEnabled', 'Chargepoint Sperren', 'OWB.ChargePointEnabled', 140);
+        $this->RegisterVariableInteger('State', 'Status', 'OWB.LPState', 150);
+        $this->RegisterVariableInteger('FaultState', 'Fehlerstatus', '', 160);
+        $this->RegisterVariableString('FaultString', 'Fehlertext', '', 170);
+        $this->RegisterVariableString('StateString', 'Statustext', '', 180);
+        $this->RegisterVariableString('VehicleName', 'Fahrzeug Name', '', 190);
+        $this->RegisterVariableString('RFID', 'RFID', '', 200);
+        $this->RegisterVariableFloat('DailyImported', 'Import Tag', '~Electricity', 210);
+        $this->RegisterVariableFloat('Imported', 'Import Gesamt', '~Electricity', 220);
 
         // Schreibbare Parameter gemäß simpleAPI Set-Topics
 
@@ -472,9 +472,9 @@ class openWB2 extends IPSModuleStrict
     private function RegisterProfiles(): void
     {
         $this->RegisterProfileIntegerEx('OWB.ChargeLimitation', 'Power', '', '', [
-            [0, 'Off', '', -1],
-            [1, 'kWh charge', '', -1],
-            [2, 'SoC charge', '', -1]
+            [0, 'Aus', '', -1],
+            [1, 'kWh laden', '', -1],
+            [2, 'SoC laden', '', -1]
         ]);
 
         $this->RegisterProfileIntegerEx('OWB.ResetDirectCharge', 'Power', '', '', [
@@ -486,24 +486,24 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterProfileInteger('OWB.EnergyToCharge', 'Electricity', '', ' kWh', 1, 50, 1);
 
         $this->RegisterProfileBooleanEx('OWB.PlugState', 'Car', '', '', [
-            [false, 'Free', '', 0xFF0000],
-            [true, 'Plugged', '', 0x00FF00]
+            [false, 'Frei', '', 0xFF0000],
+            [true, 'Gesteckt', '', 0x00FF00]
         ]);
 
         $this->RegisterProfileBooleanEx('OWB.ChargeState', 'Car', '', '', [
-            [false, 'Off', '', 0xFF0000],
-            [true, 'Charge', '', 0x00FF00]
+            [false, 'Aus', '', 0xFF0000],
+            [true, 'Laden', '', 0x00FF00]
         ]);
 
         $this->RegisterProfileBooleanEx('OWB.ChargePointEnabled', 'Car', '', '', [
-            [false, 'Locked', '', 0xFF0000],
-            [true, 'Open', '', 0x00FF00]
+            [false, 'Nein', '', 0xFF0000],
+            [true, 'Ja', '', 0x00FF00]
         ]);
 
         $this->RegisterProfileIntegerEx('OWB.LPState', 'Information', '', '', [
-            [0, 'Free', '', 0x00FF00],
-            [1, 'Blocked', '', 0xFFFF00],
-            [2, 'Charge', '', 0xFF0000]
+            [0, 'Frei', '', 0x00FF00],
+            [1, 'Blockiert', '', 0xFFFF00],
+            [2, 'Laden', '', 0xFF0000]
         ]);
 
         $this->RegisterProfileIntegerEx('OWB.ChargeMode', 'Car', '', '', [
