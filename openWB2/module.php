@@ -9,32 +9,69 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterPropertyString('BaseTopic', 'openWB');
         $this->RegisterPropertyInteger('ChargePointID', 1);
 
-        // Profile direkt im Modul erzeugen
+        // Profile erzeugen
         $this->RegisterProfiles();
 
         // Status / Read-Werte
         $this->RegisterVariableInteger('SoC', 'SoC', '~Intensity.100', 10);
+        $this->RegisterVariableString('SocTimestamp', 'SoC Zeitstempel', '', 15);
         $this->RegisterVariableInteger('ProSoC', 'Pro SoC', '~Intensity.100', 20);
+        
         $this->RegisterVariableInteger('ConfiguredCurrent', 'EVSE Aktuell', 'OWB.Ampere', 30);
+        
         $this->RegisterVariableFloat('PhaseCurrent1', 'Phase 1 Aktuell', '~Ampere', 40);
         $this->RegisterVariableFloat('PhaseCurrent2', 'Phase 2 Aktuell', '~Ampere', 50);
         $this->RegisterVariableFloat('PhaseCurrent3', 'Phase 3 Aktuell', '~Ampere', 60);
+        
         $this->RegisterVariableFloat('Voltage1', 'Phase 1 Spannung', '~Volt', 70);
         $this->RegisterVariableFloat('Voltage2', 'Phase 2 Spannung', '~Volt', 80);
         $this->RegisterVariableFloat('Voltage3', 'Phase 3 Spannung', '~Volt', 90);
+        
         $this->RegisterVariableFloat('Power', 'Ladeleistung', 'OWB.Watt', 100);
+        
         $this->RegisterVariableInteger('PhasesInUse', 'Verwendete Phasen', '', 110);
         $this->RegisterVariableBoolean('ChargeState', 'Ladestatus', 'OWB.ChargeState', 120);
         $this->RegisterVariableBoolean('PlugState', 'Stecker Status', 'OWB.PlugState', 130);
         $this->RegisterVariableBoolean('ChargePointEnabled', 'Ladepunkt sperren', 'OWB.ChargePointEnabled', 140);
         $this->RegisterVariableInteger('State', 'Status', 'OWB.LPState', 150);
+        
         $this->RegisterVariableInteger('FaultState', 'Fehlerstatus', '', 160);
         $this->RegisterVariableString('FaultString', 'Fehlertext', '', 170);
         $this->RegisterVariableString('StateString', 'Statustext', '', 180);
+        $this->RegisterVariableString('ErrorTimestamp', 'Fehler Zeitstempel', '', 185);
+
         $this->RegisterVariableString('VehicleName', 'Fahrzeug Name', '', 190);
+        
         $this->RegisterVariableString('RFID', 'RFID', '', 200);
+        $this->RegisterVariableString('RFIDTimestamp', 'RFID Zeitstempel', '', 205);
+        
         $this->RegisterVariableFloat('DailyImported', 'Energie Tag', '~Electricity', 210);
+        $this->RegisterVariableFloat('DailyExported', 'Energie Tag Export', '~Electricity', 215);
+
         $this->RegisterVariableFloat('Imported', 'Energie Gesamt', '~Electricity', 220);
+        $this->RegisterVariableFloat('Exported', 'Energie Gesamt Export', '~Electricity', 225);
+
+        $this->RegisterVariableFloat('PowerL1', 'Leistung Phase 1', 'OWB.Watt', 230);
+        $this->RegisterVariableFloat('PowerL2', 'Leistung Phase 2', 'OWB.Watt', 231);
+        $this->RegisterVariableFloat('PowerL3', 'Leistung Phase 3', 'OWB.Watt', 232);
+
+        $this->RegisterVariableFloat('Frequency', 'Frequenz', '~Hertz', 233);
+
+        $this->RegisterVariableFloat('PowerFactor1', 'Leistungsfaktor Phase 1', '', 234);
+        $this->RegisterVariableFloat('PowerFactor2', 'Leistungsfaktor Phase 2', '', 235);
+        $this->RegisterVariableFloat('PowerFactor3', 'Leistungsfaktor Phase 3', '', 236);
+
+        $this->RegisterVariableString('SerialNumber', 'Seriennummer', '', 237);
+        $this->RegisterVariableString('VehicleID', 'Fahrzeug ID', '', 238);
+        $this->RegisterVariableString('Version', 'Version', '', 239);
+        $this->RegisterVariableString('EvseSignaling', 'EVSE Signaling', '', 240);
+        $this->RegisterVariableString('Revision', 'Revision', '', 241);
+
+        $this->RegisterVariableInteger('ChargingPower', 'Aktuelle Ladeleistung', 'OWB.Watt', 242);
+        $this->RegisterVariableInteger('ChargingVoltage', 'Aktuelle Ladespannung', '~Volt', 243);
+
+        $this->RegisterVariableFloat('MaxDischargePower', 'Max. Entladeleistung', 'OWB.Watt', 244);
+        $this->RegisterVariableFloat('MaxChargePower', 'Max. Ladeleistung', 'OWB.Watt', 245);
 
         // Schreibbare Parameter gemäß simpleAPI Set-Topics
 
@@ -164,7 +201,7 @@ class openWB2 extends IPSModuleStrict
             //$this->SendDebug('Prüfe Base', $cpBase, 0);
 
             switch ($topic) {
-                case $cpBase . '/soc/soc':
+                case $cpBase . '/soc':
                     //$this->SendDebug('Match', 'soc/soc', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('SoC', (int) round((float) $payload));
@@ -245,12 +282,6 @@ class openWB2 extends IPSModuleStrict
                     $this->UpdateLPState();
                     return '';
 
-                case $cpBase . '/manual_lock':
-                    //$this->SendDebug('Match', 'manual_lock', 0);
-                    $isLocked = $this->ToBool($payload);
-                    $this->SetValue('SetChargePointLock', !$isLocked);
-                    return '';
-
                 case $cpBase . '/fault_state':
                     //$this->SendDebug('Match', 'fault_state', 0);
                     if ($this->IsNumericPayload($payload)) {
@@ -294,6 +325,115 @@ class openWB2 extends IPSModuleStrict
                         $value = ((float) $payload) / 1000;
                         $this->SetValue('Imported', $value);
                     }
+                    return '';
+
+                                    case $cpBase . '/soc':
+                    if ($this->IsNumericPayload($payload)) {
+                        $this->SetValue('SoC', (int) round((float) $payload));
+                    }
+                    return '';
+
+                case $cpBase . '/rfid_timestamp':
+                    $this->SetValue('RFIDTimestamp', $this->PayloadToString($payload));
+                    return '';
+
+                case $cpBase . '/daily_exported':
+                    if ($this->IsNumericPayload($payload)) {
+                        $value = ((float) $payload) / 1000;
+                        $this->SetValue('DailyExported', $value);
+                    }
+                    return '';
+
+                case $cpBase . '/exported':
+                    if ($this->IsNumericPayload($payload)) {
+                        $value = ((float) $payload) / 1000;
+                        $this->SetValue('Exported', $value);
+                    }
+                    return '';
+
+                case $cpBase . '/powers/1':
+                    $this->SetFloatIfNumeric('PowerL1', $payload);
+                    return '';
+
+                case $cpBase . '/powers/2':
+                    $this->SetFloatIfNumeric('PowerL2', $payload);
+                    return '';
+
+                case $cpBase . '/powers/3':
+                    $this->SetFloatIfNumeric('PowerL3', $payload);
+                    return '';
+
+                case $cpBase . '/frequency':
+                    $this->SetFloatIfNumeric('Frequency', $payload);
+                    return '';
+
+                case $cpBase . '/power_factors/1':
+                    $this->SetFloatIfNumeric('PowerFactor1', $payload);
+                    return '';
+
+                case $cpBase . '/power_factors/2':
+                    $this->SetFloatIfNumeric('PowerFactor2', $payload);
+                    return '';
+
+                case $cpBase . '/power_factors/3':
+                    $this->SetFloatIfNumeric('PowerFactor3', $payload);
+                    return '';
+
+                case $cpBase . '/serial_number':
+                    $this->SetValue('SerialNumber', $this->PayloadToString($payload));
+                    return '';
+
+                case $cpBase . '/soc_timestamp':
+                    $this->SetValue('SocTimestamp', $this->PayloadToString($payload));
+                    return '';
+
+                case $cpBase . '/vehicle_id':
+                    $this->SetValue('VehicleID', $this->PayloadToString($payload));
+                    return '';
+
+                case $cpBase . '/error_timestamp':
+                    $this->SetValue('ErrorTimestamp', $this->PayloadToString($payload));
+                    return '';
+
+                case $cpBase . '/charging_power':
+                    if ($this->IsNumericPayload($payload)) {
+                        $this->SetValue('ChargingPower', (int) round((float) $payload));
+                    }
+                    return '';
+
+                case $cpBase . '/charging_voltage':
+                    if ($this->IsNumericPayload($payload)) {
+                        $this->SetValue('ChargingVoltage', (int) round((float) $payload));
+                    }
+                    return '';
+
+                case $cpBase . '/version':
+                    $this->SetValue('Version', $this->PayloadToString($payload));
+                    return '';
+
+                case $cpBase . '/evse_signaling':
+                    $this->SetValue('EvseSignaling', $this->PayloadToString($payload));
+                    return '';
+
+                case $cpBase . '/max_discharge_power':
+                    if ($this->IsNumericPayload($payload)) {
+                        $this->SetValue('MaxDischargePower', (float) $payload);
+                    }
+                    return '';
+
+                case $cpBase . '/max_charge_power':
+                    if ($this->IsNumericPayload($payload)) {
+                        $this->SetValue('MaxChargePower', (float) $payload);
+                    }
+                    return '';
+                
+                
+                //Ab hier die Datarn für die Variblen mit AKtion
+                
+                case $cpBase . '/manual_lock':
+                    //$this->SendDebug('Match', 'manual_lock', 0);
+                    $isLocked = $this->ToBool($payload);
+                    $this->SetValue('SetChargePointLock', !$isLocked);
                     return '';
 
                 case $cpBase . '/chargemode':
