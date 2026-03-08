@@ -7,7 +7,7 @@ class openWB2 extends IPSModuleStrict
         parent::Create();
 
         $this->RegisterPropertyString('BaseTopic', 'openWB');
-        $this->RegisterPropertyInteger('ChargePointID', 1);
+        $this->RegisterPropertyInteger('ChargePointID', 0);
 
         // Profile erzeugen
         $this->RegisterProfiles();
