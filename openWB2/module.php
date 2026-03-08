@@ -227,7 +227,6 @@ class openWB2 extends IPSModuleStrict
                     //$this->SendDebug('Match', 'phases_in_use', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('PhasesInUse', (int) round((float) $payload));
-                        //$this->SendDebug('SetValue', 'LPPhasesInUse = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
@@ -235,7 +234,7 @@ class openWB2 extends IPSModuleStrict
                     //$this->SendDebug('Match', 'charge_state', 0);
                     $value = $this->ToBool($payload);
                     $this->SetValue('ChargeState', $value);
-                    //$this->SendDebug('SetValue', 'LPChargeState = ' . ($value ? 'true' : 'false'), 0);
+        
                     $this->UpdateLPState();
                     return '';
 
@@ -243,25 +242,20 @@ class openWB2 extends IPSModuleStrict
                     //$this->SendDebug('Match', 'plug_state', 0);
                     $value = $this->ToBool($payload);
                     $this->SetValue('PlugState', $value);
-                    //$this->SendDebug('SetValue', 'LPPlugState = ' . ($value ? 'true' : 'false'), 0);
                     $this->UpdateLPState();
                     return '';
 
                 case $cpBase . '/manual_lock':
                     //$this->SendDebug('Match', 'manual_lock', 0);
-
                     $isLocked = $this->ToBool($payload);
                     $isEnabled = !$isLocked;
-
                     $this->SetValue('SetChargePointLock', $isLocked);
-                    //$this->SendDebug('SetValue', 'SetChargePointLock = ' . ($isLocked ? 'true' : 'false'), 0);
                     return '';
 
                 case $cpBase . '/fault_state':
                     //$this->SendDebug('Match', 'fault_state', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('FaultState', (int) round((float) $payload));
-                        //$this->SendDebug('SetValue', 'LPFaultState = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
@@ -269,34 +263,30 @@ class openWB2 extends IPSModuleStrict
                     //$this->SendDebug('Match', 'fault_str', 0);
                     $value = $this->PayloadToString($payload);
                     $this->SetValue('FaultString', $value);
-                    //$this->SendDebug('SetValue', 'LPFaultString = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/state_str':
                     //$this->SendDebug('Match', 'state_str', 0);
                     $value = $this->PayloadToString($payload);
                     $this->SetValue('StateString', $value);
-                    //$this->SendDebug('SetValue', 'LPStateString = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/vehicle_name':
                     //$this->SendDebug('Match', 'vehicle_name', 0);
                     $value = $this->PayloadToString($payload);
                     $this->SetValue('VehicleName', $value);
-                    //$this->SendDebug('SetValue', 'LPVehicleName = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/rfid':
                     //$this->SendDebug('Match', 'rfid', 0);
                     $value = $this->PayloadToString($payload);
                     $this->SetValue('RFID', $value);
-                    //$this->SendDebug('SetValue', 'LPRFID = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/daily_imported':
                     //$this->SendDebug('Match', 'daily_imported', 0);
                     $value = ((float) $payload) / 1000;
-                    $this->SetFloatIfNumeric('DailyImported', $value);
+                    $this->SetValue('DailyImported', $value);
                     return '';
 
                 case $cpBase . '/imported':
@@ -304,7 +294,6 @@ class openWB2 extends IPSModuleStrict
                     if ($this->IsNumericPayload($payload)) {
                         $value = ((float) $payload) / 1000;
                         $this->SetValue('Imported', $value);
-                        //$this->SendDebug('SetValue', 'LPImported = ' . $value, 0);
                     }
                     return '';
 
@@ -312,14 +301,12 @@ class openWB2 extends IPSModuleStrict
                     //$this->SendDebug('Match', 'chargemode', 0);
                     $value = $this->MapChargeModeStringToInt($this->PayloadToString($payload));
                     $this->SetValue('SetChargeMode', $value);
-                    //$this->SendDebug('SetValue', 'SetChargeMode = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/instant_charging_limit':
                     //$this->SendDebug('Match', 'instant_charging_limit', 0);
                     $value = $this->MapLimitTypeStringToInt($this->PayloadToString($payload));
                     $this->SetValue('SetInstantChargingLimit', $value);
-                    //$this->SendDebug('SetValue', 'SetInstantChargingLimit = ' . $value, 0);
                     return '';
 
                 case $cpBase . '/instant_charging_limit_soc':
@@ -327,7 +314,6 @@ class openWB2 extends IPSModuleStrict
                     if ($this->IsNumericPayload($payload)) {
                         $value = (int) round((float) $payload);
                         $this->SetValue('SetInstantChargingLimitSoc', $value);
-                        //$this->SendDebug('SetValue', 'SetInstantChargingLimitSoc = ' . $value, 0);
                     }
                     return '';
 
@@ -336,7 +322,6 @@ class openWB2 extends IPSModuleStrict
                     if ($this->IsNumericPayload($payload)) {
                         $value = (int) round((float) $payload);
                         $this->SetValue('SetInstantChargingLimitAmount', $value);
-                        //$this->SendDebug('SetValue', 'SetInstantChargingLimitAmount = ' . $value, 0);
                     }
                     return '';
 
@@ -345,7 +330,6 @@ class openWB2 extends IPSModuleStrict
                     if ($this->IsNumericPayload($payload)) {
                         $value = (int) round((float) $payload);
                         $this->SetValue('SetChargeCurrent', $value);
-                        //$this->SendDebug('SetValue', 'SetChargeCurrent = ' . $value, 0);
                     }
                     return '';
 
@@ -354,7 +338,6 @@ class openWB2 extends IPSModuleStrict
                     if ($this->IsNumericPayload($payload)) {
                         $value = (int) round((float) $payload);
                         $this->SetValue('SetMinimalPvSoc', $value);
-                        //$this->SendDebug('SetValue', 'SetMinimalPvSoc = ' . $value, 0);
                     }
                     return '';
 
@@ -363,7 +346,6 @@ class openWB2 extends IPSModuleStrict
                     if ($this->IsNumericPayload($payload)) {
                         $value = (int) round((float) $payload);
                         $this->SetValue('SetMinimalPermanentCurrent', $value);
-                        //$this->SendDebug('SetValue', 'SetMinimalPermanentCurrent = ' . $value, 0);
                     }
                     return '';
 
@@ -373,7 +355,6 @@ class openWB2 extends IPSModuleStrict
                         $value = (float) $payload;
                         if (!is_nan($value) && !is_infinite($value)) {
                             $this->SetValue('SetMaxPriceEco', $value);
-                            //$this->SendDebug('SetValue', 'SetMaxPriceEco = ' . $value, 0);
                         }
                     }
                     return '';
@@ -382,7 +363,6 @@ class openWB2 extends IPSModuleStrict
                     //$this->SendDebug('Match', 'bat_mode', 0);
                     $value = $this->MapBatModeStringToInt($this->PayloadToString($payload));
                     $this->SetValue('SetBatMode', $value);
-                    //$this->SendDebug('SetValue', 'SetBatMode = ' . $value, 0);
                     return '';
             }
         }
