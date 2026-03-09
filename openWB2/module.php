@@ -117,6 +117,9 @@ class openWB2 extends IPSModuleStrict
 
         $this->RegisterTimer('SendChargeCurrentDelayed', 0, 'OWB_SendChargeCurrentDelayed($_IPS["TARGET"]);');
         $this->SetBuffer('DelayedChargeCurrent', '');
+
+        $this->RegisterTimer('PhaseSwitchLockTimer', 0, 'OWB_ClearPhaseSwitchLock($_IPS["TARGET"]);');
+        $this->SetBuffer('PhaseSwitchLock', '0');
     }
 
     public function GetCompatibleParents(): string
@@ -590,6 +593,9 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case 'SetChargePower':
+                if ($this->GetBuffer('PhaseSwitchLock') === '1') {
+                    $this->SendDebug('SetChargePower', 'Phasenwechsel aktuell gesperrt', 0);
+                }
                 $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
                 $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
 
@@ -626,14 +632,19 @@ class openWB2 extends IPSModuleStrict
                     break;
                 }
 
+                // 30 Sekunden Sperre für neue Phasenwechsel
+                $this->SetBuffer('PhaseSwitchLock', '1');
+                $this->SetTimerInterval('PhaseSwitchLockTimer', 30000);
+
                 $this->SetBuffer('DelayedChargeCurrent', (string)$current);
                 $this->SetTimerInterval('SendChargeCurrentDelayed', 700);
 
                 $this->SendDebug(
                     'SetChargePower',
-                    'Template auf ' . $phases . ' Phase(n) gesetzt, Strom ' . $current . ' A wird verzögert gesendet',
+                    'Phase gewechselt auf ' . $phases . ', Strom ' . $current . 'A wird verzögert gesendet, 30s Sperre aktiv',
                     0
                 );
+
                 break;
             }
 
@@ -1225,5 +1236,13 @@ class openWB2 extends IPSModuleStrict
 
         $this->SendDebug('SendChargeCurrentDelayed', 'Verzögert gesendet: ' . $current . ' A', 0);
         $this->SetBuffer('DelayedChargeCurrent', '');
+    }
+
+    public function ClearPhaseSwitchLock(): void
+    {
+        $this->SetBuffer('PhaseSwitchLock', '0');
+        $this->SetTimerInterval('PhaseSwitchLockTimer', 0);
+
+        $this->SendDebug('PhaseSwitchLock', 'Phasenwechsel wieder erlaubt', 0);
     }
 }
