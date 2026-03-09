@@ -612,6 +612,13 @@ class openWB2 extends IPSModuleStrict
                     0
                 );
 
+                $targetPhases = (int)$this->GetValue('PhasesToUse');
+
+                if ($targetPhases === $phases) {
+                    // Phase wurde bereits angefordert, warten bis WB nachzieht
+                    return;
+                }
+                
                 $currentPhasesInUse = (int) $this->GetValue('PhasesInUse');
                 if (!in_array($currentPhasesInUse, [1, 3], true)) {
                     $currentPhasesInUse = (int) $this->GetValue('PhasesToUse');
