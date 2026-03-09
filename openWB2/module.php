@@ -114,6 +114,8 @@ class openWB2 extends IPSModuleStrict
 
         $this->RegisterVariableInteger('PhasesToUse', 'Phasen Sofortladen', 'OWB.PhasesToUse', 315);
         $this->EnableAction('PhasesToUse');
+
+        $this->SetBuffer('LastRequestedChargePower', '');
     }
 
     public function GetCompatibleParents(): string
@@ -594,13 +596,21 @@ class openWB2 extends IPSModuleStrict
                 $maxPower = 230 * 3 * $maxCurrent;
 
                 $power = max($minPower, min($maxPower, (int) $Value));
+
+                $lastPower = (int) $this->GetBuffer('LastRequestedChargePower');
+                if ($lastPower === $power) {
+                    $this->SendDebug('SetChargePower', 'Sollleistung unverändert, keine Neuberechnung', 0);
+                    $this->SetValue('SetChargePower', $power);
+                    break;
+                }
+
+                $this->SetBuffer('LastRequestedChargePower', (string) $power);
                 $this->SetValue('SetChargePower', $power);
 
-                // Nur im Sofortladen aktiv
                 $chargeMode = (int) $this->GetValue('SetChargeMode');
                 if ($chargeMode !== 0) {
                     $this->SendDebug('SetChargePower', 'Sollleistung blockiert - nicht im Sofortladen', 0);
-                    return;
+                    break;
                 }
 
                 $phases = $this->DeterminePhasesByPower($power);
@@ -608,43 +618,27 @@ class openWB2 extends IPSModuleStrict
 
                 $this->SendDebug(
                     'SetChargePower',
-                    'Sollleistung ' . $power . ' W -> ' . $phases . ' Phase(n), ' . $current . ' A',
+                    'Neu berechnet: ' . $power . ' W -> ' . $phases . ' Phase(n), ' . $current . ' A',
                     0
                 );
 
-                $targetPhases = (int)$this->GetValue('PhasesToUse');
-                
-                $currentPhasesInUse = (int) $this->GetValue('PhasesInUse');
-            if (!in_array($currentPhasesInUse, [1, 3], true)) {
-                $currentPhasesInUse = 1;
-            }
-
-            $targetPhasesToUse = (int) $this->GetValue('PhasesToUse');
-            if (!in_array($targetPhasesToUse, [1, 3], true)) {
-                $targetPhasesToUse = $currentPhasesInUse;
-            }
-
-            // Phase wechseln nur dann, wenn weder Ist noch bereits angeforderter Sollwert passen
-            if ($phases !== $currentPhasesInUse && $phases !== $targetPhasesToUse) {
-                if ($this->UpdatePhasesInChargeTemplate($phases)) {
-                    $this->SendDebug('SetChargePower', 'Phasenumschaltung auf ' . $phases . ' angefordert', 0);
-                    return;
+                $targetPhasesToUse = (int) $this->GetValue('PhasesToUse');
+                if (!in_array($targetPhasesToUse, [1, 3], true)) {
+                    $targetPhasesToUse = 1;
                 }
 
-                $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
-                return;
-            }
+                if ($targetPhasesToUse !== $phases) {
+                    if (!$this->UpdatePhasesInChargeTemplate($phases)) {
+                        $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
+                        break;
+                    }
 
-            // Wenn Zielphase schon angefordert ist, noch keinen Strom nachschieben
-            if ($phases !== $currentPhasesInUse && $phases === $targetPhasesToUse) {
-                $this->SendDebug('SetChargePower', 'Phasenwechsel noch unterwegs, Strom wird noch nicht gesendet', 0);
-                return;
-            }
+                    $this->SendDebug('SetChargePower', 'Template auf ' . $phases . ' Phase(n) gesetzt', 0);
+                }
 
-            // Erst wenn die passende Phase wirklich anliegt, Strom senden
-            $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
-            $this->SetValue('SetChargeCurrent', $current);
-            break;
+                $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
+                $this->SetValue('SetChargeCurrent', $current);
+                break;
 
             case 'SetChargeMode':
                 $modeString = $this->MapChargeModeIntToString((int) $Value);
