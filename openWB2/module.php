@@ -528,7 +528,7 @@ class openWB2 extends IPSModuleStrict
             }
         }
 
-        $this->SendDebug('Kein Match', $topic, 0);
+        //$this->SendDebug('Kein Match', $topic, 0);
         return '';
     }
 
