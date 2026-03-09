@@ -231,7 +231,29 @@ class openWB2 extends IPSModuleStrict
 
             $templateData = json_decode($value, true);
             if (is_array($templateData) && isset($templateData['chargemode']['instant_charging']['phases_to_use'])) {
-                $this->SetValue('PhasesToUse', (int) $templateData['chargemode']['instant_charging']['phases_to_use']);
+
+                $receivedPhases = (int) $templateData['chargemode']['instant_charging']['phases_to_use'];
+
+                $ignoreUntil = (float) $this->GetBuffer('IgnorePhasesToUseUntil');
+                $pendingPhases = (int) $this->GetBuffer('PendingPhasesToUse');
+
+                // Kurz nach dem Senden alte Rückmeldung ignorieren
+                if (microtime(true) < $ignoreUntil && $receivedPhases !== $pendingPhases) {
+                    $this->SendDebug(
+                        'ChargeTemplate',
+                        'PhasesToUse ignoriert: empfangen=' . $receivedPhases . ', erwartet=' . $pendingPhases,
+                        0
+                    );
+                    return '';
+                }
+
+                // Erwarteter Wert angekommen -> Sperre zurücksetzen
+                if ($receivedPhases === $pendingPhases) {
+                    $this->SetBuffer('IgnorePhasesToUseUntil', '0');
+                    $this->SetBuffer('PendingPhasesToUse', '');
+                }
+
+                $this->SetValue('PhasesToUse', $receivedPhases);
             }
             return '';
         }
@@ -607,7 +629,6 @@ class openWB2 extends IPSModuleStrict
                 if ($phases !== (int) $this->GetValue('PhasesToUse')) {
                     if ($this->UpdatePhasesInChargeTemplate($phases)) {
                         $this->SetValue('PhasesToUse', $phases);
-                        $this->SetBuffer('PhaseSwitchLockUntil', (string)(time() + 1));
                     } else {
                         $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
                         return;
@@ -856,6 +877,10 @@ class openWB2 extends IPSModuleStrict
 
         $this->MQTTCommand($topic, $payload);
         $this->SendDebug(__FUNCTION__, 'Gesendet an ' . $topic . ': ' . $payload, 0);
+
+        // Rückschreiben kurz blockieren
+        $this->SetBuffer('IgnorePhasesToUseUntil', (string) (microtime(true) + 1.0));
+        $this->SetBuffer('PendingPhasesToUse', (string) $phases);
 
         return true;
     }
