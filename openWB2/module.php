@@ -114,6 +114,9 @@ class openWB2 extends IPSModuleStrict
 
         $this->RegisterVariableInteger('PhasesToUse', 'Phasen Sofortladen', 'OWB.PhasesToUse', 315);
         $this->EnableAction('PhasesToUse');
+
+        $this->RegisterTimer('SendChargeCurrentDelayed', 0, 'OWB_SendChargeCurrentDelayed($_IPS["TARGET"]);');
+        $this->SetBuffer('DelayedChargeCurrent', '');
     }
 
     public function GetCompatibleParents(): string
@@ -623,14 +626,18 @@ class openWB2 extends IPSModuleStrict
                     break;
                 }
 
+                $this->SetBuffer('DelayedChargeCurrent', (string)$current);
+                $this->SetTimerInterval('SendChargeCurrentDelayed', 700);
+
                 $this->SendDebug(
                     'SetChargePower',
-                    'Template auf ' . $phases . ' Phase(n) gesetzt, Strom ' . $current . ' A wird direkt mitgesendet',
+                    'Template auf ' . $phases . ' Phase(n) gesetzt, Strom ' . $current . ' A wird verzögert gesendet',
                     0
                 );
+                break;
             }
 
-            // Strom immer passend zur berechneten Phase senden
+            // Wenn keine Phasenumschaltung nötig ist: Strom sofort senden
             $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
             $this->SetValue('SetChargeCurrent', $current);
             break;
@@ -1201,5 +1208,22 @@ class openWB2 extends IPSModuleStrict
         $current = max($minCurrent, min($maxCurrent, $current));
 
         return $current;
+    }
+
+    public function SendChargeCurrentDelayed(): void
+    {
+        $this->SetTimerInterval('SendChargeCurrentDelayed', 0);
+
+        $current = (int)$this->GetBuffer('DelayedChargeCurrent');
+        if ($current <= 0) {
+            return;
+        }
+
+        $cpSetBase = $this->GetChargePointSetBaseTopic();
+        $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string)$current);
+        $this->SetValue('SetChargeCurrent', $current);
+
+        $this->SendDebug('SendChargeCurrentDelayed', 'Verzögert gesendet: ' . $current . ' A', 0);
+        $this->SetBuffer('DelayedChargeCurrent', '');
     }
 }
