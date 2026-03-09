@@ -224,7 +224,7 @@ class openWB2 extends IPSModuleStrict
         $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
         $templateId = (int) $this->ReadPropertyInteger('ChargeTemplateID');
 
-        if ($topic === $baseTopic . '/vehicle/template/charge_template/' . $templateId) {
+        iif ($topic === $baseTopic . '/vehicle/template/charge_template/' . $templateId) {
             $value = trim((string) $payload);
             $this->SetBuffer('ChargeTemplateJSON', $value);
             $this->SendDebug('ChargeTemplate', $value, 0);
@@ -232,16 +232,16 @@ class openWB2 extends IPSModuleStrict
             $templateData = json_decode($value, true);
             if (is_array($templateData) && isset($templateData['chargemode']['instant_charging']['phases_to_use'])) {
 
-                $ignoreUntil = (int) $this->GetBuffer('IgnorePhasesToUseUntil');
+                $ignoreUntil = (int) $this->GetBuffer('IgnoreTemplatePhasesUntil');
 
-                // Nur das Zurückschreiben kurz blockieren
                 if (time() < $ignoreUntil) {
-                    $this->SendDebug('ChargeTemplate', 'PhasesToUse Rückschreiben kurz blockiert', 0);
+                    $this->SendDebug('ChargeTemplate', 'Template-Rückschreiben von PhasesToUse für 1s ignoriert', 0);
                     return '';
                 }
 
                 $this->SetValue('PhasesToUse', (int) $templateData['chargemode']['instant_charging']['phases_to_use']);
             }
+
             return '';
         }
 
@@ -865,8 +865,8 @@ class openWB2 extends IPSModuleStrict
         $this->MQTTCommand($topic, $payload);
         $this->SendDebug(__FUNCTION__, 'Gesendet an ' . $topic . ': ' . $payload, 0);
 
-        // Rückschreiben 2 Sekunden blockieren
-        $this->SetBuffer('IgnorePhasesToUseUntil', (string) (time() + 2));
+        // 1 Sekunde lang Template-Rückschreiben ignorieren
+        $this->SetBuffer('IgnoreTemplatePhasesUntil', (string) (time() + 1));
 
         return true;
     }
