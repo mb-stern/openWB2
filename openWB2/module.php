@@ -114,8 +114,6 @@ class openWB2 extends IPSModuleStrict
 
         $this->RegisterVariableInteger('PhasesToUse', 'Phasen Sofortladen', 'OWB.PhasesToUse', 315);
         $this->EnableAction('PhasesToUse');
-
-        $this->SetBuffer('LastRequestedChargePower', '');
     }
 
     public function GetCompatibleParents(): string
@@ -597,14 +595,6 @@ class openWB2 extends IPSModuleStrict
 
                 $power = max($minPower, min($maxPower, (int) $Value));
 
-                $lastPower = (int) $this->GetBuffer('LastRequestedChargePower');
-                if ($lastPower === $power) {
-                    $this->SendDebug('SetChargePower', 'Sollleistung unverändert, keine Neuberechnung', 0);
-                    $this->SetValue('SetChargePower', $power);
-                    break;
-                }
-
-                $this->SetBuffer('LastRequestedChargePower', (string) $power);
                 $this->SetValue('SetChargePower', $power);
 
                 $chargeMode = (int) $this->GetValue('SetChargeMode');
