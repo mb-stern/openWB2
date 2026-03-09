@@ -634,7 +634,7 @@ class openWB2 extends IPSModuleStrict
 
                 // 30 Sekunden Sperre für neue Phasenwechsel
                 $this->SetBuffer('PhaseSwitchLock', '1');
-                $this->SetTimerInterval('PhaseSwitchLockTimer', 30000);
+                $this->SetTimerInterval('PhaseSwitchLockTimer', 60000);
 
                 $this->SetBuffer('DelayedChargeCurrent', (string)$current);
                 $this->SetTimerInterval('SendChargeCurrentDelayed', 700);
