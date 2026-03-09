@@ -228,20 +228,6 @@ class openWB2 extends IPSModuleStrict
             $value = trim((string) $payload);
             $this->SetBuffer('ChargeTemplateJSON', $value);
             $this->SendDebug('ChargeTemplate', $value, 0);
-
-            $templateData = json_decode($value, true);
-            if (is_array($templateData) && isset($templateData['chargemode']['instant_charging']['phases_to_use'])) {
-
-                $ignoreUntil = (int) $this->GetBuffer('IgnoreTemplatePhasesUntil');
-
-                if (time() < $ignoreUntil) {
-                    $this->SendDebug('ChargeTemplate', 'Template-Rückschreiben von PhasesToUse für 1s ignoriert', 0);
-                    return '';
-                }
-
-                $this->SetValue('PhasesToUse', (int) $templateData['chargemode']['instant_charging']['phases_to_use']);
-            }
-
             return '';
         }
 
@@ -865,9 +851,6 @@ class openWB2 extends IPSModuleStrict
         $this->MQTTCommand($topic, $payload);
         $this->SendDebug(__FUNCTION__, 'Gesendet an ' . $topic . ': ' . $payload, 0);
 
-        // 1 Sekunde lang Template-Rückschreiben ignorieren
-        $this->SetBuffer('IgnoreTemplatePhasesUntil', (string) (time() + 1));
-
         return true;
     }
 
@@ -1170,16 +1153,29 @@ class openWB2 extends IPSModuleStrict
         $maxPower1Phase = 230 * $maxCurrent;
         $minPower3Phase = 230 * 3 * $minCurrent;
 
-        // Auf 3 Phasen erst wechseln, wenn 3-phasig sinnvoll möglich
         $switchTo3Phase = $minPower3Phase + $hysteresis;
-
-        // Auf 1 Phase erst zurück, wenn 1-phasig sicher wieder möglich
         $switchTo1Phase = $maxPower1Phase - $hysteresis;
 
-        $currentPhases = (int) $this->GetValue('PhasesToUse');
+        // Erst echte Rückmeldung verwenden
+        $currentPhases = (int) $this->GetValue('PhasesInUse');
+
+        // Falls noch keine brauchbare Rückmeldung da ist, auf Sollwert zurückfallen
+        if (!in_array($currentPhases, [1, 3], true)) {
+            $currentPhases = (int) $this->GetValue('PhasesToUse');
+        }
+
         if (!in_array($currentPhases, [1, 3], true)) {
             $currentPhases = 1;
         }
+
+        $this->SendDebug(
+            'DeterminePhasesByPower',
+            'power=' . $power .
+            ' currentPhases=' . $currentPhases .
+            ' switchTo3Phase=' . $switchTo3Phase .
+            ' switchTo1Phase=' . $switchTo1Phase,
+            0
+        );
 
         if ($currentPhases === 1) {
             if ($power >= $switchTo3Phase) {
