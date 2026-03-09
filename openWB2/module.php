@@ -541,10 +541,23 @@ class openWB2 extends IPSModuleStrict
         switch ($Ident) {
             case 'PhasesToUse':
                 $Value = (int) $Value;
-                if (in_array($Value, [1, 3], true)) {
-                    if ($this->UpdatePhasesInChargeTemplate($Value)) {
-                        $this->SetValue('PhasesToUse', $Value);
-                    }
+                if (!in_array($Value, [1, 3], true)) {
+                    return;
+                }
+
+                // Prüfen ob Sofortladen aktiv ist
+                $chargeMode = $this->GetValue('SetChargeMode');
+                if ($chargeMode !== 0) {
+                    $this->SendDebug('PhasesToUse', 'Phasenumschaltung blockiert – nicht im Sofortladen', 0);
+                    
+                    // Variable trotzdem setzen damit UI nicht zurückspringt
+                    $this->SetValue('PhasesToUse', $Value);
+                    return;
+                }
+
+                // Nur bei Sofortladen an openWB senden
+                if ($this->UpdatePhasesInChargeTemplate($Value)) {
+                    $this->SetValue('PhasesToUse', $Value);
                 }
                 break;
 
