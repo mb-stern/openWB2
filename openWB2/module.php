@@ -599,7 +599,12 @@ class openWB2 extends IPSModuleStrict
 
                 $this->SendDebug('SetChargePower', 'Sollleistung ' . $power . ' W -> ' . $phases . ' Phase(n), ' . $current . ' A', 0);
 
-                if ($phases !== (int) $this->GetValue('PhasesToUse')) {
+                $currentPhasesInUse = (int) $this->GetValue('PhasesInUse');
+                if (!in_array($currentPhasesInUse, [1, 3], true)) {
+                    $currentPhasesInUse = (int) $this->GetValue('PhasesToUse');
+                }
+
+                if ($phases !== $currentPhasesInUse) {
                     if ($this->UpdatePhasesInChargeTemplate($phases)) {
                         $this->SetValue('PhasesToUse', $phases);
                     } else {
@@ -850,6 +855,9 @@ class openWB2 extends IPSModuleStrict
 
         $this->MQTTCommand($topic, $payload);
         $this->SendDebug(__FUNCTION__, 'Gesendet an ' . $topic . ': ' . $payload, 0);
+
+        // lokalen Template-Buffer sofort auf den gesendeten Stand setzen
+        $this->SetBuffer('ChargeTemplateJSON', $payload);
 
         return true;
     }
