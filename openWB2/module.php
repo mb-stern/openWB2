@@ -613,22 +613,19 @@ class openWB2 extends IPSModuleStrict
                 );
 
                 $targetPhases = (int)$this->GetValue('PhasesToUse');
-
-                if ($targetPhases === $phases) {
-                    // Phase wurde bereits angefordert, warten bis WB nachzieht
-                    return;
-                }
                 
                 $currentPhasesInUse = (int) $this->GetValue('PhasesInUse');
-                if (!in_array($currentPhasesInUse, [1, 3], true)) {
-                    $currentPhasesInUse = (int) $this->GetValue('PhasesToUse');
-                }
-
                 if (!in_array($currentPhasesInUse, [1, 3], true)) {
                     $currentPhasesInUse = 1;
                 }
 
-                if ($phases !== $currentPhasesInUse) {
+                $targetPhasesToUse = (int) $this->GetValue('PhasesToUse');
+                if (!in_array($targetPhasesToUse, [1, 3], true)) {
+                    $targetPhasesToUse = $currentPhasesInUse;
+                }
+
+                // Nur dann Template senden, wenn weder Ist noch Soll schon passen
+                if ($phases !== $currentPhasesInUse && $phases !== $targetPhasesToUse) {
                     if ($this->UpdatePhasesInChargeTemplate($phases)) {
                         $this->SendDebug('SetChargePower', 'Phasenumschaltung auf ' . $phases . ' angefordert', 0);
                     } else {
@@ -637,6 +634,7 @@ class openWB2 extends IPSModuleStrict
                     }
                 }
 
+                // Strom immer weiter senden/berechnen
                 $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
                 $this->SetValue('SetChargeCurrent', $current);
                 break;
