@@ -224,7 +224,7 @@ class openWB2 extends IPSModuleStrict
         $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
         $templateId = (int) $this->ReadPropertyInteger('ChargeTemplateID');
 
-        iif ($topic === $baseTopic . '/vehicle/template/charge_template/' . $templateId) {
+        if ($topic === $baseTopic . '/vehicle/template/charge_template/' . $templateId) {
             $value = trim((string) $payload);
             $this->SetBuffer('ChargeTemplateJSON', $value);
             $this->SendDebug('ChargeTemplate', $value, 0);
