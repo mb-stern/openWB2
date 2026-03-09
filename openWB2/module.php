@@ -627,6 +627,7 @@ class openWB2 extends IPSModuleStrict
                     $targetPhasesToUse = 1;
                 }
 
+                // Wenn Zielphase geändert werden muss: nur Template senden und hier beenden
                 if ($targetPhasesToUse !== $phases) {
                     if (!$this->UpdatePhasesInChargeTemplate($phases)) {
                         $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
@@ -634,8 +635,12 @@ class openWB2 extends IPSModuleStrict
                     }
 
                     $this->SendDebug('SetChargePower', 'Template auf ' . $phases . ' Phase(n) gesetzt', 0);
+
+                    // Wichtig: nach Phasenwechsel noch KEINEN Strom senden
+                    break;
                 }
 
+                // Nur wenn die Zielphase bereits stimmt, Strom senden
                 $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
                 $this->SetValue('SetChargeCurrent', $current);
                 break;
