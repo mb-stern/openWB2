@@ -9,6 +9,9 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterPropertyString('BaseTopic', 'openWB');
         $this->RegisterPropertyInteger('ChargePointID', 0);
         $this->RegisterPropertyInteger('ChargeTemplateID', 0);
+        $this->RegisterPropertyInteger('MinCurrentPerPhase', 6);
+        $this->RegisterPropertyInteger('MaxCurrentPerPhase', 16);
+        $this->RegisterPropertyInteger('PhaseSwitchHysteresisWatt', 0);
 
         // Profile erzeugen
         $this->RegisterProfiles();
@@ -82,8 +85,11 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterVariableInteger('SetChargeMode', 'Lademodus', 'OWB.ChargeMode', 300);
         $this->EnableAction('SetChargeMode');
 
-        $this->RegisterVariableInteger('SetChargeCurrent', 'Stromstärke', 'OWB.Ampere', 310);
+        $this->RegisterVariableInteger('SetChargeCurrent', 'Stromstärke', '', 310);
         $this->EnableAction('SetChargeCurrent');
+
+        $this->RegisterVariableInteger('SetChargePower', 'Sollleistung', '', 312);
+        $this->EnableAction('SetChargePower');
 
         $this->RegisterVariableInteger('SetMinimalPvSoc', 'Mindes-SoC für das Fahrzeug', '~Intensity.100', 320);
         $this->EnableAction('SetMinimalPvSoc');
@@ -110,6 +116,11 @@ class openWB2 extends IPSModuleStrict
 
         $this->RegisterVariableInteger('PhasesToUse', 'Phasen Sofortladen', 'OWB.PhasesToUse', 315);
         $this->EnableAction('PhasesToUse');
+
+        // Sollleistung
+
+        $this->RegisterVariableInteger('SetChargePower', 'Sollleistung', '', 312);
+        $this->EnableAction('SetChargePower');
     }
 
     public function GetCompatibleParents(): string
@@ -139,6 +150,8 @@ class openWB2 extends IPSModuleStrict
 
         $filter = '.*"Topic":"' . preg_quote($baseTopic, '/') . '\/.*';
         $this->SetReceiveDataFilter($filter);
+
+        $this->UpdateDynamicProfiles();
     }
 
     public function GetConfigurationForm(): string
@@ -159,6 +172,21 @@ class openWB2 extends IPSModuleStrict
                     'name'    => 'ChargeTemplateID',
                     'type'    => 'NumberSpinner',
                     'caption' => 'Ladepunkt-Profil ID'
+                ],
+                [
+                    'name'    => 'MinCurrentPerPhase',
+                    'type'    => 'NumberSpinner',
+                    'caption' => 'Minimalstrom pro Phase (A)'
+                ],
+                [
+                    'name'    => 'MaxCurrentPerPhase',
+                    'type'    => 'NumberSpinner',
+                    'caption' => 'Maximalstrom pro Phase (A)'
+                ],
+                [
+                    'name'    => 'PhaseSwitchHysteresisWatt',
+                    'type'    => 'NumberSpinner',
+                    'caption' => 'Hysterese Phasenumschaltung (W)'
                 ]
             ],
             'actions' => [
@@ -561,6 +589,41 @@ class openWB2 extends IPSModuleStrict
                 }
                 break;
 
+            case 'SetChargePower':
+                $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
+                $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
+
+                $minPower = 230 * $minCurrent;
+                $maxPower = 230 * 3 * $maxCurrent;
+
+                $power = max($minPower, min($maxPower, (int) $Value));
+                $this->SetValue('SetChargePower', $power);
+
+                // Nur im Sofortladen an die Box weiterleiten
+                $chargeMode = (int) $this->GetValue('SetChargeMode');
+                if ($chargeMode !== 0) {
+                    $this->SendDebug('SetChargePower', 'Sollleistung blockiert - nicht im Sofortladen', 0);
+                    return;
+                }
+
+                $phases = $this->DeterminePhasesByPower($power);
+                $current = $this->CalculateCurrentFromPower($power, $phases);
+
+                $this->SendDebug('SetChargePower', 'Sollleistung ' . $power . ' W -> ' . $phases . ' Phase(n), ' . $current . ' A', 0);
+
+                if ($phases !== (int) $this->GetValue('PhasesToUse')) {
+                    if ($this->UpdatePhasesInChargeTemplate($phases)) {
+                        $this->SetValue('PhasesToUse', $phases);
+                    } else {
+                        $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
+                        return;
+                    }
+                }
+
+                $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
+                $this->SetValue('SetChargeCurrent', $current);
+                break;
+
             case 'SetChargeMode':
                 $modeString = $this->MapChargeModeIntToString((int) $Value);
                 $this->PublishSetTopic($cpSetBase . '/chargemode', $modeString);
@@ -650,8 +713,6 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterProfileIntegerEx('OWB.ResetDirectCharge', 'Power', '', '', [
             [1, 'Reset', '', -1]
         ]);
-
-        $this->RegisterProfileInteger('OWB.Ampere', 'Electricity', '', ' A', 6, 16, 1);
 
         $this->RegisterProfileInteger('OWB.Watt', 'Electricity', '', ' W', 0, 0, 1);
 
@@ -1055,5 +1116,81 @@ class openWB2 extends IPSModuleStrict
                 (int) $association[3]
             );
         }
+    }
+
+    private function UpdateDynamicProfiles(): void
+    {
+        $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
+        $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
+
+        $minPower = 230 * $minCurrent;
+        $maxPower = 230 * 3 * $maxCurrent;
+
+        $ampereProfile = 'OWB.Ampere.' . $this->InstanceID;
+        $powerProfile  = 'OWB.TargetPower.' . $this->InstanceID;
+
+        // Ampere-Profil
+        if (!IPS_VariableProfileExists($ampereProfile)) {
+            IPS_CreateVariableProfile($ampereProfile, VARIABLETYPE_INTEGER);
+        }
+        IPS_SetVariableProfileIcon($ampereProfile, 'Electricity');
+        IPS_SetVariableProfileText($ampereProfile, '', ' A');
+        IPS_SetVariableProfileValues($ampereProfile, $minCurrent, $maxCurrent, 1);
+
+        // Sollleistungs-Profil
+        if (!IPS_VariableProfileExists($powerProfile)) {
+            IPS_CreateVariableProfile($powerProfile, VARIABLETYPE_INTEGER);
+        }
+        IPS_SetVariableProfileIcon($powerProfile, 'Electricity');
+        IPS_SetVariableProfileText($powerProfile, '', ' W');
+        IPS_SetVariableProfileValues($powerProfile, $minPower, $maxPower, 10);
+
+        // Profile den Variablen zuweisen
+        IPS_SetVariableCustomProfile($this->GetIDForIdent('SetChargeCurrent'), $ampereProfile);
+        IPS_SetVariableCustomProfile($this->GetIDForIdent('SetChargePower'), $powerProfile);
+    }
+
+    private function DeterminePhasesByPower(int $power): int
+    {
+        $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
+        $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
+        $hysteresis = max(0, (int) $this->ReadPropertyInteger('PhaseSwitchHysteresisWatt'));
+
+        $maxPower1Phase = 230 * $maxCurrent;
+        $minPower3Phase = 230 * 3 * $minCurrent;
+
+        $switchTo3Phase = $maxPower1Phase + $hysteresis;
+        $switchTo1Phase = $minPower3Phase - $hysteresis;
+
+        $currentPhases = (int) $this->GetValue('PhasesToUse');
+        if (!in_array($currentPhases, [1, 3], true)) {
+            $currentPhases = 1;
+        }
+
+        if ($currentPhases === 1) {
+            if ($power > $switchTo3Phase) {
+                return 3;
+            }
+            return 1;
+        }
+
+        if ($power < $switchTo1Phase) {
+            return 1;
+        }
+
+        return 3;
+    }
+
+    private function CalculateCurrentFromPower(int $power, int $phases): int
+    {
+        $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
+        $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
+
+        $phases = ($phases === 3) ? 3 : 1;
+
+        $current = (int) ceil($power / (230 * $phases));
+        $current = max($minCurrent, min($maxCurrent, $current));
+
+        return $current;
     }
 }
