@@ -588,7 +588,7 @@ class openWB2 extends IPSModuleStrict
                 $power = max($minPower, min($maxPower, (int) $Value));
                 $this->SetValue('SetChargePower', $power);
 
-                // Nur im Sofortladen an die Box weiterleiten
+                // Nur im Sofortladen aktiv
                 $chargeMode = (int) $this->GetValue('SetChargeMode');
                 if ($chargeMode !== 0) {
                     $this->SendDebug('SetChargePower', 'Sollleistung blockiert - nicht im Sofortladen', 0);
@@ -598,21 +598,28 @@ class openWB2 extends IPSModuleStrict
                 $phases = $this->DeterminePhasesByPower($power);
                 $current = $this->CalculateCurrentFromPower($power, $phases);
 
-                $this->SendDebug('SetChargePower', 'Sollleistung ' . $power . ' W -> ' . $phases . ' Phase(n), ' . $current . ' A', 0);
+                $this->SendDebug(
+                    'SetChargePower',
+                    'Sollleistung ' . $power . ' W -> ' . $phases . ' Phase(n), ' . $current . ' A',
+                    0
+                );
 
                 $currentPhasesInUse = (int) $this->GetValue('PhasesInUse');
                 if (!in_array($currentPhasesInUse, [1, 3], true)) {
                     $currentPhasesInUse = (int) $this->GetValue('PhasesToUse');
                 }
 
+                if (!in_array($currentPhasesInUse, [1, 3], true)) {
+                    $currentPhasesInUse = 1;
+                }
+
                 if ($phases !== $currentPhasesInUse) {
                     if ($this->UpdatePhasesInChargeTemplate($phases)) {
                         $this->SetValue('PhasesToUse', $phases);
-                        $this->SendDebug('SetChargePower', 'Phasenwechsel angefordert - Strom wird erst im nächsten Durchlauf gesendet', 0);
                     } else {
                         $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
+                        return;
                     }
-                    return;
                 }
 
                 $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
@@ -858,7 +865,6 @@ class openWB2 extends IPSModuleStrict
         $this->MQTTCommand($topic, $payload);
         $this->SendDebug(__FUNCTION__, 'Gesendet an ' . $topic . ': ' . $payload, 0);
 
-        // lokalen Template-Buffer sofort auf den gesendeten Stand setzen
         $this->SetBuffer('ChargeTemplateJSON', $payload);
 
         return true;
@@ -1131,7 +1137,6 @@ class openWB2 extends IPSModuleStrict
         $ampereProfile = 'OWB.Ampere.' . $this->InstanceID;
         $powerProfile  = 'OWB.TargetPower.' . $this->InstanceID;
 
-        // Ampere-Profil
         if (!IPS_VariableProfileExists($ampereProfile)) {
             IPS_CreateVariableProfile($ampereProfile, VARIABLETYPE_INTEGER);
         }
@@ -1139,7 +1144,6 @@ class openWB2 extends IPSModuleStrict
         IPS_SetVariableProfileText($ampereProfile, '', ' A');
         IPS_SetVariableProfileValues($ampereProfile, $minCurrent, $maxCurrent, 1);
 
-        // Sollleistungs-Profil
         if (!IPS_VariableProfileExists($powerProfile)) {
             IPS_CreateVariableProfile($powerProfile, VARIABLETYPE_INTEGER);
         }
@@ -1147,11 +1151,10 @@ class openWB2 extends IPSModuleStrict
         IPS_SetVariableProfileText($powerProfile, '', ' W');
         IPS_SetVariableProfileValues($powerProfile, $minPower, $maxPower, 10);
 
-        // Profile den Variablen zuweisen
         IPS_SetVariableCustomProfile($this->GetIDForIdent('SetChargeCurrent'), $ampereProfile);
-        IPS_SetVariableCustomProfile($this->GetIDForIdent('SetChargePower'), $powerProfile);
         IPS_SetVariableCustomProfile($this->GetIDForIdent('ConfiguredCurrent'), $ampereProfile);
         IPS_SetVariableCustomProfile($this->GetIDForIdent('SetMinimalPermanentCurrent'), $ampereProfile);
+        IPS_SetVariableCustomProfile($this->GetIDForIdent('SetChargePower'), $powerProfile);
     }
 
     private function DeterminePhasesByPower(int $power): int
@@ -1166,39 +1169,19 @@ class openWB2 extends IPSModuleStrict
         $switchTo3Phase = $minPower3Phase + $hysteresis;
         $switchTo1Phase = $maxPower1Phase - $hysteresis;
 
-        // Erst echte Rückmeldung verwenden
         $currentPhases = (int) $this->GetValue('PhasesInUse');
-
-        // Falls noch keine brauchbare Rückmeldung da ist, auf Sollwert zurückfallen
         if (!in_array($currentPhases, [1, 3], true)) {
             $currentPhases = (int) $this->GetValue('PhasesToUse');
         }
-
         if (!in_array($currentPhases, [1, 3], true)) {
             $currentPhases = 1;
         }
 
-        $this->SendDebug(
-            'DeterminePhasesByPower',
-            'power=' . $power .
-            ' currentPhases=' . $currentPhases .
-            ' switchTo3Phase=' . $switchTo3Phase .
-            ' switchTo1Phase=' . $switchTo1Phase,
-            0
-        );
-
         if ($currentPhases === 1) {
-            if ($power >= $switchTo3Phase) {
-                return 3;
-            }
-            return 1;
+            return ($power >= $switchTo3Phase) ? 3 : 1;
         }
 
-        if ($power <= $switchTo1Phase) {
-            return 1;
-        }
-
-        return 3;
+        return ($power <= $switchTo1Phase) ? 1 : 3;
     }
 
     private function CalculateCurrentFromPower(int $power, int $phases): int
