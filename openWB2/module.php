@@ -232,28 +232,15 @@ class openWB2 extends IPSModuleStrict
             $templateData = json_decode($value, true);
             if (is_array($templateData) && isset($templateData['chargemode']['instant_charging']['phases_to_use'])) {
 
-                $receivedPhases = (int) $templateData['chargemode']['instant_charging']['phases_to_use'];
+                $ignoreUntil = (int) $this->GetBuffer('IgnorePhasesToUseUntil');
 
-                $ignoreUntil = (float) $this->GetBuffer('IgnorePhasesToUseUntil');
-                $pendingPhases = (int) $this->GetBuffer('PendingPhasesToUse');
-
-                // Kurz nach dem Senden alte Rückmeldung ignorieren
-                if (microtime(true) < $ignoreUntil && $receivedPhases !== $pendingPhases) {
-                    $this->SendDebug(
-                        'ChargeTemplate',
-                        'PhasesToUse ignoriert: empfangen=' . $receivedPhases . ', erwartet=' . $pendingPhases,
-                        0
-                    );
+                // Nur das Zurückschreiben kurz blockieren
+                if (time() < $ignoreUntil) {
+                    $this->SendDebug('ChargeTemplate', 'PhasesToUse Rückschreiben kurz blockiert', 0);
                     return '';
                 }
 
-                // Erwarteter Wert angekommen -> Sperre zurücksetzen
-                if ($receivedPhases === $pendingPhases) {
-                    $this->SetBuffer('IgnorePhasesToUseUntil', '0');
-                    $this->SetBuffer('PendingPhasesToUse', '');
-                }
-
-                $this->SetValue('PhasesToUse', $receivedPhases);
+                $this->SetValue('PhasesToUse', (int) $templateData['chargemode']['instant_charging']['phases_to_use']);
             }
             return '';
         }
@@ -878,9 +865,8 @@ class openWB2 extends IPSModuleStrict
         $this->MQTTCommand($topic, $payload);
         $this->SendDebug(__FUNCTION__, 'Gesendet an ' . $topic . ': ' . $payload, 0);
 
-        // Rückschreiben kurz blockieren
-        $this->SetBuffer('IgnorePhasesToUseUntil', (string) (microtime(true) + 1.0));
-        $this->SetBuffer('PendingPhasesToUse', (string) $phases);
+        // Rückschreiben 2 Sekunden blockieren
+        $this->SetBuffer('IgnorePhasesToUseUntil', (string) (time() + 2));
 
         return true;
     }
@@ -1184,8 +1170,11 @@ class openWB2 extends IPSModuleStrict
         $maxPower1Phase = 230 * $maxCurrent;
         $minPower3Phase = 230 * 3 * $minCurrent;
 
-        $switchTo3Phase = $maxPower1Phase + $hysteresis;
-        $switchTo1Phase = $minPower3Phase - $hysteresis;
+        // Auf 3 Phasen erst wechseln, wenn 3-phasig sinnvoll möglich
+        $switchTo3Phase = $minPower3Phase + $hysteresis;
+
+        // Auf 1 Phase erst zurück, wenn 1-phasig sicher wieder möglich
+        $switchTo1Phase = $maxPower1Phase - $hysteresis;
 
         $currentPhases = (int) $this->GetValue('PhasesToUse');
         if (!in_array($currentPhases, [1, 3], true)) {
@@ -1193,13 +1182,13 @@ class openWB2 extends IPSModuleStrict
         }
 
         if ($currentPhases === 1) {
-            if ($power > $switchTo3Phase) {
+            if ($power >= $switchTo3Phase) {
                 return 3;
             }
             return 1;
         }
 
-        if ($power < $switchTo1Phase) {
+        if ($power <= $switchTo1Phase) {
             return 1;
         }
 
