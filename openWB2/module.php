@@ -607,7 +607,7 @@ class openWB2 extends IPSModuleStrict
                 if ($phases !== (int) $this->GetValue('PhasesToUse')) {
                     if ($this->UpdatePhasesInChargeTemplate($phases)) {
                         $this->SetValue('PhasesToUse', $phases);
-                        $this->SetBuffer('PhaseSwitchLockUntil', (string)(time() + 15));
+                        $this->SetBuffer('PhaseSwitchLockUntil', (string)(time() + 1));
                     } else {
                         $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
                         return;
