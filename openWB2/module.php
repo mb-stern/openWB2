@@ -114,6 +114,9 @@ class openWB2 extends IPSModuleStrict
 
         $this->RegisterVariableInteger('PhasesToUse', 'Phasen Sofortladen', 'OWB.PhasesToUse', 315);
         $this->EnableAction('PhasesToUse');
+
+        $this->SetBuffer('PendingChargeCurrent', '');
+        $this->SetBuffer('PendingChargePhases', '');
     }
 
     public function GetCompatibleParents(): string
@@ -310,11 +313,29 @@ class openWB2 extends IPSModuleStrict
                     return '';
 
                 case $cpBase . '/phases_in_use':
-                    //$this->SendDebug('Match', 'phases_in_use', 0);
-                    if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('PhasesInUse', (int) round((float) $payload));
+                if ($this->IsNumericPayload($payload)) {
+                    $phasesInUse = (int) round((float) $payload);
+                    $this->SetValue('PhasesInUse', $phasesInUse);
+
+                    $pendingCurrent = (int) $this->GetBuffer('PendingChargeCurrent');
+                    $pendingPhases  = (int) $this->GetBuffer('PendingChargePhases');
+
+                    if ($pendingCurrent > 0 && in_array($pendingPhases, [1, 3], true) && $pendingPhases === $phasesInUse) {
+                        $cpSetBase = $this->GetChargePointSetBaseTopic();
+                        $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $pendingCurrent);
+                        $this->SetValue('SetChargeCurrent', $pendingCurrent);
+
+                        $this->SendDebug(
+                            'PendingChargeCurrent',
+                            'Nach Phasenwechsel gesendet: ' . $pendingCurrent . ' A bei ' . $phasesInUse . ' Phase(n)',
+                            0
+                        );
+
+                        $this->SetBuffer('PendingChargeCurrent', '');
+                        $this->SetBuffer('PendingChargePhases', '');
                     }
-                    return '';
+                }
+                return '';
 
                 case $cpBase . '/charge_state':
                     //$this->SendDebug('Match', 'charge_state', 0);
@@ -617,16 +638,21 @@ class openWB2 extends IPSModuleStrict
                     $targetPhasesToUse = 1;
                 }
 
-                // Wenn Zielphase geändert werden muss: nur Template senden und hier beenden
                 if ($targetPhasesToUse !== $phases) {
                     if (!$this->UpdatePhasesInChargeTemplate($phases)) {
                         $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
                         break;
                     }
 
-                    $this->SendDebug('SetChargePower', 'Template auf ' . $phases . ' Phase(n) gesetzt', 0);
+                    $this->SetBuffer('PendingChargeCurrent', (string) $current);
+                    $this->SetBuffer('PendingChargePhases', (string) $phases);
 
-                    // Wichtig: nach Phasenwechsel noch KEINEN Strom senden
+                    $this->SendDebug(
+                        'SetChargePower',
+                        'Template auf ' . $phases . ' Phase(n) gesetzt, Strom ' . $current . ' A wird nach Umschaltung gesendet',
+                        0
+                    );
+
                     break;
                 }
 
