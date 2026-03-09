@@ -229,8 +229,16 @@ class openWB2 extends IPSModuleStrict
             $this->SetBuffer('ChargeTemplateJSON', $value);
             $this->SendDebug('ChargeTemplate', $value, 0);
 
+            $template = json_decode($value, true);
+            if (is_array($template)
+                && isset($template['chargemode']['instant_charging']['phases_to_use'])
+                && in_array((int)$template['chargemode']['instant_charging']['phases_to_use'], [1, 3], true)
+            ) {
+                $this->SetValue('PhasesToUse', (int)$template['chargemode']['instant_charging']['phases_to_use']);
+            }
+
             return '';
-        }
+    }
 
         $cpBases = $this->GetChargePointBaseTopics();
         if ($cpBases === []) {
@@ -615,7 +623,7 @@ class openWB2 extends IPSModuleStrict
 
                 if ($phases !== $currentPhasesInUse) {
                     if ($this->UpdatePhasesInChargeTemplate($phases)) {
-                        $this->SetValue('PhasesToUse', $phases);
+                        $this->SendDebug('SetChargePower', 'Phasenumschaltung auf ' . $phases . ' angefordert', 0);
                     } else {
                         $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
                         return;
@@ -1170,9 +1178,6 @@ class openWB2 extends IPSModuleStrict
         $switchTo1Phase = $maxPower1Phase - $hysteresis;
 
         $currentPhases = (int) $this->GetValue('PhasesInUse');
-        if (!in_array($currentPhases, [1, 3], true)) {
-            $currentPhases = (int) $this->GetValue('PhasesToUse');
-        }
         if (!in_array($currentPhases, [1, 3], true)) {
             $currentPhases = 1;
         }
