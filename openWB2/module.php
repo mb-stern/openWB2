@@ -228,6 +228,7 @@ class openWB2 extends IPSModuleStrict
             $value = trim((string) $payload);
             $this->SetBuffer('ChargeTemplateJSON', $value);
             $this->SendDebug('ChargeTemplate', $value, 0);
+
             return '';
         }
 
@@ -607,10 +608,11 @@ class openWB2 extends IPSModuleStrict
                 if ($phases !== $currentPhasesInUse) {
                     if ($this->UpdatePhasesInChargeTemplate($phases)) {
                         $this->SetValue('PhasesToUse', $phases);
+                        $this->SendDebug('SetChargePower', 'Phasenwechsel angefordert - Strom wird erst im nächsten Durchlauf gesendet', 0);
                     } else {
                         $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
-                        return;
                     }
+                    return;
                 }
 
                 $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
