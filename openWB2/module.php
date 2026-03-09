@@ -21,7 +21,7 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterVariableInteger('ProSoC', 'Pro-SoC', '~Intensity.100', 20);
         $this->RegisterVariableString('SocTimestamp', 'Pro-SoC Zeitstempel', '', 25);
         
-        $this->RegisterVariableInteger('ConfiguredCurrent', 'EVSE Aktuell', 'OWB.Ampere', 30);
+        $this->RegisterVariableInteger('ConfiguredCurrent', 'EVSE Aktuell', '', 30);
         
         $this->RegisterVariableFloat('PhaseCurrent1', 'Strom Phase 1', '~Ampere', 40);
         $this->RegisterVariableFloat('PhaseCurrent2', 'Strom Phase 2', '~Ampere', 41);
@@ -94,7 +94,7 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterVariableInteger('SetMinimalPvSoc', 'Mindes-SoC für das Fahrzeug', '~Intensity.100', 320);
         $this->EnableAction('SetMinimalPvSoc');
 
-        $this->RegisterVariableInteger('SetMinimalPermanentCurrent', 'Minimaler Dauerstrom', 'OWB.Ampere', 330);
+        $this->RegisterVariableInteger('SetMinimalPermanentCurrent', 'Minimaler Dauerstrom', '', 330);
         $this->EnableAction('SetMinimalPermanentCurrent');
 
         $this->RegisterVariableFloat('SetMaxPriceEco', 'Höchstpreis Eco', 'OWB.Price', 340);
@@ -112,15 +112,8 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterVariableInteger('SetInstantChargingLimitAmount', 'Energie Limit', 'OWB.EnergyToCharge', 390);
         $this->EnableAction('SetInstantChargingLimitAmount');
 
-        // Phasenumschaltung
-
         $this->RegisterVariableInteger('PhasesToUse', 'Phasen Sofortladen', 'OWB.PhasesToUse', 315);
         $this->EnableAction('PhasesToUse');
-
-        // Sollleistung
-
-        $this->RegisterVariableInteger('SetChargePower', 'Sollleistung', '', 312);
-        $this->EnableAction('SetChargePower');
     }
 
     public function GetCompatibleParents(): string
@@ -631,7 +624,9 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case 'SetChargeCurrent':
-                $current = max(6, min(32, (int) $Value));
+                $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
+                $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
+                $current = max($minCurrent, min($maxCurrent, (int) $Value));
                 $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
                 $this->SetValue('SetChargeCurrent', $current);
                 break;
@@ -643,7 +638,9 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case 'SetMinimalPermanentCurrent':
-                $current = max(6, min(32, (int) $Value));
+                $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
+                $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
+                $current = max($minCurrent, min($maxCurrent, (int) $Value));
                 $this->PublishSetTopic($cpSetBase . '/minimal_permanent_current', (string) $current);
                 $this->SetValue('SetMinimalPermanentCurrent', $current);
                 break;
@@ -1148,6 +1145,8 @@ class openWB2 extends IPSModuleStrict
         // Profile den Variablen zuweisen
         IPS_SetVariableCustomProfile($this->GetIDForIdent('SetChargeCurrent'), $ampereProfile);
         IPS_SetVariableCustomProfile($this->GetIDForIdent('SetChargePower'), $powerProfile);
+        IPS_SetVariableCustomProfile($this->GetIDForIdent('ConfiguredCurrent'), $ampereProfile);
+        IPS_SetVariableCustomProfile($this->GetIDForIdent('SetMinimalPermanentCurrent'), $ampereProfile);
     }
 
     private function DeterminePhasesByPower(int $power): int
