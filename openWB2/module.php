@@ -218,6 +218,7 @@ class openWB2 extends IPSModuleStrict
                             "caption" => ""
                         ]
                     ]
+                ]
             ]
         ];
 
