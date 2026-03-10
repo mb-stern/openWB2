@@ -12,6 +12,7 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterPropertyInteger('MinCurrentPerPhase', 6);
         $this->RegisterPropertyInteger('MaxCurrentPerPhase', 16);
         $this->RegisterPropertyInteger('PhaseSwitchHysteresisWatt', 0);
+        $this->RegisterPropertyInteger('PhaseSwitchLockTime', 60);
 
         // Profile erzeugen
         $this->RegisterProfiles();
@@ -193,6 +194,11 @@ class openWB2 extends IPSModuleStrict
                     'name'    => 'PhaseSwitchHysteresisWatt',
                     'type'    => 'NumberSpinner',
                     'caption' => 'Hysterese Phasenumschaltung (W)'
+                ],
+                [
+                    'name'    => 'PhaseSwitchLockTime',
+                    'type'    => 'NumberSpinner',
+                    'caption' => 'Sperrzeit Phasenumschaltung (Sekunden)'
                 ]
             ],
             'actions' => [
@@ -641,9 +647,10 @@ class openWB2 extends IPSModuleStrict
                     break;
                 }
 
-                // 30 Sekunden Sperre für neue Phasenwechsel
+                $lockTimeSeconds = max(0, (int)$this->ReadPropertyInteger('PhaseSwitchLockTime'));
+
                 $this->SetBuffer('PhaseSwitchLock', '1');
-                $this->SetTimerInterval('PhaseSwitchLockTimer', 60000);
+                $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
 
                 $this->SetBuffer('DelayedChargeCurrent', (string)$current);
                 $this->SetTimerInterval('SendChargeCurrentDelayed', 700);
