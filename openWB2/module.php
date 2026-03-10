@@ -120,6 +120,8 @@ class openWB2 extends IPSModuleStrict
 
         $this->RegisterTimer('PhaseSwitchLockTimer', 0, 'OWB_ClearPhaseSwitchLock($_IPS["TARGET"]);');
         $this->SetBuffer('PhaseSwitchLock', '0');
+
+        $this->RegisterAttributeString('ChargeTemplateJSON', '');
     }
 
     public function GetCompatibleParents(): string
@@ -149,6 +151,11 @@ class openWB2 extends IPSModuleStrict
 
         $filter = '.*"Topic":"' . preg_quote($baseTopic, '/') . '\/.*';
         $this->SetReceiveDataFilter($filter);
+
+        $savedTemplate = $this->ReadAttributeString('ChargeTemplateJSON');
+        if ($savedTemplate !== '') {
+            $this->SetBuffer('ChargeTemplateJSON', $savedTemplate);
+        }
 
         $this->UpdateDynamicProfiles();
     }
@@ -233,6 +240,8 @@ class openWB2 extends IPSModuleStrict
         if ($topic === $baseTopic . '/vehicle/template/charge_template/' . $templateId) {
             $value = trim((string) $payload);
             $this->SetBuffer('ChargeTemplateJSON', $value);
+            $this->WriteAttributeString('ChargeTemplateJSON', $value);
+
             $this->SendDebug('ChargeTemplate', $value, 0);
 
             $template = json_decode($value, true);
@@ -863,7 +872,14 @@ class openWB2 extends IPSModuleStrict
     {
         $json = $this->GetBuffer('ChargeTemplateJSON');
         if ($json === '') {
-            $this->SendDebug(__FUNCTION__, 'Kein ChargeTemplate im Buffer vorhanden', 0);
+            $json = $this->ReadAttributeString('ChargeTemplateJSON');
+            if ($json !== '') {
+                $this->SetBuffer('ChargeTemplateJSON', $json);
+            }
+        }
+
+        if ($json === '') {
+            $this->SendDebug(__FUNCTION__, 'Kein ChargeTemplate vorhanden', 0);
             return false;
         }
 
@@ -893,6 +909,7 @@ class openWB2 extends IPSModuleStrict
         $this->SendDebug(__FUNCTION__, 'Gesendet an ' . $topic . ': ' . $payload, 0);
 
         $this->SetBuffer('ChargeTemplateJSON', $payload);
+        $this->WriteAttributeString('ChargeTemplateJSON', $payload);
 
         return true;
     }
