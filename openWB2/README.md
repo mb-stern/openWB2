@@ -121,7 +121,8 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 
 ## Version
 
-1.0
+Version 1.0 (10.3.26)
+- Initale Version
 
 ---
 
