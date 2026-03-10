@@ -1,8 +1,7 @@
 # openWB2 (IP-Symcon Modul)
 
-Folgende Funktionen beinhaltet das Goodwe Symcon Repository
-
-openWB2 (Dokumentation)
+Folgende Module beinhaltet das Reolink Repository:
+- __OpenWB2__ ([Dokumentation](openWB2))   
 
 
 Dieses Modul integriert eine **openWB Wallbox** über **MQTT (SimpleAPI)** in **IP-Symcon**.
