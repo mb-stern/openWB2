@@ -113,6 +113,8 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterVariableInteger('SetInstantChargingLimitAmount', 'Energie Limit', 'OWB.EnergyToCharge', 390);
         $this->EnableAction('SetInstantChargingLimitAmount');
 
+        // Phasenumschaltung
+
         $this->RegisterVariableInteger('PhasesToUse', 'Phasen Sofortladen', 'OWB.PhasesToUse', 315);
         $this->EnableAction('PhasesToUse');
 
@@ -210,6 +212,10 @@ class openWB2 extends IPSModuleStrict
    
     public function ReceiveData(string $JSONString): string
     {
+        if ($this->ReadPropertyString('BaseTopic') === '') {
+            return '';
+        }
+        
         //$this->SendDebug('ReceiveData JSON', $JSONString, 0);
 
         $data = json_decode($JSONString, true);
