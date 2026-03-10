@@ -399,10 +399,12 @@ class openWB2 extends IPSModuleStrict
                     return '';
 
                 case $cpBase . '/rfid_timestamp':
+                    //$this->SendDebug('Match', 'rfid_timestamp', 0);
                     $this->SetValue('RFIDTimestamp', $this->PayloadToString($payload));
                     return '';
 
                 case $cpBase . '/daily_exported':
+                    //$this->SendDebug('Match', 'daily_exported', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $value = ((float) $payload) / 1000;
                         $this->SetValue('DailyExported', $value);
@@ -410,6 +412,7 @@ class openWB2 extends IPSModuleStrict
                     return '';
 
                 case $cpBase . '/exported':
+                    //$this->SendDebug('Match', 'exported', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $value = ((float) $payload) / 1000;
                         $this->SetValue('Exported', $value);
@@ -417,83 +420,100 @@ class openWB2 extends IPSModuleStrict
                     return '';
 
                 case $cpBase . '/powers/1':
+                    //$this->SendDebug('Match', 'powers/1', 0);
                     $this->SetFloatIfNumeric('PowerL1', $payload);
                     return '';
 
                 case $cpBase . '/powers/2':
+                    //$this->SendDebug('Match', 'powers/2', 0);
                     $this->SetFloatIfNumeric('PowerL2', $payload);
                     return '';
 
                 case $cpBase . '/powers/3':
+                    //$this->SendDebug('Match', 'powers/3', 0);
                     $this->SetFloatIfNumeric('PowerL3', $payload);
                     return '';
 
                 case $cpBase . '/frequency':
+                    //$this->SendDebug('Match', 'frequency', 0);
                     $this->SetFloatIfNumeric('Frequency', $payload);
                     return '';
 
                 case $cpBase . '/power_factors/1':
+                    //$this->SendDebug('Match', 'power_factors/1', 0);
                     $this->SetFloatIfNumeric('PowerFactor1', $payload);
                     return '';
 
                 case $cpBase . '/power_factors/2':
+                    //$this->SendDebug('Match', 'power_factors/2', 0);
                     $this->SetFloatIfNumeric('PowerFactor2', $payload);
                     return '';
 
                 case $cpBase . '/power_factors/3':
+                    //$this->SendDebug('Match', 'power_factors/3', 0);
                     $this->SetFloatIfNumeric('PowerFactor3', $payload);
                     return '';
 
                 case $cpBase . '/serial_number':
+                    //$this->SendDebug('Match', 'serial_number', 0);
                     $this->SetValue('SerialNumber', $this->PayloadToString($payload));
                     return '';
 
                 case $cpBase . '/soc_timestamp':
+                    //$this->SendDebug('Match', 'soc_timestamp', 0);
                     $this->SetValue('SocTimestamp', $this->PayloadToString($payload));
                     return '';
 
                 case $cpBase . '/vehicle_id':
+                    //$this->SendDebug('Match', 'vehicle_id', 0);
                     $this->SetValue('VehicleID', $this->PayloadToString($payload));
                     return '';
 
                 case $cpBase . '/error_timestamp':
+                    //$this->SendDebug('Match', 'error_timestamp', 0);
                     $this->SetValue('ErrorTimestamp', $this->PayloadToString($payload));
                     return '';
 
                 case $cpBase . '/charging_power':
+                    //$this->SendDebug('Match', 'charging_power', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('ChargingPower', (int) round((float) $payload));
                     }
                     return '';
 
                 case $cpBase . '/charging_voltage':
+                    //$this->SendDebug('Match', 'charging_voltage', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('ChargingVoltage', (int) round((float) $payload));
                     }
                     return '';
 
                 case $cpBase . '/version':
+                    //$this->SendDebug('Match', 'version', 0);
                     $this->SetValue('Version', $this->PayloadToString($payload));
                     return '';
 
                 case $cpBase . '/evse_signaling':
+                    //$this->SendDebug('Match', 'evse_signaling', 0);
                     $this->SetValue('EvseSignaling', $this->PayloadToString($payload));
                     return '';
 
                 case $cpBase . '/max_discharge_power':
+                    //$this->SendDebug('Match', 'max_discharge_power', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('MaxDischargePower', (float) $payload);
                     }
                     return '';
 
                 case $cpBase . '/max_charge_power':
+                    //$this->SendDebug('Match', 'max_charge_power', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('MaxChargePower', (float) $payload);
                     }
                     return '';
                 
                 
-                //Ab hier die Datarn für die Variblen mit AKtion
+                //Ab hier die Daten für die Variblen mit AKtion
                 
                 case $cpBase . '/manual_lock':
                     //$this->SendDebug('Match', 'manual_lock', 0);
