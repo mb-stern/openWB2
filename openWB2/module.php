@@ -116,9 +116,6 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterVariableInteger('PhasesToUse', 'Phasen Sofortladen', 'OWB.PhasesToUse', 315);
         $this->EnableAction('PhasesToUse');
 
-        $this->RegisterTimer('SendChargeCurrentDelayed', 0, 'OWB_SendChargeCurrentDelayed($_IPS["TARGET"]);');
-        $this->SetBuffer('DelayedChargeCurrent', '');
-
         $this->RegisterTimer('PhaseSwitchLockTimer', 0, 'OWB_ClearPhaseSwitchLock($_IPS["TARGET"]);');
         $this->SetBuffer('PhaseSwitchLock', '0');
 
@@ -654,9 +651,6 @@ class openWB2 extends IPSModuleStrict
 
                 $this->SetBuffer('PhaseSwitchLock', '1');
                 $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
-
-                $this->SetBuffer('DelayedChargeCurrent', (string)$current);
-                $this->SetTimerInterval('SendChargeCurrentDelayed', 0);
 
                 $this->SendDebug(
                     'SetChargePower',
@@ -1245,23 +1239,6 @@ class openWB2 extends IPSModuleStrict
         $current = max($minCurrent, min($maxCurrent, $current));
 
         return $current;
-    }
-
-    public function SendChargeCurrentDelayed(): void
-    {
-        $this->SetTimerInterval('SendChargeCurrentDelayed', 0);
-
-        $current = (int)$this->GetBuffer('DelayedChargeCurrent');
-        if ($current <= 0) {
-            return;
-        }
-
-        $cpSetBase = $this->GetChargePointSetBaseTopic();
-        $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string)$current);
-        $this->SetValue('SetChargeCurrent', $current);
-
-        $this->SendDebug('SendChargeCurrentDelayed', 'Verzögert gesendet: ' . $current . ' A', 0);
-        $this->SetBuffer('DelayedChargeCurrent', '');
     }
 
     public function ClearPhaseSwitchLock(): void
