@@ -656,7 +656,7 @@ class openWB2 extends IPSModuleStrict
                 $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
 
                 $this->SetBuffer('DelayedChargeCurrent', (string)$current);
-                //$this->SetTimerInterval('SendChargeCurrentDelayed', 10000);
+                $this->SetTimerInterval('SendChargeCurrentDelayed', 0);
 
                 $this->SendDebug(
                     'SetChargePower',
