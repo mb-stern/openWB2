@@ -116,7 +116,7 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterVariableInteger('PhasesToUse', 'Phasen Sofortladen', 'OWB.PhasesToUse', 315);
         $this->EnableAction('PhasesToUse');
 
-        $$this->RegisterTimer('PhaseSwitchPrepareTimer', 0, 'OWB_ExecutePhaseSwitch($_IPS["TARGET"]);');
+        $this->RegisterTimer('PhaseSwitchPrepareTimer', 0, 'OWB_ExecutePhaseSwitch($_IPS["TARGET"]);');
         $this->RegisterTimer('SendChargeCurrentDelayed', 0, 'OWB_SendChargeCurrentDelayed($_IPS["TARGET"]);');
         $this->RegisterTimer('PhaseSwitchLockTimer', 0, 'OWB_ClearPhaseSwitchLock($_IPS["TARGET"]);');
 
