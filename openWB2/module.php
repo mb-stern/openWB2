@@ -613,7 +613,7 @@ class openWB2 extends IPSModuleStrict
                     $this->SendDebug('SetChargePower', 'Phasenwechsel aktuell gesperrt', 0);
                     return;
                 }
-                
+
                 $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
                 $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
 
@@ -656,7 +656,7 @@ class openWB2 extends IPSModuleStrict
                 $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
 
                 $this->SetBuffer('DelayedChargeCurrent', (string)$current);
-                $this->SetTimerInterval('SendChargeCurrentDelayed', 700);
+                $this->SetTimerInterval('SendChargeCurrentDelayed', 10000);
 
                 $this->SendDebug(
                     'SetChargePower',
