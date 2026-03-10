@@ -10,6 +10,8 @@ Es ermöglicht das **Auslesen von Status- und Energiedaten** sowie das **Steuern
 
 Die Kommunikation erfolgt über den MQTT-Client von IP-Symcon und nutzt die **SimpleAPI Topics** der openWB.
 
+Für eine Integration in den Energiemanager ist dort unter Leistung (Soll) die Variable 'Sollleistung' des Moduls zu wählen. Ebenfalls ist in der AUswahl für die Variable An/Aus die Variable 'Ladepunkt aktivieren' zu wählen.
+
 ---
 
 ## Funktionen
@@ -40,21 +42,24 @@ Folgende Einstellungen können direkt über IP-Symcon gesteuert werden:
 
 - Lademodus
 - Ladestrom
-- Ziel-Ladeleistung
+- Sollleistung
+- Phasenwahl beim Sofortladen (1 oder Maximum)
 - Minimaler Dauerstrom
 - Minimaler PV-SoC
 - Ladepunkt sperren / entsperren
 - Batterie-Priorität
 - Sofortlade-Limit
-- Phasenwahl beim Sofortladen (1 oder 3 Phasen)
+
 
 ---
 
 ### Automatische Phasenumschaltung
 
+Die Phasenumschaltung ist nur im Sofort-Lademodus verfügbar.
+
 Das Modul unterstützt eine automatische Umschaltung zwischen **einphasigem und dreiphasigem Laden** abhängig von der gewünschten Ladeleistung.
 
-Die Umschaltung erfolgt über das Ladeprofil der openWB.
+Die Umschaltung erfolgt über das umschalten des Ladeprofil der openWB und ist als einzige Funktion nicht Umfang der SimpleAPI
 
 ---
 
