@@ -657,7 +657,6 @@ class openWB2 extends IPSModuleStrict
                 break;
             }
 
-            // Wenn keine Phasenumschaltung nötig ist: Strom sofort senden
             $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
             $this->SetValue('SetChargeCurrent', $current);
             break;
