@@ -212,7 +212,7 @@ class openWB2 extends IPSModuleStrict
    
     public function ReceiveData(string $JSONString): string
     {
-        //Unterdrückt die Fehlermeldung beim Modulupdate
+        //Unterdrückt die Fehlermeldung beim Modulupdate bei noch nicht befüllter Property
         if ($this->ReadPropertyString('BaseTopic') === '') {
             return '';
         }
@@ -279,7 +279,6 @@ class openWB2 extends IPSModuleStrict
                     //$this->SendDebug('Match', 'soc/soc', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('SoC', (int) round((float) $payload));
-                        //$this->SendDebug('SetValue', 'LPSoC = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
@@ -287,7 +286,6 @@ class openWB2 extends IPSModuleStrict
                     //$this->SendDebug('Match', 'pro_soc', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('ProSoC', (int) round((float) $payload));
-                        //$this->SendDebug('SetValue', 'LPProSoC = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
@@ -295,7 +293,6 @@ class openWB2 extends IPSModuleStrict
                     //$this->SendDebug('Match', 'evse_current', 0);
                     if ($this->IsNumericPayload($payload)) {
                         $this->SetValue('ConfiguredCurrent', (int) round((float) $payload));
-                        //$this->SendDebug('SetValue', 'LPConfiguredCurrent = ' . (int) round((float) $payload), 0);
                     }
                     return '';
 
