@@ -11,3 +11,5 @@ Das Modul erfordert IP-Symcon ab 8.1 und openWB ab 2.1.9
 Es ermöglicht das **Auslesen von Status- und Energiedaten** sowie das **Steuern von Ladevorgängen** direkt aus IP-Symcon heraus.
 
 Die Kommunikation erfolgt über den MQTT-Client von IP-Symcon und nutzt die **SimpleAPI Topics** der openWB.
+
+Für eine Integration in den Energiemanager ist dort unter Leistung (Soll) die Variable 'Sollleistung' des Moduls zu wählen. Ebenfalls ist in der AUswahl für die Variable An/Aus die Variable 'Ladepunkt aktivieren' zu wählen.
