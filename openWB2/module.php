@@ -212,10 +212,12 @@ class openWB2 extends IPSModuleStrict
    
     public function ReceiveData(string $JSONString): string
     {
+        
+        //Unterdrückt die Fehlermeldung beim Modulupdate
         if ($this->ReadPropertyString('BaseTopic') === '') {
             return '';
         }
-        
+
         //$this->SendDebug('ReceiveData JSON', $JSONString, 0);
 
         $data = json_decode($JSONString, true);
