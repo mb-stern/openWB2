@@ -608,9 +608,12 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case 'SetChargePower':
+                
                 if ($this->GetBuffer('PhaseSwitchLock') === '1') {
                     $this->SendDebug('SetChargePower', 'Phasenwechsel aktuell gesperrt', 0);
+                    return;
                 }
+                
                 $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
                 $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
 
