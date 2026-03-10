@@ -1,8 +1,10 @@
-# openWB (IP-Symcon Modul)
+# openWB2 (IP-Symcon Modul)
 
 ## Beschreibung
 
 Dieses Modul integriert eine **openWB Wallbox** über **MQTT (SimpleAPI)** in **IP-Symcon**.
+
+Das Modul erfordert IP-Symcon ab 8.1 und openWB ab 2.1.9
 
 Es ermöglicht das **Auslesen von Status- und Energiedaten** sowie das **Steuern von Ladevorgängen** direkt aus IP-Symcon heraus.
 
