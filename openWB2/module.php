@@ -662,7 +662,7 @@ class openWB2 extends IPSModuleStrict
                 }
                 break;
 
-                       case 'SetChargePower':
+            case 'SetChargePower':
                 $power = (int) $Value;
 
                 $setup = $this->DetermineBestChargingSetup($power);
@@ -689,8 +689,11 @@ class openWB2 extends IPSModuleStrict
                     break;
                 }
 
-                // lokalen Sollwert sofort setzen, damit die UI stabil bleibt
+                // lokalen Sollwert sofort setzen
                 $this->SetValue('PhasesToUse', $phases);
+
+                // kurze Pause, damit openWB das Template zuerst übernehmen kann
+                IPS_Sleep(500);
 
                 $cpSetBase = $this->GetChargePointSetBaseTopic();
                 $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
