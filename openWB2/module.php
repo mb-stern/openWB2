@@ -680,25 +680,29 @@ class openWB2 extends IPSModuleStrict
                     $targetPhasesToUse = 1;
                 }
 
-            if ($targetPhasesToUse !== $phases) {
-                if (!$this->UpdatePhasesInChargeTemplate($phases)) {
-                    $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
+                if ($targetPhasesToUse !== $phases) {
+                    // ZUERST Ampere senden
+                    $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
+                    $this->SetValue('SetChargeCurrent', $current);
+
+                    $this->SendDebug(
+                        'SetChargePower',
+                        'Sende zuerst Strom: ' . $current . ' A, danach Phasenwechsel auf ' . $phases,
+                        0
+                    );
+
+                    // DANACH Phasen senden
+                    if (!$this->UpdatePhasesInChargeTemplate($phases)) {
+                        $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
+                        break;
+                    }
+
+                    $lockTimeSeconds = max(0, (int)$this->ReadPropertyInteger('PhaseSwitchLockTime'));
+                    $this->SetBuffer('PhaseSwitchLock', '1');
+                    $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
+
                     break;
                 }
-
-                $lockTimeSeconds = max(0, (int)$this->ReadPropertyInteger('PhaseSwitchLockTime'));
-
-                $this->SetBuffer('PhaseSwitchLock', '1');
-                $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
-
-                $this->SendDebug(
-                    'SetChargePower',
-                    'Phase gewechselt auf ' . $phases . ', Strom ' . $current . 'A wird verzögert gesendet, 30s Sperre aktiv',
-                    0
-                );
-
-                break;
-            }
 
             $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
             $this->SetValue('SetChargeCurrent', $current);
