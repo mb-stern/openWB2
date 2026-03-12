@@ -122,6 +122,9 @@ class openWB2 extends IPSModuleStrict
         $this->SetBuffer('PhaseSwitchLock', '0');
 
         $this->RegisterAttributeString('ChargeTemplateJSON', '');
+
+        $this->SetBuffer('PendingPhaseSwitch', '0');
+        $this->SetBuffer('PendingChargeCurrent', '0');
     }
 
     public function GetCompatibleParents(): string
@@ -347,9 +350,35 @@ class openWB2 extends IPSModuleStrict
                     return '';
 
                 case $cpBase . '/phases_in_use':
-                    //$this->SendDebug('Match', 'phases_in_use', 0);
                     if ($this->IsNumericPayload($payload)) {
-                        $this->SetValue('PhasesInUse', (int) round((float) $payload));
+                        $phasesInUse = (int) round((float) $payload);
+                        $this->SetValue('PhasesInUse', $phasesInUse);
+
+                        $pendingPhase = (int) $this->GetBuffer('PendingPhaseSwitch');
+                        $pendingCurrent = (int) $this->GetBuffer('PendingChargeCurrent');
+
+                        $this->SendDebug(
+                            'phases_in_use',
+                            'Empfangen: ' . $phasesInUse . ', PendingPhase: ' . $pendingPhase . ', PendingCurrent: ' . $pendingCurrent,
+                            0
+                        );
+
+                        if (in_array($pendingPhase, [1, 3], true) && $phasesInUse === $pendingPhase) {
+                            if ($pendingCurrent > 0) {
+                                $cpSetBase = $this->GetChargePointSetBaseTopic();
+                                $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $pendingCurrent);
+                                $this->SetValue('SetChargeCurrent', $pendingCurrent);
+
+                                $this->SendDebug(
+                                    'phases_in_use',
+                                    'Phasenwechsel bestätigt, sende Zielstrom: ' . $pendingCurrent . ' A',
+                                    0
+                                );
+                            }
+
+                            $this->SetBuffer('PendingPhaseSwitch', '0');
+                            $this->SetBuffer('PendingChargeCurrent', '0');
+                        }
                     }
                     return '';
 
@@ -691,8 +720,14 @@ class openWB2 extends IPSModuleStrict
                 }
 
                 if ($targetPhasesToUse !== $phases) {
+                    // Zielwerte puffern
+                    $this->SetBuffer('PendingPhaseSwitch', (string) $phases);
+                    $this->SetBuffer('PendingChargeCurrent', (string) $current);
+
                     if (!$this->UpdatePhasesInChargeTemplate($phases)) {
                         $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
+                        $this->SetBuffer('PendingPhaseSwitch', '0');
+                        $this->SetBuffer('PendingChargeCurrent', '0');
                         break;
                     }
 
@@ -708,7 +743,7 @@ class openWB2 extends IPSModuleStrict
 
                     $this->SendDebug(
                         'SetChargePower',
-                        'Phase gewechselt auf ' . $phases . ', Strom ' . $current . 'A wird verzögert gesendet, 30s Sperre aktiv',
+                        'Phasenwechsel angefordert: Zielphase ' . $phases . ', Zielstrom nach Bestätigung ' . $current . ' A',
                         0
                     );
 
