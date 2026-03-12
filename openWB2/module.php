@@ -646,8 +646,8 @@ class openWB2 extends IPSModuleStrict
             case 'SetChargePower':
                 
                 if ($this->GetBuffer('PhaseSwitchLock') === '1') {
-                    $this->SendDebug('SetChargePower', 'Phasenwechsel aktuell gesperrt', 0);
-                    return;
+                if ($this->GetBuffer('PhaseSwitchLock') === '1') {
+                    $this->SendDebug('SetChargePower', 'Phasenwechsel aktuell gesperrt - keine neue Umschaltung, aber Stromregelung läuft weiter', 0);
                 }
 
                 $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
@@ -680,15 +680,19 @@ class openWB2 extends IPSModuleStrict
                     $targetPhasesToUse = 1;
                 }
 
-                if ($targetPhasesToUse !== $phases) {
-                // Strom passend zu den AKTUELL eingestellten Phasen berechnen
-                $currentBeforeSwitch = $this->CalculateCurrentFromPower($power, $targetPhasesToUse);
+                if ($this->GetBuffer('PhaseSwitchLock') === '1') {
+                    $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
+                    $this->SetValue('SetChargeCurrent', $current);
 
-                // ZUERST diesen Strom senden
-                $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $currentBeforeSwitch);
-                $this->SetValue('SetChargeCurrent', $currentBeforeSwitch);
+                    $this->SendDebug(
+                        'SetChargePower',
+                        'Während Sperre nur Strom gesendet: ' . $current . ' A, keine erneute Phasenumschaltung',
+                        0
+                    );
+                    break;
+                }
 
-                // DANACH Phasen umschalten
+            if ($targetPhasesToUse !== $phases) {
                 if (!$this->UpdatePhasesInChargeTemplate($phases)) {
                     $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
                     break;
@@ -696,17 +700,17 @@ class openWB2 extends IPSModuleStrict
 
                 $lockTimeSeconds = max(0, (int)$this->ReadPropertyInteger('PhaseSwitchLockTime'));
 
-                if ($lockTimeSeconds > 0) {
-                    $this->SetBuffer('PhaseSwitchLock', '1');
-                    $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
-                } else {
-                    $this->SetBuffer('PhaseSwitchLock', '0');
-                    $this->SetTimerInterval('PhaseSwitchLockTimer', 0);
-                }
+            if ($lockTimeSeconds > 0) {
+                $this->SetBuffer('PhaseSwitchLock', '1');
+                $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
+            } else {
+                $this->SetBuffer('PhaseSwitchLock', '0');
+                $this->SetTimerInterval('PhaseSwitchLockTimer', 0);
+            }
 
                 $this->SendDebug(
                     'SetChargePower',
-                    'Vor Phasenwechsel zuerst ' . $currentBeforeSwitch . ' A bei ' . $targetPhasesToUse . ' Phase(n), danach Wechsel auf ' . $phases,
+                    'Phase gewechselt auf ' . $phases . ', Strom ' . $current . 'A wird verzögert gesendet, 30s Sperre aktiv',
                     0
                 );
 
