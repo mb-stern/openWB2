@@ -1240,41 +1240,7 @@ class openWB2 extends IPSModuleStrict
         IPS_SetVariableCustomProfile($this->GetIDForIdent('SetChargePower'), $powerProfile);
     }
 
-        private function DetermineBestChargingSetup(int $requestedPower): array
-    {
-        $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
-        $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
-
-        // Kandidat 1-phasig
-        $current1 = (int) ceil($requestedPower / 230);
-        $current1 = max($minCurrent, min($maxCurrent, $current1));
-        $power1 = $current1 * 230;
-
-        // Kandidat 3-phasig
-        $current3 = (int) ceil($requestedPower / (230 * 3));
-        $current3 = max($minCurrent, min($maxCurrent, $current3));
-        $power3 = $current3 * 230 * 3;
-
-        $diff1 = abs($power1 - $requestedPower);
-        $diff3 = abs($power3 - $requestedPower);
-
-        // Bevorzuge die Variante, die näher an der Sollleistung liegt
-        if ($diff1 <= $diff3) {
-            return [
-                'phases'  => 1,
-                'current' => $current1,
-                'power'   => $power1
-            ];
-        }
-
-        return [
-            'phases'  => 3,
-            'current' => $current3,
-            'power'   => $power3
-        ];
-    }
-
-        private function DetermineBestChargingSetup(int $requestedPower): array
+    private function DetermineBestChargingSetup(int $requestedPower): array
     {
         $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
         $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
