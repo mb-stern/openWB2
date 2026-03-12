@@ -657,7 +657,6 @@ class openWB2 extends IPSModuleStrict
                 $maxPower = 230 * 3 * $maxCurrent;
 
                 $power = max($minPower, min($maxPower, (int) $Value));
-
                 $this->SetValue('SetChargePower', $power);
 
                 $chargeMode = (int) $this->GetValue('SetChargeMode');
@@ -675,12 +674,11 @@ class openWB2 extends IPSModuleStrict
                     0
                 );
 
-                $targetPhasesToUse = (int) $this->GetValue('PhasesToUse');
-                if (!in_array($targetPhasesToUse, [1, 3], true)) {
-                    $targetPhasesToUse = 1;
-                }
+                // IMMER zuerst Ampere senden
+                $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
+                $this->SetValue('SetChargeCurrent', $current);
 
-            if ($targetPhasesToUse !== $phases) {
+                // IMMER danach Phasen ins Template schreiben
                 if (!$this->UpdatePhasesInChargeTemplate($phases)) {
                     $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
                     break;
@@ -688,26 +686,21 @@ class openWB2 extends IPSModuleStrict
 
                 $lockTimeSeconds = max(0, (int)$this->ReadPropertyInteger('PhaseSwitchLockTime'));
 
-            if ($lockTimeSeconds > 0) {
-                $this->SetBuffer('PhaseSwitchLock', '1');
-                $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
-            } else {
-                $this->SetBuffer('PhaseSwitchLock', '0');
-                $this->SetTimerInterval('PhaseSwitchLockTimer', 0);
-            }
+                if ($lockTimeSeconds > 0) {
+                    $this->SetBuffer('PhaseSwitchLock', '1');
+                    $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
+                } else {
+                    $this->SetBuffer('PhaseSwitchLock', '0');
+                    $this->SetTimerInterval('PhaseSwitchLockTimer', 0);
+                }
 
                 $this->SendDebug(
                     'SetChargePower',
-                    'Phase gewechselt auf ' . $phases . ', Strom ' . $current . 'A wird verzögert gesendet, 30s Sperre aktiv',
+                    'Immer gleicher Ablauf: zuerst ' . $current . ' A, danach Phasen auf ' . $phases,
                     0
                 );
 
                 break;
-            }
-
-            $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
-            $this->SetValue('SetChargeCurrent', $current);
-            break;
 
             case 'SetChargeMode':
                 $modeString = $this->MapChargeModeIntToString((int) $Value);
