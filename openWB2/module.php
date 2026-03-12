@@ -675,12 +675,17 @@ class openWB2 extends IPSModuleStrict
                     0
                 );
 
-                $targetPhasesToUse = (int) $this->GetValue('PhasesToUse');
-                if (!in_array($targetPhasesToUse, [1, 3], true)) {
-                    $targetPhasesToUse = 1;
+                $currentPhasesInUse = (int) $this->GetValue('PhasesInUse');
+                if (!in_array($currentPhasesInUse, [1, 3], true)) {
+                    $currentPhasesInUse = 1;
                 }
 
-            if ($targetPhasesToUse !== $phases) {
+                if ($currentPhasesInUse !== $phases) {
+                // zuerst Ampere senden
+                $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
+                $this->SetValue('SetChargeCurrent', $current);
+
+                // danach Phasen umschalten
                 if (!$this->UpdatePhasesInChargeTemplate($phases)) {
                     $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
                     break;
@@ -688,17 +693,17 @@ class openWB2 extends IPSModuleStrict
 
                 $lockTimeSeconds = max(0, (int)$this->ReadPropertyInteger('PhaseSwitchLockTime'));
 
-            if ($lockTimeSeconds > 0) {
-                $this->SetBuffer('PhaseSwitchLock', '1');
-                $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
-            } else {
-                $this->SetBuffer('PhaseSwitchLock', '0');
-                $this->SetTimerInterval('PhaseSwitchLockTimer', 0);
-            }
+                if ($lockTimeSeconds > 0) {
+                    $this->SetBuffer('PhaseSwitchLock', '1');
+                    $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
+                } else {
+                    $this->SetBuffer('PhaseSwitchLock', '0');
+                    $this->SetTimerInterval('PhaseSwitchLockTimer', 0);
+                }
 
                 $this->SendDebug(
                     'SetChargePower',
-                    'Phase gewechselt auf ' . $phases . ', Strom ' . $current . 'A wird verzögert gesendet, 30s Sperre aktiv',
+                    'Zuerst Strom ' . $current . ' A gesendet, danach Phasenwechsel von ' . $currentPhasesInUse . ' auf ' . $phases,
                     0
                 );
 
