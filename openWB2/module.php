@@ -122,6 +122,9 @@ class openWB2 extends IPSModuleStrict
         $this->SetBuffer('PhaseSwitchLock', '0');
 
         $this->RegisterAttributeString('ChargeTemplateJSON', '');
+
+        $this->SetBuffer('PendingPhasesToUse', '0');
+        $this->SetBuffer('LastRequestedChargePower', '0');
     }
 
     public function GetCompatibleParents(): string
@@ -262,15 +265,43 @@ class openWB2 extends IPSModuleStrict
         $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
         $templateId = (int) $this->ReadPropertyInteger('ChargeTemplateID');
 
-        if ($topic === $baseTopic . '/vehicle/template/charge_template/' . $templateId) {
+            if ($topic === $baseTopic . '/vehicle/template/charge_template/' . $templateId) {
             $value = trim((string) $payload);
             $this->SetBuffer('ChargeTemplateJSON', $value);
             $this->WriteAttributeString('ChargeTemplateJSON', $value);
 
             $this->SendDebug('ChargeTemplate', $value, 0);
 
+            $template = json_decode($value, true);
+            if (is_array($template)
+                && isset($template['chargemode']['instant_charging']['phases_to_use'])
+                && in_array((int)$template['chargemode']['instant_charging']['phases_to_use'], [1, 3], true)
+            ) {
+                $receivedPhases = (int) $template['chargemode']['instant_charging']['phases_to_use'];
+                $pendingPhases  = (int) $this->GetBuffer('PendingPhasesToUse');
+
+                // Wenn gerade keine Umstellung offen ist, empfangenen Wert normal übernehmen
+                if ($pendingPhases === 0) {
+                    $this->SetValue('PhasesToUse', $receivedPhases);
+                } else {
+                    // Wenn openWB den gewünschten Wert zurückmeldet, übernehmen und Pending löschen
+                    if ($receivedPhases === $pendingPhases) {
+                        $this->SetValue('PhasesToUse', $receivedPhases);
+                        $this->SetBuffer('PendingPhasesToUse', '0');
+                        $this->SendDebug('ChargeTemplate', 'Pending-Phasenumschaltung bestätigt: ' . $receivedPhases, 0);
+                    } else {
+                        // Altes Template empfangen -> nur puffern, aber UI/Sollwert nicht zurücksetzen
+                        $this->SendDebug(
+                            'ChargeTemplate',
+                            'Altes Template empfangen (' . $receivedPhases . '), Pending bleibt auf ' . $pendingPhases,
+                            0
+                        );
+                    }
+                }
+            }
+
             return '';
-    }
+        }
 
         $cpBases = $this->GetChargePointBaseTopics();
         if ($cpBases === []) {
@@ -631,7 +662,7 @@ class openWB2 extends IPSModuleStrict
                 }
                 break;
 
-            case 'SetChargePower':
+                       case 'SetChargePower':
                 $power = (int) $Value;
 
                 $setup = $this->DetermineBestChargingSetup($power);
@@ -645,7 +676,6 @@ class openWB2 extends IPSModuleStrict
                     0
                 );
 
-                // Lokale Sollleistung auf den tatsächlich erreichbaren Wert setzen
                 $this->SetValue('SetChargePower', $effectivePower);
 
                 $chargeMode = (int) $this->GetValue('SetChargeMode');
@@ -654,16 +684,14 @@ class openWB2 extends IPSModuleStrict
                     break;
                 }
 
-                // Erst Phasen setzen
                 if (!$this->UpdatePhasesInChargeTemplate($phases)) {
                     $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
                     break;
                 }
 
-                // Lokale Anzeige aktualisieren
+                // lokalen Sollwert sofort setzen, damit die UI stabil bleibt
                 $this->SetValue('PhasesToUse', $phases);
 
-                // Danach Strom setzen
                 $cpSetBase = $this->GetChargePointSetBaseTopic();
                 $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
                 $this->SetValue('SetChargeCurrent', $current);
@@ -876,7 +904,7 @@ class openWB2 extends IPSModuleStrict
         return $topics;
     }
 
-    private function UpdatePhasesInChargeTemplate(int $phases): bool
+        private function UpdatePhasesInChargeTemplate(int $phases): bool
     {
         $json = $this->GetBuffer('ChargeTemplateJSON');
         if ($json === '') {
@@ -912,6 +940,9 @@ class openWB2 extends IPSModuleStrict
 
         $chargePointId = (int) $this->ReadPropertyInteger('ChargePointID');
         $topic = 'set/chargepoint/' . $chargePointId . '/set/charge_template';
+
+        // Pending merken, damit altes Echo den Wert nicht zurückdreht
+        $this->SetBuffer('PendingPhasesToUse', (string) $phases);
 
         $this->MQTTCommand($topic, $payload);
         $this->SendDebug(__FUNCTION__, 'Gesendet an ' . $topic . ': ' . $payload, 0);
@@ -1228,6 +1259,37 @@ class openWB2 extends IPSModuleStrict
         $diff3 = abs($power3 - $requestedPower);
 
         // Bevorzuge die Variante, die näher an der Sollleistung liegt
+        if ($diff1 <= $diff3) {
+            return [
+                'phases'  => 1,
+                'current' => $current1,
+                'power'   => $power1
+            ];
+        }
+
+        return [
+            'phases'  => 3,
+            'current' => $current3,
+            'power'   => $power3
+        ];
+    }
+
+        private function DetermineBestChargingSetup(int $requestedPower): array
+    {
+        $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
+        $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
+
+        $current1 = (int) ceil($requestedPower / 230);
+        $current1 = max($minCurrent, min($maxCurrent, $current1));
+        $power1 = $current1 * 230;
+
+        $current3 = (int) ceil($requestedPower / (230 * 3));
+        $current3 = max($minCurrent, min($maxCurrent, $current3));
+        $power3 = $current3 * 230 * 3;
+
+        $diff1 = abs($power1 - $requestedPower);
+        $diff3 = abs($power3 - $requestedPower);
+
         if ($diff1 <= $diff3) {
             return [
                 'phases'  => 1,
