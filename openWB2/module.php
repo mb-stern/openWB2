@@ -657,6 +657,7 @@ class openWB2 extends IPSModuleStrict
                 $maxPower = 230 * 3 * $maxCurrent;
 
                 $power = max($minPower, min($maxPower, (int) $Value));
+
                 $this->SetValue('SetChargePower', $power);
 
                 $chargeMode = (int) $this->GetValue('SetChargeMode');
@@ -674,11 +675,17 @@ class openWB2 extends IPSModuleStrict
                     0
                 );
 
-                // IMMER zuerst Ampere senden
+                $targetPhasesToUse = (int) $this->GetValue('PhasesToUse');
+                if (!in_array($targetPhasesToUse, [1, 3], true)) {
+                    $targetPhasesToUse = 1;
+                }
+
+            if ($targetPhasesToUse !== $phases) {
+                // ZUERST Ampere senden
                 $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
                 $this->SetValue('SetChargeCurrent', $current);
 
-                // IMMER danach Phasen ins Template schreiben
+                // DANACH Phasen umschalten
                 if (!$this->UpdatePhasesInChargeTemplate($phases)) {
                     $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
                     break;
@@ -696,11 +703,16 @@ class openWB2 extends IPSModuleStrict
 
                 $this->SendDebug(
                     'SetChargePower',
-                    'Immer gleicher Ablauf: zuerst ' . $current . ' A, danach Phasen auf ' . $phases,
+                    'Phase gewechselt auf ' . $phases . ', Strom ' . $current . ' A wurde direkt davor gesendet',
                     0
                 );
 
                 break;
+            }
+
+            $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
+            $this->SetValue('SetChargeCurrent', $current);
+            break;
 
             case 'SetChargeMode':
                 $modeString = $this->MapChargeModeIntToString((int) $Value);
