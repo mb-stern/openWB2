@@ -680,7 +680,15 @@ class openWB2 extends IPSModuleStrict
                     $targetPhasesToUse = 1;
                 }
 
-            if ($targetPhasesToUse !== $phases) {
+                if ($targetPhasesToUse !== $phases) {
+                // Strom passend zu den AKTUELL eingestellten Phasen berechnen
+                $currentBeforeSwitch = $this->CalculateCurrentFromPower($power, $targetPhasesToUse);
+
+                // ZUERST diesen Strom senden
+                $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $currentBeforeSwitch);
+                $this->SetValue('SetChargeCurrent', $currentBeforeSwitch);
+
+                // DANACH Phasen umschalten
                 if (!$this->UpdatePhasesInChargeTemplate($phases)) {
                     $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
                     break;
@@ -688,17 +696,17 @@ class openWB2 extends IPSModuleStrict
 
                 $lockTimeSeconds = max(0, (int)$this->ReadPropertyInteger('PhaseSwitchLockTime'));
 
-            if ($lockTimeSeconds > 0) {
-                $this->SetBuffer('PhaseSwitchLock', '1');
-                $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
-            } else {
-                $this->SetBuffer('PhaseSwitchLock', '0');
-                $this->SetTimerInterval('PhaseSwitchLockTimer', 0);
-            }
+                if ($lockTimeSeconds > 0) {
+                    $this->SetBuffer('PhaseSwitchLock', '1');
+                    $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
+                } else {
+                    $this->SetBuffer('PhaseSwitchLock', '0');
+                    $this->SetTimerInterval('PhaseSwitchLockTimer', 0);
+                }
 
                 $this->SendDebug(
                     'SetChargePower',
-                    'Phase gewechselt auf ' . $phases . ', Strom ' . $current . 'A wird verzögert gesendet, 30s Sperre aktiv',
+                    'Vor Phasenwechsel zuerst ' . $currentBeforeSwitch . ' A bei ' . $targetPhasesToUse . ' Phase(n), danach Wechsel auf ' . $phases,
                     0
                 );
 
