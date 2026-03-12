@@ -666,6 +666,18 @@ class openWB2 extends IPSModuleStrict
                 $phases = $this->DeterminePhasesByPower($power);
                 $current = $this->CalculateCurrentFromPower($power, $phases);
 
+                $pendingPhase = (int) $this->GetBuffer('PendingPhaseSwitch');
+                if (in_array($pendingPhase, [1, 3], true)) {
+                    $this->SetBuffer('PendingChargeCurrent', (string) $current);
+
+                    $this->SendDebug(
+                        'SetChargePower',
+                        'Phasenwechsel läuft noch, merke neuen Zielstrom: ' . $current . ' A',
+                        0
+                    );
+                    break;
+                }
+
                 $this->SendDebug(
                     'SetChargePower',
                     'Neu berechnet: ' . $power . ' W -> ' . $phases . ' Phase(n), ' . $current . ' A',
