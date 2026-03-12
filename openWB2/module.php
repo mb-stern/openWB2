@@ -11,7 +11,6 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterPropertyInteger('ChargeTemplateID', 0);
         $this->RegisterPropertyInteger('MinCurrentPerPhase', 6);
         $this->RegisterPropertyInteger('MaxCurrentPerPhase', 16);
-        $this->RegisterPropertyInteger('PhaseSwitchHysteresisWatt', 0);
         $this->RegisterPropertyInteger('PhaseSwitchLockTime', 60);
 
         // Profile erzeugen
@@ -124,7 +123,6 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterAttributeString('ChargeTemplateJSON', '');
 
         $this->SetBuffer('PendingPhasesToUse', '0');
-        $this->SetBuffer('LastRequestedChargePower', '0');
 
         $this->RegisterTimer('ApplyChargeCurrentTimer', 0, 'OWB_ApplyPendingChargeCurrent($_IPS["TARGET"]);');
         $this->SetBuffer('PendingChargeCurrent', '0');
@@ -194,11 +192,6 @@ class openWB2 extends IPSModuleStrict
                     'name'    => 'MaxCurrentPerPhase',
                     'type'    => 'NumberSpinner',
                     'caption' => 'Maximalstrom pro Phase (A)'
-                ],
-                [
-                    'name'    => 'PhaseSwitchHysteresisWatt',
-                    'type'    => 'NumberSpinner',
-                    'caption' => 'Hysterese Phasenumschaltung (W)'
                 ],
                 [
                     'name'    => 'PhaseSwitchLockTime',
@@ -666,19 +659,17 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case 'SetChargePower':
-
                 $power = (int)$Value;
 
                 $setup = $this->DetermineBestChargingSetup($power);
 
-                $phases  = $setup['phases'];
-                $current = $setup['current'];
+                $targetPhases   = $setup['phases'];
+                $targetCurrent  = $setup['current'];
                 $effectivePower = $setup['power'];
 
                 $this->SetValue('SetChargePower', $effectivePower);
 
                 $chargeMode = (int)$this->GetValue('SetChargeMode');
-
                 if ($chargeMode !== 0) {
                     $this->SendDebug(
                         'SetChargePower',
@@ -688,22 +679,49 @@ class openWB2 extends IPSModuleStrict
                     break;
                 }
 
-                if (!$this->UpdatePhasesInChargeTemplate($phases)) {
-                    $this->SendDebug(
-                        'SetChargePower',
-                        'Phasenumschaltung fehlgeschlagen',
-                        0
-                    );
-                    break;
+                $currentTargetPhases = (int)$this->GetValue('PhasesToUse');
+                if (!in_array($currentTargetPhases, [1, 3], true)) {
+                    $currentTargetPhases = 1;
                 }
 
-                $this->SetValue('PhasesToUse', $phases);
+                $phaseChanged = ($targetPhases !== $currentTargetPhases);
 
-                // Strom für später merken
-                $this->SetBuffer('PendingChargeCurrent', (string)$current);
+                // Strom immer für später merken
+                $this->SetBuffer('PendingChargeCurrent', (string)$targetCurrent);
 
-                // 200 ms warten
-                $this->SetTimerInterval('ApplyChargeCurrentTimer', 200);
+                if ($phaseChanged) {
+                    if ($this->IsPhaseSwitchLocked()) {
+                        $this->SendDebug(
+                            'SetChargePower',
+                            'Phasenumschaltung gesperrt',
+                            0
+                        );
+                        break;
+                    }
+
+                    if (!$this->UpdatePhasesInChargeTemplate($targetPhases)) {
+                        $this->SendDebug(
+                            'SetChargePower',
+                            'Phasenumschaltung fehlgeschlagen',
+                            0
+                        );
+                        break;
+                    }
+
+                    $this->SetValue('PhasesToUse', $targetPhases);
+
+                    $lockTimeSeconds = max(0, (int)$this->ReadPropertyInteger('PhaseSwitchLockTime'));
+                    if ($lockTimeSeconds > 0) {
+                        $this->SetBuffer('PhaseSwitchLock', '1');
+                        $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
+                    }
+
+                    // nach Phasenwechsel immer kurz warten
+                    $this->SetTimerInterval('ApplyChargeCurrentTimer', 200);
+                } else {
+                    // gleiche Phase -> Strom direkt senden
+                    $this->ApplyPendingChargeCurrent();
+                }
 
                 break;
 
@@ -1308,6 +1326,11 @@ class openWB2 extends IPSModuleStrict
 
         // Timer wieder stoppen
         $this->SetTimerInterval('ApplyChargeCurrentTimer', 0);
+    }
+
+    private function IsPhaseSwitchLocked(): bool
+    {
+        return $this->GetBuffer('PhaseSwitchLock') === '1';
     }
 
     public function ClearPhaseSwitchLock(): void
