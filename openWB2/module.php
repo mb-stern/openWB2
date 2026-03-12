@@ -627,38 +627,34 @@ class openWB2 extends IPSModuleStrict
                     return;
                 }
 
-                // Prüfen ob Sofortladen aktiv ist
-                $chargeMode = $this->GetValue('SetChargeMode');
+                $chargeMode = (int) $this->GetValue('SetChargeMode');
                 if ($chargeMode !== 0) {
                     $this->SendDebug('PhasesToUse', 'Phasenumschaltung blockiert – nicht im Sofortladen', 0);
-                    
-                    // Variable trotzdem setzen damit UI nicht zurückspringt
                     $this->SetValue('PhasesToUse', $Value);
                     return;
                 }
 
-                // Nur bei Sofortladen an openWB senden
                 if ($this->UpdatePhasesInChargeTemplate($Value)) {
                     $this->SetValue('PhasesToUse', $Value);
                 }
                 break;
 
             case 'SetChargePower':
-                
-                if ($this->GetBuffer('PhaseSwitchLock') === '1') {
-                    $this->SendDebug('SetChargePower', 'Phasenwechsel aktuell gesperrt', 0);
-                    return;
-                }
+                $power = (int) $Value;
 
-                $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
-                $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
+                $setup = $this->DetermineBestChargingSetup($power);
+                $phases = $setup['phases'];
+                $current = $setup['current'];
+                $effectivePower = $setup['power'];
 
-                $minPower = 230 * $minCurrent;
-                $maxPower = 230 * 3 * $maxCurrent;
+                $this->SendDebug(
+                    'SetChargePower',
+                    'Soll=' . $power . ' W, berechnet: ' . $phases . ' Phase(n), ' . $current . ' A, effektiv ' . $effectivePower . ' W',
+                    0
+                );
 
-                $power = max($minPower, min($maxPower, (int) $Value));
-
-                $this->SetValue('SetChargePower', $power);
+                // Lokale Sollleistung auf den tatsächlich erreichbaren Wert setzen
+                $this->SetValue('SetChargePower', $effectivePower);
 
                 $chargeMode = (int) $this->GetValue('SetChargeMode');
                 if ($chargeMode !== 0) {
@@ -666,48 +662,21 @@ class openWB2 extends IPSModuleStrict
                     break;
                 }
 
-                $phases = $this->DeterminePhasesByPower($power);
-                $current = $this->CalculateCurrentFromPower($power, $phases);
-
-                $this->SendDebug(
-                    'SetChargePower',
-                    'Neu berechnet: ' . $power . ' W -> ' . $phases . ' Phase(n), ' . $current . ' A',
-                    0
-                );
-
-                $targetPhasesToUse = (int) $this->GetValue('PhasesToUse');
-                if (!in_array($targetPhasesToUse, [1, 3], true)) {
-                    $targetPhasesToUse = 1;
-                }
-
-            if ($targetPhasesToUse !== $phases) {
+                // Erst Phasen setzen
                 if (!$this->UpdatePhasesInChargeTemplate($phases)) {
                     $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
                     break;
                 }
 
-                $lockTimeSeconds = max(0, (int)$this->ReadPropertyInteger('PhaseSwitchLockTime'));
+                // Lokale Anzeige aktualisieren
+                $this->SetValue('PhasesToUse', $phases);
 
-            if ($lockTimeSeconds > 0) {
-                $this->SetBuffer('PhaseSwitchLock', '1');
-                $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
-            } else {
-                $this->SetBuffer('PhaseSwitchLock', '0');
-                $this->SetTimerInterval('PhaseSwitchLockTimer', 0);
-            }
-
-                $this->SendDebug(
-                    'SetChargePower',
-                    'Phase gewechselt auf ' . $phases . ', Strom ' . $current . 'A wird verzögert gesendet, 30s Sperre aktiv',
-                    0
-                );
+                // Danach Strom setzen
+                $cpSetBase = $this->GetChargePointSetBaseTopic();
+                $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
+                $this->SetValue('SetChargeCurrent', $current);
 
                 break;
-            }
-
-            $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
-            $this->SetValue('SetChargeCurrent', $current);
-            break;
 
             case 'SetChargeMode':
                 $modeString = $this->MapChargeModeIntToString((int) $Value);
@@ -1248,41 +1217,38 @@ class openWB2 extends IPSModuleStrict
         IPS_SetVariableCustomProfile($this->GetIDForIdent('SetChargePower'), $powerProfile);
     }
 
-    private function DeterminePhasesByPower(int $power): int
-    {
-        $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
-        $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
-        $hysteresis = max(0, (int) $this->ReadPropertyInteger('PhaseSwitchHysteresisWatt'));
-
-        $maxPower1Phase = 230 * $maxCurrent;
-        $minPower3Phase = 230 * 3 * $minCurrent;
-
-        $switchTo3Phase = $minPower3Phase + $hysteresis;
-        $switchTo1Phase = $maxPower1Phase - $hysteresis;
-
-        $currentPhases = (int) $this->GetValue('PhasesInUse');
-        if (!in_array($currentPhases, [1, 3], true)) {
-            $currentPhases = 1;
-        }
-
-        if ($currentPhases === 1) {
-            return ($power >= $switchTo3Phase) ? 3 : 1;
-        }
-
-        return ($power <= $switchTo1Phase) ? 1 : 3;
-    }
-
-    private function CalculateCurrentFromPower(int $power, int $phases): int
+        private function DetermineBestChargingSetup(int $requestedPower): array
     {
         $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
         $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
 
-        $phases = ($phases === 3) ? 3 : 1;
+        // Kandidat 1-phasig
+        $current1 = (int) ceil($requestedPower / 230);
+        $current1 = max($minCurrent, min($maxCurrent, $current1));
+        $power1 = $current1 * 230;
 
-        $current = (int) ceil($power / (230 * $phases));
-        $current = max($minCurrent, min($maxCurrent, $current));
+        // Kandidat 3-phasig
+        $current3 = (int) ceil($requestedPower / (230 * 3));
+        $current3 = max($minCurrent, min($maxCurrent, $current3));
+        $power3 = $current3 * 230 * 3;
 
-        return $current;
+        $diff1 = abs($power1 - $requestedPower);
+        $diff3 = abs($power3 - $requestedPower);
+
+        // Bevorzuge die Variante, die näher an der Sollleistung liegt
+        if ($diff1 <= $diff3) {
+            return [
+                'phases'  => 1,
+                'current' => $current1,
+                'power'   => $power1
+            ];
+        }
+
+        return [
+            'phases'  => 3,
+            'current' => $current3,
+            'power'   => $power3
+        ];
     }
 
     public function ClearPhaseSwitchLock(): void
