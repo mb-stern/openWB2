@@ -1272,30 +1272,40 @@ class openWB2 extends IPSModuleStrict
 
         $voltage = $this->GetEffectiveVoltage();
 
-        $current1 = (int) ceil($requestedPower / $voltage);
-        $current1 = max($minCurrent, min($maxCurrent, $current1));
-        $power1 = $current1 * $voltage;
+        $candidates = [];
 
-        $current3 = (int) ceil($requestedPower / ($voltage * 3));
-        $current3 = max($minCurrent, min($maxCurrent, $current3));
-        $power3 = $current3 * $voltage * 3;
+        foreach ([1, 3] as $phases) {
+            $idealCurrent = $requestedPower / ($voltage * $phases);
 
-        $diff1 = abs($power1 - $requestedPower);
-        $diff3 = abs($power3 - $requestedPower);
-
-        if ($diff1 <= $diff3) {
-            return [
-                'phases'  => 1,
-                'current' => $current1,
-                'power'   => (int)round($power1)
+            $candidateCurrents = [
+                (int) floor($idealCurrent),
+                (int) round($idealCurrent),
+                (int) ceil($idealCurrent)
             ];
+
+            foreach ($candidateCurrents as $current) {
+                $current = max($minCurrent, min($maxCurrent, $current));
+                $power = $current * $voltage * $phases;
+                $diff = abs($power - $requestedPower);
+
+                $key = $phases . '_' . $current;
+                $candidates[$key] = [
+                    'phases'  => $phases,
+                    'current' => $current,
+                    'power'   => (int) round($power),
+                    'diff'    => $diff
+                ];
+            }
         }
 
-        return [
-            'phases'  => 3,
-            'current' => $current3,
-            'power'   => (int)round($power3)
-        ];
+        usort($candidates, function (array $a, array $b): int {
+            if ($a['diff'] === $b['diff']) {
+                return $a['phases'] <=> $b['phases'];
+            }
+            return $a['diff'] <=> $b['diff'];
+        });
+
+        return $candidates[0];
     }
 
     public function ApplyPendingChargeCurrent(): void
