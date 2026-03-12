@@ -686,9 +686,12 @@ class openWB2 extends IPSModuleStrict
             }
 
             if ($currentPhasesInUse !== $phases) {
-                // Erst Ampere senden
-                $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
-                $this->SetValue('SetChargeCurrent', $current);
+                // Strom passend zu den AKTUELL verwendeten Phasen berechnen
+                $currentBeforeSwitch = $this->CalculateCurrentFromPower($power, $currentPhasesInUse);
+
+                // Erst Strom senden
+                $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $currentBeforeSwitch);
+                $this->SetValue('SetChargeCurrent', $currentBeforeSwitch);
 
                 // Dann Phasen umschalten
                 if (!$this->UpdatePhasesInChargeTemplate($phases)) {
@@ -708,7 +711,7 @@ class openWB2 extends IPSModuleStrict
 
                 $this->SendDebug(
                     'SetChargePower',
-                    'Sende erst ' . $current . ' A, dann Phasenwechsel von ' . $currentPhasesInUse . ' auf ' . $phases,
+                    'Sende erst ' . $currentBeforeSwitch . ' A bei ' . $currentPhasesInUse . ' Phase(n), dann Umschaltung auf ' . $phases,
                     0
                 );
 
