@@ -688,8 +688,13 @@ class openWB2 extends IPSModuleStrict
 
                 $lockTimeSeconds = max(0, (int)$this->ReadPropertyInteger('PhaseSwitchLockTime'));
 
-                $this->SetBuffer('PhaseSwitchLock', '1');
-                $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
+                if ($lockTimeSeconds > 0) {
+                    $this->SetBuffer('PhaseSwitchLock', '1');
+                    $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
+                } else {
+                    $this->SetBuffer('PhaseSwitchLock', '0');
+                    $this->SetTimerInterval('PhaseSwitchLockTimer', 0);
+                }
 
                 $this->SendDebug(
                     'SetChargePower',
