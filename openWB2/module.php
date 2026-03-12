@@ -663,7 +663,7 @@ class openWB2 extends IPSModuleStrict
                 $targetCurrent  = $setup['current'];
                 $effectivePower = $setup['power'];
 
-                $this->SetValue('SetChargePower', $effectivePower);
+                $this->SetValue('SetChargePower', $power);
 
                 $chargeMode = (int)$this->GetValue('SetChargeMode');
                 if ($chargeMode !== 0) {
