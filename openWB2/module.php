@@ -125,6 +125,9 @@ class openWB2 extends IPSModuleStrict
 
         $this->SetBuffer('PendingPhasesToUse', '0');
         $this->SetBuffer('LastRequestedChargePower', '0');
+
+        $this->RegisterTimer('ApplyChargeCurrentTimer', 0, 'OWB_ApplyPendingChargeCurrent($_IPS["TARGET"]);');
+        $this->SetBuffer('PendingChargeCurrent', '0');
     }
 
     public function GetCompatibleParents(): string
@@ -663,41 +666,44 @@ class openWB2 extends IPSModuleStrict
                 break;
 
             case 'SetChargePower':
-                $power = (int) $Value;
+
+                $power = (int)$Value;
 
                 $setup = $this->DetermineBestChargingSetup($power);
-                $phases = $setup['phases'];
+
+                $phases  = $setup['phases'];
                 $current = $setup['current'];
                 $effectivePower = $setup['power'];
 
-                $this->SendDebug(
-                    'SetChargePower',
-                    'Soll=' . $power . ' W, berechnet: ' . $phases . ' Phase(n), ' . $current . ' A, effektiv ' . $effectivePower . ' W',
-                    0
-                );
-
                 $this->SetValue('SetChargePower', $effectivePower);
 
-                $chargeMode = (int) $this->GetValue('SetChargeMode');
+                $chargeMode = (int)$this->GetValue('SetChargeMode');
+
                 if ($chargeMode !== 0) {
-                    $this->SendDebug('SetChargePower', 'Sollleistung blockiert - nicht im Sofortladen', 0);
+                    $this->SendDebug(
+                        'SetChargePower',
+                        'Sollleistung blockiert - nicht im Sofortladen',
+                        0
+                    );
                     break;
                 }
 
                 if (!$this->UpdatePhasesInChargeTemplate($phases)) {
-                    $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
+                    $this->SendDebug(
+                        'SetChargePower',
+                        'Phasenumschaltung fehlgeschlagen',
+                        0
+                    );
                     break;
                 }
 
-                // lokalen Sollwert sofort setzen
                 $this->SetValue('PhasesToUse', $phases);
 
-                // kurze Pause, damit openWB das Template zuerst übernehmen kann
-                IPS_Sleep(200);
+                // Strom für später merken
+                $this->SetBuffer('PendingChargeCurrent', (string)$current);
 
-                $cpSetBase = $this->GetChargePointSetBaseTopic();
-                $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
-                $this->SetValue('SetChargeCurrent', $current);
+                // 200 ms warten
+                $this->SetTimerInterval('ApplyChargeCurrentTimer', 200);
 
                 break;
 
@@ -1272,6 +1278,36 @@ class openWB2 extends IPSModuleStrict
             'current' => $current3,
             'power'   => $power3
         ];
+    }
+
+    public function ApplyPendingChargeCurrent(): void
+    {
+        $current = (int) $this->GetBuffer('PendingChargeCurrent');
+
+        if ($current <= 0) {
+            $this->SetTimerInterval('ApplyChargeCurrentTimer', 0);
+            return;
+        }
+
+        $cpSetBase = $this->GetChargePointSetBaseTopic();
+
+        $this->PublishSetTopic(
+            $cpSetBase . '/chargecurrent',
+            (string)$current
+        );
+
+        $this->SetValue('SetChargeCurrent', $current);
+
+        $this->SendDebug(
+            'ApplyPendingChargeCurrent',
+            'Strom gesendet: ' . $current . ' A',
+            0
+        );
+
+        $this->SetBuffer('PendingChargeCurrent', '0');
+
+        // Timer wieder stoppen
+        $this->SetTimerInterval('ApplyChargeCurrentTimer', 0);
     }
 
     public function ClearPhaseSwitchLock(): void
