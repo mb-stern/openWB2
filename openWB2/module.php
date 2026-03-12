@@ -693,7 +693,7 @@ class openWB2 extends IPSModuleStrict
                 $this->SetValue('PhasesToUse', $phases);
 
                 // kurze Pause, damit openWB das Template zuerst übernehmen kann
-                IPS_Sleep(500);
+                IPS_Sleep(100);
 
                 $cpSetBase = $this->GetChargePointSetBaseTopic();
                 $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
