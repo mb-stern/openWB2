@@ -681,6 +681,9 @@ class openWB2 extends IPSModuleStrict
                 }
 
             if ($targetPhasesToUse !== $phases) {
+                $this->PublishSetTopic($cpSetBase . '/chargecurrent', (string) $current);
+                $this->SetValue('SetChargeCurrent', $current);
+
                 if (!$this->UpdatePhasesInChargeTemplate($phases)) {
                     $this->SendDebug('SetChargePower', 'Phasenumschaltung fehlgeschlagen', 0);
                     break;
@@ -698,7 +701,7 @@ class openWB2 extends IPSModuleStrict
 
                 $this->SendDebug(
                     'SetChargePower',
-                    'Phase gewechselt auf ' . $phases . ', Strom ' . $current . 'A wird verzögert gesendet, 30s Sperre aktiv',
+                    'Sende erst ' . $current . ' A, dann Phasenwechsel auf ' . $phases,
                     0
                 );
 
