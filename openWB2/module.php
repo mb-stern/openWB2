@@ -1241,8 +1241,10 @@ class openWB2 extends IPSModuleStrict
         $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
         $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
 
-        $minPower = 230 * $minCurrent;
-        $maxPower = 230 * 3 * $maxCurrent;
+        $voltage = $this->GetEffectiveVoltage();
+
+        $minPower = (int) round($voltage * $minCurrent);
+        $maxPower = (int) round($voltage * 3 * $maxCurrent);
 
         $ampereProfile = 'OWB.Ampere.' . $this->InstanceID;
         $powerProfile  = 'OWB.TargetPower.' . $this->InstanceID;
@@ -1269,16 +1271,18 @@ class openWB2 extends IPSModuleStrict
 
     private function DetermineBestChargingSetup(int $requestedPower): array
     {
-        $minCurrent = max(6, min(32, (int) $this->ReadPropertyInteger('MinCurrentPerPhase')));
-        $maxCurrent = max($minCurrent, min(32, (int) $this->ReadPropertyInteger('MaxCurrentPerPhase')));
+        $minCurrent = max(6, min(32, (int)$this->ReadPropertyInteger('MinCurrentPerPhase')));
+        $maxCurrent = max($minCurrent, min(32, (int)$this->ReadPropertyInteger('MaxCurrentPerPhase')));
 
-        $current1 = (int) ceil($requestedPower / 230);
+        $voltage = $this->GetEffectiveVoltage();
+
+        $current1 = (int) ceil($requestedPower / $voltage);
         $current1 = max($minCurrent, min($maxCurrent, $current1));
-        $power1 = $current1 * 230;
+        $power1 = $current1 * $voltage;
 
-        $current3 = (int) ceil($requestedPower / (230 * 3));
+        $current3 = (int) ceil($requestedPower / ($voltage * 3));
         $current3 = max($minCurrent, min($maxCurrent, $current3));
-        $power3 = $current3 * 230 * 3;
+        $power3 = $current3 * $voltage * 3;
 
         $diff1 = abs($power1 - $requestedPower);
         $diff3 = abs($power3 - $requestedPower);
@@ -1287,14 +1291,14 @@ class openWB2 extends IPSModuleStrict
             return [
                 'phases'  => 1,
                 'current' => $current1,
-                'power'   => $power1
+                'power'   => (int)round($power1)
             ];
         }
 
         return [
             'phases'  => 3,
             'current' => $current3,
-            'power'   => $power3
+            'power'   => (int)round($power3)
         ];
     }
 
@@ -1339,5 +1343,23 @@ class openWB2 extends IPSModuleStrict
         $this->SetTimerInterval('PhaseSwitchLockTimer', 0);
 
         $this->SendDebug('PhaseSwitchLock', 'Phasenwechsel wieder erlaubt', 0);
+    }
+
+    private function GetEffectiveVoltage(): float
+    {
+        $voltage = 230.0;
+
+        $id = @$this->GetIDForIdent('Voltage1');
+        if ($id !== false) {
+            $value = GetValue($id);
+            if (is_numeric($value)) {
+                $value = (float)$value;
+                if ($value > 100 && $value < 300) {
+                    $voltage = $value;
+                }
+            }
+        }
+
+        return $voltage;
     }
 }
