@@ -126,7 +126,7 @@ class openWB2 extends IPSModuleStrict
                             'name'    => 'ident',
                             'width'   => '220px',
                             'edit'    => ['type' => 'ValidationTextBox'],
-                            'save'    => false
+                            'save'    => true
                         ],
                         [
                             'caption' => 'Bezeichnung',
@@ -1391,8 +1391,7 @@ class openWB2 extends IPSModuleStrict
         $data = json_decode($raw, true);
 
         if (!is_array($data) || $data === []) {
-            // Standard: alles aktiv
-            return array_column($this->GetVariableDefinitions(), 'ident');
+            return [];
         }
 
         $idents = [];
@@ -1403,10 +1402,6 @@ class openWB2 extends IPSModuleStrict
             if (!empty($row['enabled']) && isset($row['ident']) && $row['ident'] !== '') {
                 $idents[] = (string) $row['ident'];
             }
-        }
-
-        if ($idents === []) {
-            return [];
         }
 
         return array_values(array_unique($idents));
