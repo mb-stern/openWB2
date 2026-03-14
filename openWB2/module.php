@@ -1224,10 +1224,18 @@ class openWB2 extends IPSModuleStrict
         IPS_SetVariableProfileText($powerProfile, '', ' W');
         IPS_SetVariableProfileValues($powerProfile, $minPower, $maxPower, 10);
 
-        IPS_SetVariableCustomProfile($this->GetIDForIdent('SetChargeCurrent'), $ampereProfile);
-        IPS_SetVariableCustomProfile($this->GetIDForIdent('ConfiguredCurrent'), $ampereProfile);
-        IPS_SetVariableCustomProfile($this->GetIDForIdent('SetMinimalPermanentCurrent'), $ampereProfile);
-        IPS_SetVariableCustomProfile($this->GetIDForIdent('SetChargePower'), $powerProfile);
+        $this->SetVariableCustomProfileIfExists('SetChargeCurrent', $ampereProfile);
+        $this->SetVariableCustomProfileIfExists('ConfiguredCurrent', $ampereProfile);
+        $this->SetVariableCustomProfileIfExists('SetMinimalPermanentCurrent', $ampereProfile);
+        $this->SetVariableCustomProfileIfExists('SetChargePower', $powerProfile);
+    }
+
+    private function SetVariableCustomProfileIfExists(string $ident, string $profile): void
+    {
+        $id = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
+        if ($id > 0 && IPS_VariableExists($id)) {
+            IPS_SetVariableCustomProfile($id, $profile);
+        }
     }
 
     private function DetermineBestChargingSetup(int $requestedPower): array
