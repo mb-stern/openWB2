@@ -59,6 +59,7 @@ class openWB2 extends IPSModuleStrict
         }
 
         $this->SyncVariables();
+        $this->UpdateDynamicProfiles();
     }
 
     public function GetConfigurationForm(): string
