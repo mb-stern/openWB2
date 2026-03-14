@@ -235,6 +235,9 @@ class openWB2 extends IPSModuleStrict
         $topic = (string) $data['Topic'];
         $payload = $data['Payload'];
 
+        $this->SendDebug('RD-Topic', $topic, 0);
+        $this->SendDebug('RD-Payload', print_r($payload, true), 0);
+
         if (is_string($payload)) {
             $decodedPayload = @hex2bin($payload);
             if ($decodedPayload !== false) {
