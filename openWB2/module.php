@@ -1300,69 +1300,6 @@ class openWB2 extends IPSModuleStrict
         return $voltage;
     }
 
-    private function GetVariableDefinitions(): array
-    {
-        return [
-            // Status / Read
-            ['ident' => 'SoC',                         'caption' => 'EV-SoC',                          'type' => VARIABLETYPE_INTEGER, 'profile' => '~Intensity.100',       'position' => 10,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'ProSoC',                      'caption' => 'Pro-SoC',                         'type' => VARIABLETYPE_INTEGER, 'profile' => '~Intensity.100',       'position' => 20,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'SocTimestamp',                'caption' => 'Pro-SoC Zeitstempel',            'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 25,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'ConfiguredCurrent',           'caption' => 'EVSE Aktuell',                    'type' => VARIABLETYPE_INTEGER, 'profile' => '',                      'position' => 30,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'PhaseCurrent1',               'caption' => 'Strom Phase 1',                   'type' => VARIABLETYPE_FLOAT,   'profile' => '~Ampere',              'position' => 40,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'PhaseCurrent2',               'caption' => 'Strom Phase 2',                   'type' => VARIABLETYPE_FLOAT,   'profile' => '~Ampere',              'position' => 41,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'PhaseCurrent3',               'caption' => 'Strom Phase 3',                   'type' => VARIABLETYPE_FLOAT,   'profile' => '~Ampere',              'position' => 42,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'Voltage1',                    'caption' => 'Spannung Phase 1',                'type' => VARIABLETYPE_FLOAT,   'profile' => '~Volt',                'position' => 50,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'Voltage2',                    'caption' => 'Spannung Phase 2',                'type' => VARIABLETYPE_FLOAT,   'profile' => '~Volt',                'position' => 51,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'Voltage3',                    'caption' => 'Spannung Phase 3',                'type' => VARIABLETYPE_FLOAT,   'profile' => '~Volt',                'position' => 52,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'Frequency',                   'caption' => 'Frequenz',                        'type' => VARIABLETYPE_FLOAT,   'profile' => '~Hertz',               'position' => 60,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'PowerL1',                     'caption' => 'Leistung Phase 1',                'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Watt',             'position' => 70,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'PowerL2',                     'caption' => 'Leistung Phase 2',                'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Watt',             'position' => 71,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'PowerL3',                     'caption' => 'Leistung Phase 3',                'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Watt',             'position' => 72,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'PowerFactor1',                'caption' => 'Leistungsfaktor Phase 1',         'type' => VARIABLETYPE_FLOAT,   'profile' => '',                      'position' => 80,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'PowerFactor2',                'caption' => 'Leistungsfaktor Phase 2',         'type' => VARIABLETYPE_FLOAT,   'profile' => '',                      'position' => 81,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'PowerFactor3',                'caption' => 'Leistungsfaktor Phase 3',         'type' => VARIABLETYPE_FLOAT,   'profile' => '',                      'position' => 82,  'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'Power',                       'caption' => 'Ladeleistung',                    'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Watt',             'position' => 100, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'PhasesInUse',                 'caption' => 'Verwendete Phasen',               'type' => VARIABLETYPE_INTEGER, 'profile' => '',                      'position' => 110, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'ChargeState',                 'caption' => 'Ladestatus',                      'type' => VARIABLETYPE_BOOLEAN, 'profile' => 'OWB.ChargeState',      'position' => 120, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'PlugState',                   'caption' => 'Stecker Status',                  'type' => VARIABLETYPE_BOOLEAN, 'profile' => 'OWB.PlugState',        'position' => 130, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'State',                       'caption' => 'Status',                          'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.LPState',          'position' => 150, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'FaultState',                  'caption' => 'Fehlerstatus',                    'type' => VARIABLETYPE_INTEGER, 'profile' => '',                      'position' => 160, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'FaultString',                 'caption' => 'Fehlertext',                      'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 170, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'ErrorTimestamp',              'caption' => 'Fehler Zeitstempel',              'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 175, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'StateString',                 'caption' => 'Statustext',                      'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 180, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'VehicleName',                 'caption' => 'Fahrzeug Name',                   'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 190, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'RFID',                        'caption' => 'RFID',                            'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 200, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'RFIDTimestamp',               'caption' => 'RFID Zeitstempel',                'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 205, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'DailyImported',               'caption' => 'Energie Tag',                     'type' => VARIABLETYPE_FLOAT,   'profile' => '~Electricity',         'position' => 210, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'DailyExported',               'caption' => 'Energie Tag Export',              'type' => VARIABLETYPE_FLOAT,   'profile' => '~Electricity',         'position' => 215, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'Imported',                    'caption' => 'Energie Gesamt',                  'type' => VARIABLETYPE_FLOAT,   'profile' => '~Electricity',         'position' => 220, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'Exported',                    'caption' => 'Energie Gesamt Export',           'type' => VARIABLETYPE_FLOAT,   'profile' => '~Electricity',         'position' => 225, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'SerialNumber',                'caption' => 'Seriennummer',                    'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 237, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'VehicleID',                   'caption' => 'Fahrzeug ID',                     'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 238, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'Version',                     'caption' => 'Version',                         'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 239, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'EvseSignaling',               'caption' => 'EVSE Signaling',                  'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 240, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'Revision',                    'caption' => 'Revision',                        'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 241, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'ChargingPower',               'caption' => 'Aktuelle Ladeleistung',           'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.Watt',             'position' => 242, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'ChargingVoltage',             'caption' => 'Aktuelle Ladespannung',           'type' => VARIABLETYPE_INTEGER, 'profile' => '~Volt',                'position' => 243, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'MaxDischargePower',           'caption' => 'Max. Entladeleistung',            'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Watt',             'position' => 244, 'action' => false, 'group' => 'Status / Read'],
-            ['ident' => 'MaxChargePower',              'caption' => 'Max. Ladeleistung',               'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Watt',             'position' => 245, 'action' => false, 'group' => 'Status / Read'],
-
-            // Action / Write
-            ['ident' => 'SetChargePointLock',          'caption' => 'Ladepunkt sperren',               'type' => VARIABLETYPE_BOOLEAN, 'profile' => 'OWB.ChargePointEnabled','position' => 290, 'action' => true,  'group' => 'Action / Write'],
-            ['ident' => 'SetChargeMode',               'caption' => 'Lademodus',                       'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.ChargeMode',       'position' => 300, 'action' => true,  'group' => 'Action / Write'],
-            ['ident' => 'SetChargeCurrent',            'caption' => 'Stromstärke',                     'type' => VARIABLETYPE_INTEGER, 'profile' => '',                      'position' => 310, 'action' => true,  'group' => 'Action / Write'],
-            ['ident' => 'PhasesToUse',                 'caption' => 'Phasen Sofortladen',              'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.PhasesToUse',      'position' => 315, 'action' => true,  'group' => 'Action / Write'],
-            ['ident' => 'SetChargePower',              'caption' => 'Sollleistung',                    'type' => VARIABLETYPE_INTEGER, 'profile' => '',                      'position' => 312, 'action' => true,  'group' => 'Action / Write'],
-            ['ident' => 'SetMinimalPvSoc',             'caption' => 'Mindes-SoC für das Fahrzeug',     'type' => VARIABLETYPE_INTEGER, 'profile' => '~Intensity.100',       'position' => 320, 'action' => true,  'group' => 'Action / Write'],
-            ['ident' => 'SetMinimalPermanentCurrent',  'caption' => 'Minimaler Dauerstrom',            'type' => VARIABLETYPE_INTEGER, 'profile' => '',                      'position' => 330, 'action' => true,  'group' => 'Action / Write'],
-            ['ident' => 'SetMaxPriceEco',              'caption' => 'Höchstpreis Eco',                 'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Price',            'position' => 340, 'action' => true,  'group' => 'Action / Write'],
-            ['ident' => 'SetBatMode',                  'caption' => 'Ladepriorität',                   'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.BatMode',          'position' => 360, 'action' => true,  'group' => 'Action / Write'],
-            ['ident' => 'SetInstantChargingLimit',     'caption' => 'Begrenzung',                      'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.ChargeLimitation', 'position' => 370, 'action' => true,  'group' => 'Action / Write'],
-            ['ident' => 'SetInstantChargingLimitSoc',  'caption' => 'SoC-Limit für das Fahrzeug',      'type' => VARIABLETYPE_INTEGER, 'profile' => '~Intensity.100',       'position' => 380, 'action' => true,  'group' => 'Action / Write'],
-            ['ident' => 'SetInstantChargingLimitAmount','caption' => 'Energie Limit',                  'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.EnergyToCharge',   'position' => 390, 'action' => true,  'group' => 'Action / Write'],
-        ];
-    }
-
     private function GetVariableSelectionValues(): array
     {
         $raw = $this->ReadPropertyString('SelectedVariables');
@@ -1528,5 +1465,68 @@ class openWB2 extends IPSModuleStrict
         }
 
         $this->SetValueSafe($ident, $value);
+    }
+
+     private function GetVariableDefinitions(): array
+    {
+        return [
+            // Status / Read
+            ['ident' => 'SoC',                         'caption' => 'EV-SoC',                          'type' => VARIABLETYPE_INTEGER, 'profile' => '~Intensity.100',       'position' => 10,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'ProSoC',                      'caption' => 'Pro-SoC',                         'type' => VARIABLETYPE_INTEGER, 'profile' => '~Intensity.100',       'position' => 20,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'SocTimestamp',                'caption' => 'Pro-SoC Zeitstempel',            'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 25,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'ConfiguredCurrent',           'caption' => 'EVSE Aktuell',                    'type' => VARIABLETYPE_INTEGER, 'profile' => '',                      'position' => 30,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'PhaseCurrent1',               'caption' => 'Strom Phase 1',                   'type' => VARIABLETYPE_FLOAT,   'profile' => '~Ampere',              'position' => 40,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'PhaseCurrent2',               'caption' => 'Strom Phase 2',                   'type' => VARIABLETYPE_FLOAT,   'profile' => '~Ampere',              'position' => 41,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'PhaseCurrent3',               'caption' => 'Strom Phase 3',                   'type' => VARIABLETYPE_FLOAT,   'profile' => '~Ampere',              'position' => 42,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'Voltage1',                    'caption' => 'Spannung Phase 1',                'type' => VARIABLETYPE_FLOAT,   'profile' => '~Volt',                'position' => 50,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'Voltage2',                    'caption' => 'Spannung Phase 2',                'type' => VARIABLETYPE_FLOAT,   'profile' => '~Volt',                'position' => 51,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'Voltage3',                    'caption' => 'Spannung Phase 3',                'type' => VARIABLETYPE_FLOAT,   'profile' => '~Volt',                'position' => 52,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'Frequency',                   'caption' => 'Frequenz',                        'type' => VARIABLETYPE_FLOAT,   'profile' => '~Hertz',               'position' => 60,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'PowerL1',                     'caption' => 'Leistung Phase 1',                'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Watt',             'position' => 70,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'PowerL2',                     'caption' => 'Leistung Phase 2',                'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Watt',             'position' => 71,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'PowerL3',                     'caption' => 'Leistung Phase 3',                'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Watt',             'position' => 72,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'PowerFactor1',                'caption' => 'Leistungsfaktor Phase 1',         'type' => VARIABLETYPE_FLOAT,   'profile' => '',                      'position' => 80,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'PowerFactor2',                'caption' => 'Leistungsfaktor Phase 2',         'type' => VARIABLETYPE_FLOAT,   'profile' => '',                      'position' => 81,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'PowerFactor3',                'caption' => 'Leistungsfaktor Phase 3',         'type' => VARIABLETYPE_FLOAT,   'profile' => '',                      'position' => 82,  'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'Power',                       'caption' => 'Ladeleistung',                    'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Watt',             'position' => 100, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'PhasesInUse',                 'caption' => 'Verwendete Phasen',               'type' => VARIABLETYPE_INTEGER, 'profile' => '',                      'position' => 110, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'ChargeState',                 'caption' => 'Ladestatus',                      'type' => VARIABLETYPE_BOOLEAN, 'profile' => 'OWB.ChargeState',      'position' => 120, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'PlugState',                   'caption' => 'Stecker Status',                  'type' => VARIABLETYPE_BOOLEAN, 'profile' => 'OWB.PlugState',        'position' => 130, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'State',                       'caption' => 'Status',                          'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.LPState',          'position' => 150, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'FaultState',                  'caption' => 'Fehlerstatus',                    'type' => VARIABLETYPE_INTEGER, 'profile' => '',                      'position' => 160, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'FaultString',                 'caption' => 'Fehlertext',                      'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 170, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'ErrorTimestamp',              'caption' => 'Fehler Zeitstempel',              'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 175, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'StateString',                 'caption' => 'Statustext',                      'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 180, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'VehicleName',                 'caption' => 'Fahrzeug Name',                   'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 190, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'RFID',                        'caption' => 'RFID',                            'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 200, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'RFIDTimestamp',               'caption' => 'RFID Zeitstempel',                'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 205, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'DailyImported',               'caption' => 'Energie Tag',                     'type' => VARIABLETYPE_FLOAT,   'profile' => '~Electricity',         'position' => 210, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'DailyExported',               'caption' => 'Energie Tag Export',              'type' => VARIABLETYPE_FLOAT,   'profile' => '~Electricity',         'position' => 215, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'Imported',                    'caption' => 'Energie Gesamt',                  'type' => VARIABLETYPE_FLOAT,   'profile' => '~Electricity',         'position' => 220, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'Exported',                    'caption' => 'Energie Gesamt Export',           'type' => VARIABLETYPE_FLOAT,   'profile' => '~Electricity',         'position' => 225, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'SerialNumber',                'caption' => 'Seriennummer',                    'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 237, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'VehicleID',                   'caption' => 'Fahrzeug ID',                     'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 238, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'Version',                     'caption' => 'Version',                         'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 239, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'EvseSignaling',               'caption' => 'EVSE Signaling',                  'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 240, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'Revision',                    'caption' => 'Revision',                        'type' => VARIABLETYPE_STRING,  'profile' => '',                      'position' => 241, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'ChargingPower',               'caption' => 'Aktuelle Ladeleistung',           'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.Watt',             'position' => 242, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'ChargingVoltage',             'caption' => 'Aktuelle Ladespannung',           'type' => VARIABLETYPE_INTEGER, 'profile' => '~Volt',                'position' => 243, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'MaxDischargePower',           'caption' => 'Max. Entladeleistung',            'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Watt',             'position' => 244, 'action' => false, 'group' => 'Status / Read'],
+            ['ident' => 'MaxChargePower',              'caption' => 'Max. Ladeleistung',               'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Watt',             'position' => 245, 'action' => false, 'group' => 'Status / Read'],
+
+            // Action / Write
+            ['ident' => 'SetChargePointLock',          'caption' => 'Ladepunkt aktiviren',               'type' => VARIABLETYPE_BOOLEAN, 'profile' => 'OWB.ChargePointEnabled','position' => 290, 'action' => true,  'group' => 'Action / Write'],
+            ['ident' => 'SetChargeMode',               'caption' => 'Lademodus',                       'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.ChargeMode',       'position' => 300, 'action' => true,  'group' => 'Action / Write'],
+            ['ident' => 'SetChargeCurrent',            'caption' => 'Stromstärke',                     'type' => VARIABLETYPE_INTEGER, 'profile' => '',                      'position' => 310, 'action' => true,  'group' => 'Action / Write'],
+            ['ident' => 'PhasesToUse',                 'caption' => 'Phasen Sofortladen',              'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.PhasesToUse',      'position' => 315, 'action' => true,  'group' => 'Action / Write'],
+            ['ident' => 'SetChargePower',              'caption' => 'Sollleistung',                    'type' => VARIABLETYPE_INTEGER, 'profile' => '',                      'position' => 312, 'action' => true,  'group' => 'Action / Write'],
+            ['ident' => 'SetMinimalPvSoc',             'caption' => 'Mindes-SoC für das Fahrzeug',     'type' => VARIABLETYPE_INTEGER, 'profile' => '~Intensity.100',       'position' => 320, 'action' => true,  'group' => 'Action / Write'],
+            ['ident' => 'SetMinimalPermanentCurrent',  'caption' => 'Minimaler Dauerstrom',            'type' => VARIABLETYPE_INTEGER, 'profile' => '',                      'position' => 330, 'action' => true,  'group' => 'Action / Write'],
+            ['ident' => 'SetMaxPriceEco',              'caption' => 'Höchstpreis Eco',                 'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Price',            'position' => 340, 'action' => true,  'group' => 'Action / Write'],
+            ['ident' => 'SetBatMode',                  'caption' => 'Ladepriorität',                   'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.BatMode',          'position' => 360, 'action' => true,  'group' => 'Action / Write'],
+            ['ident' => 'SetInstantChargingLimit',     'caption' => 'Begrenzung',                      'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.ChargeLimitation', 'position' => 370, 'action' => true,  'group' => 'Action / Write'],
+            ['ident' => 'SetInstantChargingLimitSoc',  'caption' => 'SoC-Limit für das Fahrzeug',      'type' => VARIABLETYPE_INTEGER, 'profile' => '~Intensity.100',       'position' => 380, 'action' => true,  'group' => 'Action / Write'],
+            ['ident' => 'SetInstantChargingLimitAmount','caption' => 'Energie Limit',                  'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.EnergyToCharge',   'position' => 390, 'action' => true,  'group' => 'Action / Write'],
+        ];
     }
 }
