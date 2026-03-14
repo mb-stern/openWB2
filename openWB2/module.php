@@ -57,7 +57,7 @@ class openWB2 extends IPSModuleStrict
         if ($savedTemplate !== '') {
             $this->SetBuffer('ChargeTemplateJSON', $savedTemplate);
         }
-        
+
         $this->SyncVariables();
     }
 
@@ -165,7 +165,7 @@ class openWB2 extends IPSModuleStrict
     public function ReceiveData(string $JSONString): string
     {
 
-        //$this->SendDebug('ReceiveData JSON', $JSONString, 0);
+        $this->SendDebug('ReceiveData JSON', $JSONString, 0);
 
         $data = json_decode($JSONString, true);
         if (!is_array($data)) {
