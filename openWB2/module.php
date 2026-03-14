@@ -221,16 +221,14 @@ class openWB2 extends IPSModuleStrict
 
         //$this->SendDebug('ReceiveData JSON', $JSONString, 0);
 
-        if (IPS_GetKernelRunlevel() != KR_READY) {
-            return '';
-        }
-
         $data = json_decode($JSONString, true);
         if (!is_array($data)) {
             return '';
         }
 
         if (!isset($data['Topic']) || !array_key_exists('Payload', $data)) {
+            $this->SendDebug('ReceiveData', 'Topic oder Payload fehlt', 0);
+            $this->SendDebug('ReceiveData Data', json_encode($data), 0);
             return '';
         }
 
@@ -250,8 +248,6 @@ class openWB2 extends IPSModuleStrict
 
         $baseTopic = rtrim($this->ReadPropertyString('BaseTopic'), '/');
         $templateId = (int) $this->ReadPropertyInteger('ChargeTemplateID');
-
-
 
             if ($topic === $baseTopic . '/vehicle/template/charge_template/' . $templateId) {
             $value = trim((string) $payload);
