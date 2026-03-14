@@ -1320,11 +1320,11 @@ class openWB2 extends IPSModuleStrict
     {
         $voltage = 230.0;
 
-        $id = @$this->GetIDForIdent('Voltage1');
-        if ($id !== false) {
+        $id = @IPS_GetObjectIDByIdent('Voltage1', $this->InstanceID);
+        if ($id > 0 && IPS_VariableExists($id)) {
             $value = GetValue($id);
             if (is_numeric($value)) {
-                $value = (float)$value;
+                $value = (float) $value;
                 if ($value > 100 && $value < 300) {
                     $voltage = $value;
                 }
