@@ -57,8 +57,7 @@ class openWB2 extends IPSModuleStrict
         if ($savedTemplate !== '') {
             $this->SetBuffer('ChargeTemplateJSON', $savedTemplate);
         }
-
-        $this->SyncSelectedVariables();
+        
         $this->SyncVariables();
     }
 
