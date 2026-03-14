@@ -334,17 +334,17 @@ class openWB2 extends IPSModuleStrict
                     return '';
 
                 case $cpBase . '/voltages/1':
-                    //$this->SendDebug('Match', 'voltages/1', 0);
+                    $this->SendDebug('Match', 'voltages/1', 0);
                     $this->SetFloatIfNumeric('Voltage1', $payload);
                     return '';
 
                 case $cpBase . '/voltages/2':
-                    //$this->SendDebug('Match', 'voltages/2', 0);
+                    $this->SendDebug('Match', 'voltages/2', 0);
                     $this->SetFloatIfNumeric('Voltage2', $payload);
                     return '';
 
                 case $cpBase . '/voltages/3':
-                    //$this->SendDebug('Match', 'voltages/3', 0);
+                    $this->SendDebug('Match', 'voltages/3', 0);
                     $this->SetFloatIfNumeric('Voltage3', $payload);
                     return '';
 
