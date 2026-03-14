@@ -1431,7 +1431,9 @@ class openWB2 extends IPSModuleStrict
             ];
         }
 
-        $this->UpdateFormField('SelectedVariables', 'values', $all);
+        if (IPS_GetKernelRunlevel() == KR_READY) {
+            $this->UpdateFormField('SelectedVariables', 'values', json_encode($all));
+        }
     }
 
     private function SyncVariables(): void
