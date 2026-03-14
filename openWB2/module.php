@@ -1489,57 +1489,14 @@ class openWB2 extends IPSModuleStrict
     private function SetValueSafe(string $ident, $value): void
     {
         $id = $this->GetIDForIdentSafe($ident);
+
+        $this->SendDebug('SetValueSafe', $ident . ' | ID=' . $id . ' | Value=' . var_export($value, true), 0);
+
         if ($id <= 0) {
             return;
         }
 
-        $variable = IPS_GetVariable($id);
-        $type = $variable['VariableType'];
-
-        $this->SendDebug('SetValueSafe', $ident . ' | ID=' . $id . ' | Type=' . $type . ' | Value=' . var_export($value, true), 0);
-
-        switch ($type) {
-            case VARIABLETYPE_BOOLEAN:
-                $this->SetValueBoolean($ident, (bool) $value);
-                break;
-
-            case VARIABLETYPE_INTEGER:
-                if ($value === null || $value === '') {
-                    return;
-                }
-                $this->SetValueInteger($ident, (int) round((float) $value));
-                break;
-
-            case VARIABLETYPE_FLOAT:
-                if ($value === null || $value === '') {
-                    return;
-                }
-
-                $floatValue = (float) $value;
-                if (is_nan($floatValue) || is_infinite($floatValue)) {
-                    return;
-                }
-
-                $this->SetValueFloat($ident, $floatValue);
-                break;
-
-            case VARIABLETYPE_STRING:
-                if ($value === null) {
-                    $value = '';
-                } elseif (!is_string($value)) {
-                    if (is_scalar($value)) {
-                        $value = (string) $value;
-                    } else {
-                        $value = json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-                        if ($value === false) {
-                            $value = '';
-                        }
-                    }
-                }
-
-                $this->SetValueString($ident, $value);
-                break;
-        }
+        $this->SetValue($ident, $value);
     }
 
     private function GetValueSafe(string $ident, $default = null)
