@@ -166,7 +166,7 @@ class openWB2 extends IPSModuleStrict
     public function ReceiveData(string $JSONString): string
     {
 
-        $this->SendDebug('ReceiveData JSON', $JSONString, 0);
+        //$this->SendDebug('ReceiveData JSON', $JSONString, 0);
 
         $data = json_decode($JSONString, true);
         if (!is_array($data)) {
@@ -1489,6 +1489,9 @@ class openWB2 extends IPSModuleStrict
     private function SetValueSafe(string $ident, $value): void
     {
         $id = $this->GetIDForIdentSafe($ident);
+
+        $this->SendDebug('SetValueSafe', $ident . ' | ID=' . $id . ' | Value=' . var_export($value, true), 0);
+
         if ($id <= 0) {
             return;
         }
