@@ -88,11 +88,13 @@ class openWB2 extends IPSModuleStrict
         $baseTopic = trim($this->ReadPropertyString('BaseTopic'));
         if ($baseTopic === '') {
             $this->SetReceiveDataFilter('.*');
-        } else {
-            $baseTopic = rtrim($baseTopic, '/');
-            $filter = '.*"Topic":"' . preg_quote($baseTopic, '/') . '\/.*';
-            $this->SetReceiveDataFilter($filter);
+            return;
         }
+
+        $baseTopic = rtrim($baseTopic, '/');
+
+        $filter = '.*"Topic":"' . preg_quote($baseTopic, '/') . '\/.*';
+        $this->SetReceiveDataFilter($filter);
 
         $savedTemplate = $this->ReadAttributeString('ChargeTemplateJSON');
         if ($savedTemplate !== '') {
