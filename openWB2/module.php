@@ -990,23 +990,6 @@ class openWB2 extends IPSModuleStrict
         return false;
     }
 
-    private function SetFloatIfNumeric(string $ident, $payload): void
-    {
-        if (!$this->IsNumericPayload($payload)) {
-            $this->SendDebug('SetFloatIfNumeric', $ident . ' Payload nicht numerisch: ' . (string)$payload, 0);
-            return;
-        }
-
-        $value = (float) $payload;
-
-        if (is_nan($value) || is_infinite($value)) {
-            $this->SendDebug('SetFloatIfNumeric', $ident . ' ungültiger Wert: ' . (string)$payload, 0);
-            return;
-        }
-
-        $this->SetValueSafe($ident, $value);
-    }
-
     private function MapChargeModeStringToInt(string $value): int
     {
         $value = strtolower(trim($value));
@@ -1448,8 +1431,7 @@ class openWB2 extends IPSModuleStrict
             ];
         }
 
-        IPS_SetProperty($this->InstanceID, 'SelectedVariables', json_encode($all));
-        IPS_ApplyChanges($this->InstanceID);
+        $this->UpdateFormField('SelectedVariables', 'values', $all);
     }
 
     private function SyncVariables(): void
