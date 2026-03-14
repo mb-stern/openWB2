@@ -60,7 +60,6 @@ class openWB2 extends IPSModuleStrict
 
         $this->SyncSelectedVariables();
         $this->SyncVariables();
-        $this->UpdateDynamicProfiles();
     }
 
     public function GetConfigurationForm(): string
@@ -102,42 +101,42 @@ class openWB2 extends IPSModuleStrict
                     'caption' => 'Auswahl der anzulegenden Variablen'
                 ],
                 [
-                    'name'    => 'SelectedVariables',
-                    'type'    => 'List',
-                    'rowCount'=> 18,
-                    'add'     => false,
-                    'delete'  => false,
-                    'columns' => [
-                        [
-                            'caption' => 'Aktiv',
-                            'name'    => 'enabled',
-                            'width'   => '70px',
-                            'edit'    => ['type' => 'CheckBox']
-                        ],
-                        [
-                            'caption' => 'Bereich',
-                            'name'    => 'group',
-                            'width'   => '180px',
-                            'edit'    => ['type' => 'ValidationTextBox'],
-                            'save'    => false
-                        ],
-                        [
-                            'caption' => 'Ident',
-                            'name'    => 'ident',
-                            'width'   => '220px',
-                            'edit'    => ['type' => 'ValidationTextBox'],
-                            'save'    => true
-                        ],
-                        [
-                            'caption' => 'Bezeichnung',
-                            'name'    => 'caption',
-                            'width'   => 'auto',
-                            'edit'    => ['type' => 'ValidationTextBox'],
-                            'save'    => false
-                        ]
+                'name'    => 'SelectedVariables',
+                'type'    => 'List',
+                'rowCount'=> 18,
+                'add'     => false,
+                'delete'  => false,
+                'columns' => [
+                    [
+                        'caption' => 'Aktiv',
+                        'name'    => 'enabled',
+                        'width'   => '70px',
+                        'edit'    => ['type' => 'CheckBox']
                     ],
-                    'values' => $this->GetVariableSelectionValues()
-                ]
+                    [
+                        'caption' => 'Bereich',
+                        'name'    => 'group',
+                        'width'   => '180px',
+                        'edit'    => ['type' => 'ValidationTextBox'],
+                        'save'    => false
+                    ],
+                    [
+                        'caption' => 'Ident',
+                        'name'    => 'ident',
+                        'width'   => '220px',
+                        'edit'    => ['type' => 'ValidationTextBox'],
+                        'save'    => true
+                    ],
+                    [
+                        'caption' => 'Bezeichnung',
+                        'name'    => 'caption',
+                        'width'   => 'auto',
+                        'edit'    => ['type' => 'ValidationTextBox'],
+                        'save'    => false
+                    ]
+                ],
+                'values' => $this->GetVariableSelectionValues()
+            ]
             ],
             'actions' => [
                 [
@@ -333,28 +332,24 @@ class openWB2 extends IPSModuleStrict
                 case $cpBase . '/fault_str':
                     //$this->SendDebug('Match', 'fault_str', 0);
                     $value = $this->PayloadToString($payload);
-                    $value = json_decode('"' . addslashes($value) . '"');
                     $this->SetValueSafe('FaultString', $value);
                     return '';
 
                 case $cpBase . '/state_str':
                     //$this->SendDebug('Match', 'state_str', 0);
                     $value = $this->PayloadToString($payload);
-                    $value = json_decode('"' . addslashes($value) . '"');
                     $this->SetValueSafe('StateString', $value);
                     return '';
 
                 case $cpBase . '/vehicle_name':
                     //$this->SendDebug('Match', 'vehicle_name', 0);
                     $value = $this->PayloadToString($payload);
-                    $value = json_decode('"' . addslashes($value) . '"');
                     $this->SetValueSafe('VehicleName', $value);
                     return '';
 
                 case $cpBase . '/rfid':
                     //$this->SendDebug('Match', 'rfid', 0);
                     $value = $this->PayloadToString($payload);
-                    $value = json_decode('"' . addslashes($value) . '"');
                     $this->SetValueSafe('RFID', $value);
                     return '';
 
@@ -1370,14 +1365,27 @@ class openWB2 extends IPSModuleStrict
 
     private function GetVariableSelectionValues(): array
     {
-        $selected = $this->GetSelectedVariableIdents();
-        $values = [];
+        $raw = $this->ReadPropertyString('SelectedVariables');
+        $data = json_decode($raw, true);
 
+        $enabledMap = [];
+
+        if (is_array($data)) {
+            foreach ($data as $row) {
+                if (is_array($row) && isset($row['ident'])) {
+                    $enabledMap[(string)$row['ident']] = !empty($row['enabled']);
+                }
+            }
+        }
+
+        $values = [];
         foreach ($this->GetVariableDefinitions() as $definition) {
+            $ident = $definition['ident'];
+
             $values[] = [
-                'enabled' => in_array($definition['ident'], $selected, true),
+                'enabled' => $enabledMap[$ident] ?? false,
                 'group'   => $definition['group'],
-                'ident'   => $definition['ident'],
+                'ident'   => $ident,
                 'caption' => $definition['caption']
             ];
         }
@@ -1405,30 +1413,6 @@ class openWB2 extends IPSModuleStrict
         }
 
         return array_values(array_unique($idents));
-    }
-
-    private function SyncSelectedVariables(): void
-    {
-        $raw = $this->ReadPropertyString('SelectedVariables');
-        $data = json_decode($raw, true);
-
-        if (is_array($data) && $data !== []) {
-            return;
-        }
-
-        $all = [];
-        foreach ($this->GetVariableDefinitions() as $definition) {
-            $all[] = [
-                'enabled' => true,
-                'group'   => $definition['group'],
-                'ident'   => $definition['ident'],
-                'caption' => $definition['caption']
-            ];
-        }
-
-        if (IPS_GetKernelRunlevel() == KR_READY) {
-            $this->UpdateFormField('SelectedVariables', 'values', json_encode($all));
-        }
     }
 
     private function SyncVariables(): void
