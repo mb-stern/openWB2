@@ -1515,7 +1515,7 @@ class openWB2 extends IPSModuleStrict
             ['ident' => 'MaxChargePower',              'caption' => 'Max. Ladeleistung',               'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Watt',             'position' => 245, 'action' => false, 'group' => 'Status / Read'],
 
             // Action / Write
-            ['ident' => 'SetChargePointLock',          'caption' => 'Ladepunkt aktiviren',               'type' => VARIABLETYPE_BOOLEAN, 'profile' => 'OWB.ChargePointEnabled','position' => 290, 'action' => true,  'group' => 'Action / Write'],
+            ['ident' => 'SetChargePointLock',          'caption' => 'Ladepunkt aktivieren',            'type' => VARIABLETYPE_BOOLEAN, 'profile' => 'OWB.ChargePointEnabled','position' => 290, 'action' => true,  'group' => 'Action / Write'],
             ['ident' => 'SetChargeMode',               'caption' => 'Lademodus',                       'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.ChargeMode',       'position' => 300, 'action' => true,  'group' => 'Action / Write'],
             ['ident' => 'SetChargeCurrent',            'caption' => 'Stromstärke',                     'type' => VARIABLETYPE_INTEGER, 'profile' => '',                      'position' => 310, 'action' => true,  'group' => 'Action / Write'],
             ['ident' => 'PhasesToUse',                 'caption' => 'Phasen Sofortladen',              'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.PhasesToUse',      'position' => 315, 'action' => true,  'group' => 'Action / Write'],
