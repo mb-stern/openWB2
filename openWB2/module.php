@@ -88,19 +88,21 @@ class openWB2 extends IPSModuleStrict
         $baseTopic = trim($this->ReadPropertyString('BaseTopic'));
         if ($baseTopic === '') {
             $this->SetReceiveDataFilter('.*');
-        } else {
-            $baseTopic = rtrim($baseTopic, '/');
-            $filter = '.*"Topic":"' . preg_quote($baseTopic, '/') . '\/.*';
-            $this->SetReceiveDataFilter($filter);
+            return;
         }
+
+        $baseTopic = rtrim($baseTopic, '/');
+
+        $filter = '.*"Topic":"' . preg_quote($baseTopic, '/') . '\/.*';
+        $this->SetReceiveDataFilter($filter);
 
         $savedTemplate = $this->ReadAttributeString('ChargeTemplateJSON');
         if ($savedTemplate !== '') {
             $this->SetBuffer('ChargeTemplateJSON', $savedTemplate);
         }
 
-        $this->SyncSelectedVariables();
         $this->UpdateDynamicProfiles();
+        $this->UpdateVariableVisibility();
     }
 
     public function GetConfigurationForm(): string
@@ -115,7 +117,7 @@ class openWB2 extends IPSModuleStrict
         $values = [];
         foreach ($allGroups as $groupName => $variables) {
             foreach ($variables as $var) {
-                $ident = (string) $var['ident'];
+                $ident = (string)$var['ident'];
 
                 $values[] = [
                     'selected' => isset($selectedMap[$ident]),
@@ -204,7 +206,7 @@ class openWB2 extends IPSModuleStrict
                         [
                             'type' => 'Image',
                             'onClick' => "echo 'https://paypal.me/mbstern';",
-                            'image' => 'data:image/jpeg;base64,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'
+                            'image' => 'data:image/jpeg;base64,...'
                         ],
                         [
                             'type' => 'Label',
@@ -294,7 +296,7 @@ class openWB2 extends IPSModuleStrict
         }
 
         foreach ($cpBases as $cpBase) {
-            $this->SendDebug('Prüfe Base', $cpBase, 0);
+            //$this->SendDebug('Prüfe Base', $cpBase, 0);
 
             switch ($topic) {
                 case $cpBase . '/soc/soc':
@@ -334,17 +336,17 @@ class openWB2 extends IPSModuleStrict
                     return '';
 
                 case $cpBase . '/voltages/1':
-                    $this->SendDebug('Match', 'voltages/1', 0);
+                    //$this->SendDebug('Match', 'voltages/1', 0);
                     $this->SetFloatIfNumeric('Voltage1', $payload);
                     return '';
 
                 case $cpBase . '/voltages/2':
-                    $this->SendDebug('Match', 'voltages/2', 0);
+                    //$this->SendDebug('Match', 'voltages/2', 0);
                     $this->SetFloatIfNumeric('Voltage2', $payload);
                     return '';
 
                 case $cpBase . '/voltages/3':
-                    $this->SendDebug('Match', 'voltages/3', 0);
+                    //$this->SendDebug('Match', 'voltages/3', 0);
                     $this->SetFloatIfNumeric('Voltage3', $payload);
                     return '';
 
@@ -1247,18 +1249,10 @@ class openWB2 extends IPSModuleStrict
         IPS_SetVariableProfileText($powerProfile, '', ' W');
         IPS_SetVariableProfileValues($powerProfile, $minPower, $maxPower, 10);
 
-        $this->SetVariableCustomProfileIfExists('SetChargeCurrent', $ampereProfile);
-        $this->SetVariableCustomProfileIfExists('ConfiguredCurrent', $ampereProfile);
-        $this->SetVariableCustomProfileIfExists('SetMinimalPermanentCurrent', $ampereProfile);
-        $this->SetVariableCustomProfileIfExists('SetChargePower', $powerProfile);
-    }
-
-    private function SetVariableCustomProfileIfExists(string $ident, string $profile): void
-    {
-        $id = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
-        if ($id > 0 && IPS_VariableExists($id)) {
-            IPS_SetVariableCustomProfile($id, $profile);
-        }
+        IPS_SetVariableCustomProfile($this->GetIDForIdent('SetChargeCurrent'), $ampereProfile);
+        IPS_SetVariableCustomProfile($this->GetIDForIdent('ConfiguredCurrent'), $ampereProfile);
+        IPS_SetVariableCustomProfile($this->GetIDForIdent('SetMinimalPermanentCurrent'), $ampereProfile);
+        IPS_SetVariableCustomProfile($this->GetIDForIdent('SetChargePower'), $powerProfile);
     }
 
     private function DetermineBestChargingSetup(int $requestedPower): array
@@ -1351,11 +1345,11 @@ class openWB2 extends IPSModuleStrict
     {
         $voltage = 230.0;
 
-        $id = @IPS_GetObjectIDByIdent('Voltage1', $this->InstanceID);
-        if ($id > 0 && IPS_VariableExists($id)) {
+        $id = @$this->GetIDForIdent('Voltage1');
+        if ($id !== false) {
             $value = GetValue($id);
             if (is_numeric($value)) {
-                $value = (float) $value;
+                $value = (float)$value;
                 if ($value > 100 && $value < 300) {
                     $voltage = $value;
                 }
@@ -1382,117 +1376,73 @@ class openWB2 extends IPSModuleStrict
         return $idents;
     }
 
-    private function SyncSelectedVariables(): void
+    private function UpdateVariableVisibility(): void
     {
         $selected = $this->GetSelectedVariableIdents();
-        $currentIdents = [];
 
         foreach ($this->GetAvailableVariables() as $group => $variables) {
             foreach ($variables as $var) {
                 $ident = (string) $var['ident'];
-
-                if (!in_array($ident, $selected, true)) {
-                    continue;
-                }
-
-                $currentIdents[] = $ident;
-
                 $id = @IPS_GetObjectIDByIdent($ident, $this->InstanceID);
-                if (!($id > 0 && IPS_VariableExists($id))) {
-                    switch ($var['type']) {
-                        case VARIABLETYPE_INTEGER:
-                            $this->RegisterVariableInteger($ident, $var['name'], $var['profile'], $var['pos']);
-                            break;
 
-                        case VARIABLETYPE_FLOAT:
-                            $this->RegisterVariableFloat($ident, $var['name'], $var['profile'], $var['pos']);
-                            break;
-
-                        case VARIABLETYPE_STRING:
-                            $this->RegisterVariableString($ident, $var['name'], $var['profile'], $var['pos']);
-                            break;
-
-                        case VARIABLETYPE_BOOLEAN:
-                            $this->RegisterVariableBoolean($ident, $var['name'], $var['profile'], $var['pos']);
-                            break;
-                    }
+                if ($id > 0) {
+                    $visible = in_array($ident, $selected, true);
+                    IPS_SetHidden($id, !$visible);
                 }
             }
         }
-
-        foreach (IPS_GetChildrenIDs($this->InstanceID) as $childID) {
-            $obj = IPS_GetObject($childID);
-            $ident = $obj['ObjectIdent'];
-
-            if ($this->IsOptionalVariableIdent($ident) && !in_array($ident, $currentIdents, true)) {
-                $this->UnregisterVariable($ident);
-            }
-        }
-    }
-
-    private function IsOptionalVariableIdent(string $ident): bool
-    {
-        foreach ($this->GetAvailableVariables() as $group => $variables) {
-            foreach ($variables as $var) {
-                if ($var['ident'] === $ident) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     private function GetAvailableVariables(): array
     {
         return [
             'Allgemein' => [
-                ['ident' => 'SoC',               'name' => 'EV-SoC',                    'type' => VARIABLETYPE_INTEGER, 'profile' => '~Intensity.100', 'pos' => 10],
-                ['ident' => 'ProSoC',            'name' => 'Pro-SoC',                   'type' => VARIABLETYPE_INTEGER, 'profile' => '~Intensity.100', 'pos' => 20],
-                ['ident' => 'SocTimestamp',      'name' => 'Pro-SoC Zeitstempel',       'type' => VARIABLETYPE_STRING,  'profile' => '',               'pos' => 25],
-                ['ident' => 'ConfiguredCurrent', 'name' => 'EVSE Aktuell',              'type' => VARIABLETYPE_INTEGER, 'profile' => '',               'pos' => 30],
-                ['ident' => 'Frequency',         'name' => 'Frequenz',                  'type' => VARIABLETYPE_FLOAT,   'profile' => '~Hertz',        'pos' => 60],
-                ['ident' => 'Power',             'name' => 'Ladeleistung',              'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Watt',      'pos' => 100],
-                ['ident' => 'PhasesInUse',       'name' => 'Verwendete Phasen',         'type' => VARIABLETYPE_INTEGER, 'profile' => '',               'pos' => 110],
-                ['ident' => 'ChargeState',       'name' => 'Ladestatus',                'type' => VARIABLETYPE_BOOLEAN, 'profile' => 'OWB.ChargeState','pos' => 120],
-                ['ident' => 'PlugState',         'name' => 'Stecker Status',            'type' => VARIABLETYPE_BOOLEAN, 'profile' => 'OWB.PlugState',  'pos' => 130],
-                ['ident' => 'State',             'name' => 'Status',                    'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.LPState',    'pos' => 150],
-                ['ident' => 'FaultState',        'name' => 'Fehlerstatus',              'type' => VARIABLETYPE_INTEGER, 'profile' => '',               'pos' => 160],
-                ['ident' => 'FaultString',       'name' => 'Fehlertext',                'type' => VARIABLETYPE_STRING,  'profile' => '',               'pos' => 170],
-                ['ident' => 'ErrorTimestamp',    'name' => 'Fehler Zeitstempel',        'type' => VARIABLETYPE_STRING,  'profile' => '',               'pos' => 175],
-                ['ident' => 'StateString',       'name' => 'Statustext',                'type' => VARIABLETYPE_STRING,  'profile' => '',               'pos' => 180],
-                ['ident' => 'VehicleName',       'name' => 'Fahrzeug Name',             'type' => VARIABLETYPE_STRING,  'profile' => '',               'pos' => 190],
-                ['ident' => 'RFID',              'name' => 'RFID',                      'type' => VARIABLETYPE_STRING,  'profile' => '',               'pos' => 200],
-                ['ident' => 'RFIDTimestamp',     'name' => 'RFID Zeitstempel',          'type' => VARIABLETYPE_STRING,  'profile' => '',               'pos' => 205],
-                ['ident' => 'DailyImported',     'name' => 'Energie Tag',               'type' => VARIABLETYPE_FLOAT,   'profile' => '~Electricity',   'pos' => 210],
-                ['ident' => 'DailyExported',     'name' => 'Energie Tag Export',        'type' => VARIABLETYPE_FLOAT,   'profile' => '~Electricity',   'pos' => 215],
-                ['ident' => 'Imported',          'name' => 'Energie Gesamt',            'type' => VARIABLETYPE_FLOAT,   'profile' => '~Electricity',   'pos' => 220],
-                ['ident' => 'Exported',          'name' => 'Energie Gesamt Export',     'type' => VARIABLETYPE_FLOAT,   'profile' => '~Electricity',   'pos' => 225],
-                ['ident' => 'SerialNumber',      'name' => 'Seriennummer',              'type' => VARIABLETYPE_STRING,  'profile' => '',               'pos' => 237],
-                ['ident' => 'VehicleID',         'name' => 'Fahrzeug ID',               'type' => VARIABLETYPE_STRING,  'profile' => '',               'pos' => 238],
-                ['ident' => 'Version',           'name' => 'Version',                   'type' => VARIABLETYPE_STRING,  'profile' => '',               'pos' => 239],
-                ['ident' => 'EvseSignaling',     'name' => 'EVSE Signaling',            'type' => VARIABLETYPE_STRING,  'profile' => '',               'pos' => 240],
-                ['ident' => 'Revision',          'name' => 'Revision',                  'type' => VARIABLETYPE_STRING,  'profile' => '',               'pos' => 241],
-                ['ident' => 'ChargingPower',     'name' => 'Aktuelle Ladeleistung',     'type' => VARIABLETYPE_INTEGER, 'profile' => 'OWB.Watt',       'pos' => 242],
-                ['ident' => 'ChargingVoltage',   'name' => 'Aktuelle Ladespannung',     'type' => VARIABLETYPE_INTEGER, 'profile' => '~Volt',          'pos' => 243],
-                ['ident' => 'MaxDischargePower', 'name' => 'Max. Entladeleistung',      'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Watt',       'pos' => 244],
-                ['ident' => 'MaxChargePower',    'name' => 'Max. Ladeleistung',         'type' => VARIABLETYPE_FLOAT,   'profile' => 'OWB.Watt',       'pos' => 245],
+                ['ident' => 'SoC',               'name' => 'EV-SoC'],
+                ['ident' => 'ProSoC',            'name' => 'Pro-SoC'],
+                ['ident' => 'SocTimestamp',      'name' => 'Pro-SoC Zeitstempel'],
+                ['ident' => 'ConfiguredCurrent', 'name' => 'EVSE Aktuell'],
+                ['ident' => 'Frequency',         'name' => 'Frequenz'],
+                ['ident' => 'Power',             'name' => 'Ladeleistung'],
+                ['ident' => 'PhasesInUse',       'name' => 'Verwendete Phasen'],
+                ['ident' => 'ChargeState',       'name' => 'Ladestatus'],
+                ['ident' => 'PlugState',         'name' => 'Stecker Status'],
+                ['ident' => 'State',             'name' => 'Status'],
+                ['ident' => 'FaultState',        'name' => 'Fehlerstatus'],
+                ['ident' => 'FaultString',       'name' => 'Fehlertext'],
+                ['ident' => 'ErrorTimestamp',    'name' => 'Fehler Zeitstempel'],
+                ['ident' => 'StateString',       'name' => 'Statustext'],
+                ['ident' => 'VehicleName',       'name' => 'Fahrzeug Name'],
+                ['ident' => 'RFID',              'name' => 'RFID'],
+                ['ident' => 'RFIDTimestamp',     'name' => 'RFID Zeitstempel'],
+                ['ident' => 'DailyImported',     'name' => 'Energie Tag'],
+                ['ident' => 'DailyExported',     'name' => 'Energie Tag Export'],
+                ['ident' => 'Imported',          'name' => 'Energie Gesamt'],
+                ['ident' => 'Exported',          'name' => 'Energie Gesamt Export'],
+                ['ident' => 'SerialNumber',      'name' => 'Seriennummer'],
+                ['ident' => 'VehicleID',         'name' => 'Fahrzeug ID'],
+                ['ident' => 'Version',           'name' => 'Version'],
+                ['ident' => 'EvseSignaling',     'name' => 'EVSE Signaling'],
+                ['ident' => 'Revision',          'name' => 'Revision'],
+                ['ident' => 'ChargingPower',     'name' => 'Aktuelle Ladeleistung'],
+                ['ident' => 'ChargingVoltage',   'name' => 'Aktuelle Ladespannung'],
+                ['ident' => 'MaxDischargePower', 'name' => 'Max. Entladeleistung'],
+                ['ident' => 'MaxChargePower',    'name' => 'Max. Ladeleistung'],
             ],
             'Ströme / Spannungen' => [
-                ['ident' => 'PhaseCurrent1', 'name' => 'Strom Phase 1',    'type' => VARIABLETYPE_FLOAT, 'profile' => '~Ampere', 'pos' => 40],
-                ['ident' => 'PhaseCurrent2', 'name' => 'Strom Phase 2',    'type' => VARIABLETYPE_FLOAT, 'profile' => '~Ampere', 'pos' => 41],
-                ['ident' => 'PhaseCurrent3', 'name' => 'Strom Phase 3',    'type' => VARIABLETYPE_FLOAT, 'profile' => '~Ampere', 'pos' => 42],
-                ['ident' => 'Voltage1',      'name' => 'Spannung Phase 1', 'type' => VARIABLETYPE_FLOAT, 'profile' => '~Volt',   'pos' => 50],
-                ['ident' => 'Voltage2',      'name' => 'Spannung Phase 2', 'type' => VARIABLETYPE_FLOAT, 'profile' => '~Volt',   'pos' => 51],
-                ['ident' => 'Voltage3',      'name' => 'Spannung Phase 3', 'type' => VARIABLETYPE_FLOAT, 'profile' => '~Volt',   'pos' => 52],
+                ['ident' => 'PhaseCurrent1', 'name' => 'Strom Phase 1'],
+                ['ident' => 'PhaseCurrent2', 'name' => 'Strom Phase 2'],
+                ['ident' => 'PhaseCurrent3', 'name' => 'Strom Phase 3'],
+                ['ident' => 'Voltage1',      'name' => 'Spannung Phase 1'],
+                ['ident' => 'Voltage2',      'name' => 'Spannung Phase 2'],
+                ['ident' => 'Voltage3',      'name' => 'Spannung Phase 3'],
             ],
             'Leistung / Faktor' => [
-                ['ident' => 'PowerL1',       'name' => 'Leistung Phase 1',         'type' => VARIABLETYPE_FLOAT, 'profile' => 'OWB.Watt', 'pos' => 70],
-                ['ident' => 'PowerL2',       'name' => 'Leistung Phase 2',         'type' => VARIABLETYPE_FLOAT, 'profile' => 'OWB.Watt', 'pos' => 71],
-                ['ident' => 'PowerL3',       'name' => 'Leistung Phase 3',         'type' => VARIABLETYPE_FLOAT, 'profile' => 'OWB.Watt', 'pos' => 72],
-                ['ident' => 'PowerFactor1',  'name' => 'Leistungsfaktor Phase 1',  'type' => VARIABLETYPE_FLOAT, 'profile' => '',         'pos' => 80],
-                ['ident' => 'PowerFactor2',  'name' => 'Leistungsfaktor Phase 2',  'type' => VARIABLETYPE_FLOAT, 'profile' => '',         'pos' => 81],
-                ['ident' => 'PowerFactor3',  'name' => 'Leistungsfaktor Phase 3',  'type' => VARIABLETYPE_FLOAT, 'profile' => '',         'pos' => 82],
+                ['ident' => 'PowerL1',      'name' => 'Leistung Phase 1'],
+                ['ident' => 'PowerL2',      'name' => 'Leistung Phase 2'],
+                ['ident' => 'PowerL3',      'name' => 'Leistung Phase 3'],
+                ['ident' => 'PowerFactor1', 'name' => 'Leistungsfaktor Phase 1'],
+                ['ident' => 'PowerFactor2', 'name' => 'Leistungsfaktor Phase 2'],
+                ['ident' => 'PowerFactor3', 'name' => 'Leistungsfaktor Phase 3'],
             ]
         ];
     }
