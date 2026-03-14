@@ -1496,7 +1496,7 @@ class openWB2 extends IPSModuleStrict
             return;
         }
 
-        SetValue($id, $value);
+        SetValue($ident, $value);
     }
 
     private function GetValueSafe(string $ident, $default = null)
