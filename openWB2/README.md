@@ -18,7 +18,7 @@ Für eine Integration in den Energiemanager ist dort unter Leistung (Soll) die V
 
 ### Statusdaten
 
-Das Modul liest zahlreiche Informationen der Wallbox aus, unter anderem:
+Das Modul liest zahlreiche Informationen der Wallbox aus, diese lassen sich aber über Checkboxen an- und abwählen:
 
 - aktuelle Ladeleistung
 - Strom pro Phase
@@ -38,17 +38,20 @@ Das Modul liest zahlreiche Informationen der Wallbox aus, unter anderem:
 
 ### Steuerfunktionen
 
-Folgende Einstellungen können direkt über IP-Symcon gesteuert werden:
+Folgende Einstellungen können direkt über IP-Symcon gesteuert werden, auch diese lassen sich an und abwählen:
 
+- Ladepunkt aktivieren
 - Lademodus
-- Ladestrom
+- Stromstärke
+- Phasen Sofortladen (1 oder Maximum)
 - Sollleistung
-- Phasenwahl beim Sofortladen (1 oder Maximum)
+- Mindest SoC für das Fahrzeug
 - Minimaler Dauerstrom
-- Minimaler PV-SoC
-- Ladepunkt sperren / entsperren
-- Batterie-Priorität
-- Sofortlade-Limit
+- Höchstpreis Eco
+- LadePriorität
+- Begrenzung
+- SoC-Limit für das Fahrzeug
+- Energie Limit
 
 
 ---
