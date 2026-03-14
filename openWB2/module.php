@@ -58,8 +58,8 @@ class openWB2 extends IPSModuleStrict
             $this->SetBuffer('ChargeTemplateJSON', $savedTemplate);
         }
 
+        $this->SyncSelectedVariables();
         $this->SyncVariables();
-        $this->UpdateDynamicProfiles();
     }
 
     public function GetConfigurationForm(): string
@@ -1489,9 +1489,6 @@ class openWB2 extends IPSModuleStrict
     private function SetValueSafe(string $ident, $value): void
     {
         $id = $this->GetIDForIdentSafe($ident);
-
-        $this->SendDebug('SetValueSafe', $ident . ' | ID=' . $id . ' | Value=' . var_export($value, true), 0);
-
         if ($id <= 0) {
             return;
         }
