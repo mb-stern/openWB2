@@ -2,13 +2,11 @@
     "id": "{0AC7C3C0-EE51-C325-1136-12C3FBB8A2D6}",
     "name": "openWB2",
     "type": 3,
-    "vendor": "",
-    "aliases": [
-        "openWB2"
-    ],
-    "parentRequirements": ["{E310B701-4AE7-458E-B618-EC13A1A6F6A8}"],
-    "childRequirements": [],
-    "implemented": ["{77B31ABB-18FA-4B91-BB63-E5B2AB5588F4}"],
-    "prefix": "owb2",
-    "url": "https://github.com/mb-stern/Goodwe/tree/beta"
+    "vendor": "openWB2",
+    "aliases": [],
+    "parentRequirements": ["{043EA491-0325-4ADD-8FC2-A30C8EEB4D3F}"],
+  "childRequirements": [],
+  "implemented": ["{7F7632D9-FA40-4F38-8DEA-C83CD4325A32}"],
+    "prefix": "OWB",
+    "url": "https://github.com/mb-stern/openWB2/blob/beta/openWB2/README.md"
   }
