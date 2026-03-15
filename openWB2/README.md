@@ -18,7 +18,7 @@ Für eine Integration in den Energiemanager ist dort unter Leistung (Soll) die V
 
 ### Statusdaten
 
-Das Modul liest zahlreiche Informationen der Wallbox aus, diese lassen sich aber über Checkboxen an- und abwählen:
+Das Modul liest zahlreiche Informationen der Wallbox aus, die zugehörigen Variablen lassen sich über Checkboxen erstellen:
 
 - aktuelle Ladeleistung
 - Strom pro Phase
@@ -33,6 +33,7 @@ Das Modul liest zahlreiche Informationen der Wallbox aus, diese lassen sich aber
 - RFID
 - Fahrzeug-SoC (falls verfügbar)
 - Energieverbrauch (Tag / Gesamt)
+- und viele mehr...
 
 ---
 
@@ -62,15 +63,12 @@ Die Phasenumschaltung ist nur im Sofort-Lademodus verfügbar.
 
 Das Modul unterstützt eine automatische Umschaltung zwischen **einphasigem und dreiphasigem Laden** abhängig von der gewünschten Ladeleistung.
 
-Die Umschaltung erfolgt über das umschalten des Ladeprofil der openWB und ist als einzige Funktion nicht Umfang der SimpleAPI
-
 ---
 
 ## Voraussetzungen
 
-- **IP-Symcon 7.x oder neuer**
-- **MQTT-Client Instanz** in IP-Symcon
-- **openWB mit aktivierter MQTT SimpleAPI**
+- **IP-Symcon 8.1 oder neuer**
+- **openWB ab 2.1.9**
 
 ---
 
@@ -87,19 +85,19 @@ Die Umschaltung erfolgt über das umschalten des Ladeprofil der openWB und ist a
 
 | Einstellung | Beschreibung |
 |-------------|--------------|
-| MQTT Topic | Basis-Topic der openWB |
-| Ladepunkt ID | ID des Ladepunktes |
-| Ladeprofil ID | ID des Charge Templates |
-| Minimalstrom pro Phase | minimaler Ladestrom |
-| Maximalstrom pro Phase | maximaler Ladestrom |
-| Hysterese Phasenumschaltung | Leistungs-Hysterese für den Phasenwechsel |
-| Sperrzeit Phasenumschaltung | Zeit in Sekunden, während der kein erneuter Phasenwechsel erlaubt ist |
+| MQTT Topic | Basis-Topic der openWB - Standard ist 'openWB'.  |
+| Ladepunkt ID | ID des Ladepunktes - Diese ID findet man unter Konfiguration - Ladepunkte und wird zur Kommunikation mit dem Ladepunkt (Wallbox) benötig. |
+| Ladepunkt-Profil ID | ID des Charge Templates - Diese ID findet man unter Konfiguration - Ladepunkte und wird zur korrekten Erstellung des Templates benötig. |
+| Minimalstrom pro Phase | minimaler Ladestrom - Diese Einstellung wirkt sich direkt auf das Variablenprofil OWB.TargetPower.<Instanz-ID> und OWB.Ampere.<Instanz-ID> aus,um aus, um den Regelbereich für die vorgegebene Sollleistung und Ampere-Bereich festzulegen.  |
+| Maximalstrom pro Phase | maximaler Ladestrom - Diese Einstellung wirkt sich direkt auf das Variablenprofil OWB.TargetPower.<Instanz-ID> und OWB.Ampere.<Instanz-ID> aus,um aus, um den Regelbereich für die vorgegebene Sollleistung und Ampere-Bereich festzulegen. |
+| Sperrzeit Phasenumschaltung | Zeit in Sekunden, während der kein erneuter Phasenwechsel erlaubt ist - Der Grund hier ist, eine Störmeldung des angeschlossenen Farhrezuges zu verhindern. Voreingestellt sind 60 sec |
 
 ---
 
 ## MQTT Kommunikation
 
-Das Modul verwendet die **SimpleAPI MQTT Topics** der openWB.
+Das Modul verwendet hauptsächlich die **SimpleAPI MQTT Topics** der openWB.
+Die Umschaltung erfolgt über das umschalten des Ladeprofil der openWB und ist als einzige Funktion nicht Umfang der SimpleAPI.
 
 ### Beispiele gelesener Topics
 
