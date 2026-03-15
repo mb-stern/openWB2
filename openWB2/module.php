@@ -482,7 +482,7 @@ class openWB2 extends IPSModuleStrict
                     return '';
                 
                 
-                //Ab hier die Daten für die Variblen mit AKtion
+                //Ab hier die Daten für die Variablen mit Aktion
                 
                 case $cpBase . '/manual_lock':
                     //$this->SendDebug('Match', 'manual_lock', 0);
