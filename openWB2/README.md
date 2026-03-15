@@ -107,8 +107,9 @@ openWB/simpleAPI/chargepoint/0/power
 openWB/simpleAPI/chargepoint/0/charging_current
 openWB/simpleAPI/chargepoint/0/phases_in_use
 
+---
 
-### Einstellungen
+## Einstellungen
 
 | Variable | Beschreibung |
 |----------|--------------|
@@ -127,17 +128,52 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 
 ---
 
-## Variablen (Auszug)
+## Istwerte
 
 | Variable | Beschreibung |
 |----------|--------------|
-| Power | aktuelle Ladeleistung |
-| PhasesInUse | aktive Phasen |
-| ChargeState | Ladestatus |
-| PlugState | Steckstatus |
-| SoC | Fahrzeug-SoC | 
-| Imported | Gesamtenergie |
-| DailyImported | Energie heute |
+| EV-SoC | Ladezustand des Fahrzeugs in Prozent |
+| Pro-SoC | Prognostizierter SoC des Fahrzeugs |
+| Pro-SoC Zeitstempel | Zeitstempel der letzten Pro-SoC Aktualisierung |
+| EVSE Aktuell | Aktuell von der Wallbox vorgegebener Ladestrom |
+| Strom Phase 1 | Strom auf Phase 1 |
+| Strom Phase 2 | Strom auf Phase 2 |
+| Strom Phase 3 | Strom auf Phase 3 |
+| Spannung Phase 1 | Spannung auf Phase 1 |
+| Spannung Phase 2 | Spannung auf Phase 2 |
+| Spannung Phase 3 | Spannung auf Phase 3 |
+| Frequenz | Netzfrequenz |
+| Leistung Phase 1 | Leistung auf Phase 1 |
+| Leistung Phase 2 | Leistung auf Phase 2 |
+| Leistung Phase 3 | Leistung auf Phase 3 |
+| Leistungsfaktor Phase 1 | Leistungsfaktor auf Phase 1 |
+| Leistungsfaktor Phase 2 | Leistungsfaktor auf Phase 2 |
+| Leistungsfaktor Phase 3 | Leistungsfaktor auf Phase 3 |
+| Ladeleistung | Aktuelle Ladeleistung des Fahrzeugs |
+| Verwendete Phasen | Anzahl der aktuell genutzten Phasen |
+| Ladestatus | Gibt an ob das Fahrzeug gerade lädt |
+| Stecker Status | Gibt an ob ein Fahrzeug angeschlossen ist |
+| Status | Gesamtstatus des Ladepunktes |
+| Fehlerstatus | Fehlercode der Wallbox |
+| Fehlertext | Beschreibung des aktuellen Fehlers |
+| Fehler Zeitstempel | Zeitpunkt des letzten Fehlers |
+| Statustext | Textueller Status der Wallbox |
+| Fahrzeug Name | Name des verbundenen Fahrzeugs |
+| RFID | Letzte erkannte RFID |
+| RFID Zeitstempel | Zeitpunkt der letzten RFID-Erkennung |
+| Energie Tag | Geladene Energie des aktuellen Tages |
+| Energie Tag Export | Exportierte Energie des aktuellen Tages |
+| Energie Gesamt | Gesamte geladene Energie |
+| Energie Gesamt Export | Gesamte exportierte Energie |
+| Seriennummer | Seriennummer der Wallbox |
+| Fahrzeug ID | ID des verbundenen Fahrzeugs |
+| Version | Softwareversion der Wallbox |
+| EVSE Signaling | Signalisierungszustand der EVSE |
+| Revision | Revisionsnummer der openWB |
+| Aktuelle Ladeleistung | Momentane Ladeleistung während des Ladevorgangs |
+| Aktuelle Ladespannung | Aktuelle Spannung während des Ladens |
+| Max. Entladeleistung | Maximale mögliche Entladeleistung |
+| Max. Ladeleistung | Maximale mögliche Ladeleistung |
 
 ---
 
