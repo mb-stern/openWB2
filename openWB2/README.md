@@ -4,13 +4,11 @@
 
 Dieses Modul integriert eine **openWB Wallbox** über **MQTT (SimpleAPI)** in **IP-Symcon**.
 
-Das Modul erfordert IP-Symcon ab 8.1 und openWB ab 2.1.9
+**Das Modul erfordert IP-Symcon ab 8.1 und openWB ab 2.1.9**
 
 Es ermöglicht das **Auslesen von Status- und Energiedaten** sowie das **Steuern von Ladevorgängen** direkt aus IP-Symcon heraus.
 
-Die Kommunikation erfolgt über den MQTT-Client von IP-Symcon und nutzt die **SimpleAPI Topics** der openWB.
-
-Für eine Integration in den Energiemanager ist dort unter Leistung (Soll) die Variable 'Sollleistung' des Moduls zu wählen. Ebenfalls ist in der AUswahl für die Variable An/Aus die Variable 'Ladepunkt aktivieren' zu wählen.
+Die Kommunikation erfolgt über den MQTT-Client von IP-Symcon und nutzt hauptsächlich die **SimpleAPI Topics** der openWB.
 
 ---
 
@@ -94,6 +92,12 @@ Das Modul unterstützt eine automatische Umschaltung zwischen **einphasigem und 
 
 ---
 
+## Integratioen in den Energiemanager
+
+Für eine Integration in den Energiemanager ist der Lademodus 'Sofort' zu wählen. Im Energiemanager, unter Konfigurtion der Wallbox, ist bei der Leistung (Soll) die Variable 'Sollleistung' des openWB2- Moduls zu wählen. Ebenfalls ist in der Auswahl für die Variable An/Aus die Variable 'Ladepunkt aktivieren' zu wählen. Ebenfalls ist im Energiemanger eine Mindestlaufzeit zu definieren, da ansonsten ein sehr häufiger Wechsel der Phasen statt findet.
+
+---
+
 ## MQTT Kommunikation
 
 Das Modul verwendet hauptsächlich die **SimpleAPI MQTT Topics** der openWB.
@@ -127,7 +131,7 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 
 ## Version
 
-Version 1.0 (10.3.26)
+Version 1.0 (15.3.26)
 - Initale Version
 
 ---
