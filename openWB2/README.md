@@ -110,18 +110,20 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 
 ### Einstellungen
 
-- Ladepunkt aktivieren
-- Lademodus
-- Stromstärke
-- Phasen Sofortladen (1 oder Maximum)
-- Sollleistung
-- Mindest SoC für das Fahrzeug
-- Minimaler Dauerstrom
-- Höchstpreis Eco
-- LadePriorität
-- Begrenzung
-- SoC-Limit für das Fahrzeug
-- Energie Limit
+| Variable | Beschreibung |
+|----------|--------------|
+| Ladepunkt aktivieren | Ladepunkt aktivieren oder deaktivieren |
+| Lademodus | Lademodus am Ladepunkt ändern |
+| Stromstärke | Ladestrom für das Sofort laden |
+| Phasen Sofortladen | Anzahl Phasen beim Sofort-Laden (1 oder Maximum) |
+| Sollleistung | Vorgegebene Ladeleistung beim Sofortladen. Wir die Vorgabe über diesen Wert gemacht, findet die Phasenumschaltung automatisch statt |
+| Mindest SoC für das Fahrzeug | Nur ab openWB Revision 2 unterstützt - Minimaler EV SoC im PV Laden |
+| Minimaler Dauerstrom | Nur ab openWB Revision 2 unterstützt - Minimaler Dauerstrom für das PV Laden |
+| Höchstpreis Eco | Nur ab openWB Revision 2 unterstützt - Maximaler Preis für das ECO Laden |
+| LadePriorität |
+| Begrenzung | Nur ab openWB Revision 2 unterstützt - Setzt den Typ der Ladebegrenzung für das Sofortladen |
+| SoC-Limit für das Fahrzeug | Nur ab openWB Revision 2 unterstützt - Setzt die SoC-Grenze für das Sofortladen (aktiv wenn Limit-Typ „EV-SoC“ ist) |
+| Energie Limit | Nur ab openWB Revision 2 unterstützt - Setzt die Energiegrenze für das Sofortladen (aktiv wenn Limit-Typ „Energie“ ist) |
 
 ---
 
@@ -133,7 +135,7 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 | PhasesInUse | aktive Phasen |
 | ChargeState | Ladestatus |
 | PlugState | Steckstatus |
-| SoC | Fahrzeug-SoC |
+| SoC | Fahrzeug-SoC | 
 | Imported | Gesamtenergie |
 | DailyImported | Energie heute |
 
