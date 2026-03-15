@@ -761,8 +761,8 @@ class openWB2 extends IPSModuleStrict
         ]);
 
         $this->RegisterProfileBooleanEx('OWB.ChargePointEnabled', 'Car', '', '', [
-            [false, 'Nein', '', 0x00FF00],
-            [true, 'Ja', '', 0xFF0000]
+            [false, 'Nein', '', 0xFF0000],
+            [true, 'Ja', '', 0x00FF00]
         ]);
 
         $this->RegisterProfileIntegerEx('OWB.LPState', 'Information', '', '', [
