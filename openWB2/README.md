@@ -109,7 +109,7 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 
 ---
 
-## Einstellungen
+## Sollwerte
 
 | Variable | Beschreibung |
 |----------|--------------|
