@@ -42,7 +42,7 @@ Folgende Einstellungen können direkt über IP-Symcon gesteuert werden, auch die
 - Ladepunkt aktivieren
 - Lademodus
 - Stromstärke
-- Phasen Sofortladen (1 oder Maximum)
+- Phasen Sofortladen
 - Sollleistung
 - Mindest SoC für das Fahrzeug
 - Minimaler Dauerstrom
@@ -57,9 +57,7 @@ Folgende Einstellungen können direkt über IP-Symcon gesteuert werden, auch die
 
 ### Automatische Phasenumschaltung
 
-Die Phasenumschaltung ist nur im Sofort-Lademodus verfügbar.
-
-Das Modul unterstützt eine automatische Umschaltung zwischen **einphasigem und dreiphasigem Laden** abhängig von der gewünschten Ladeleistung.
+Das Modul unterstützt eine automatische Umschaltung zwischen **einphasigem und dreiphasigem Laden** abhängig von der gewünschten Ladeleistung im Sofort-Lademodus verfügbar. Diese Umschaltung wir auutomatisch abhängig von der Sollleistung ausgelöst.
 
 ---
 
@@ -101,7 +99,7 @@ Für eine Integration in den Energiemanager ist der Lademodus 'Sofort' zu wähle
 ## MQTT Kommunikation
 
 Das Modul verwendet hauptsächlich die **SimpleAPI MQTT Topics** der openWB.
-Die Umschaltung erfolgt über das umschalten des Ladeprofil der openWB und ist als einzige Funktion nicht Umfang der SimpleAPI.
+Die Umschaltung erfolgt über das Anpassen des Ladeprofil der openWB und ist als einzige Funktion nicht Umfang der SimpleAPI.
 
 ### Beispiele gelesener Topics
 
@@ -110,8 +108,20 @@ openWB/simpleAPI/chargepoint/0/charging_current
 openWB/simpleAPI/chargepoint/0/phases_in_use
 
 
-### Schreibzugriffe
+### Einstellungen
 
+- Ladepunkt aktivieren
+- Lademodus
+- Stromstärke
+- Phasen Sofortladen (1 oder Maximum)
+- Sollleistung
+- Mindest SoC für das Fahrzeug
+- Minimaler Dauerstrom
+- Höchstpreis Eco
+- LadePriorität
+- Begrenzung
+- SoC-Limit für das Fahrzeug
+- Energie Limit
 
 ---
 
