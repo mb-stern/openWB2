@@ -61,13 +61,6 @@ Das Modul unterstützt eine automatische Umschaltung zwischen **einphasigem und 
 
 ---
 
-## Voraussetzungen
-
-- **IP-Symcon 8.1 oder neuer**
-- **openWB ab 2.1.9**
-
----
-
 ## Installation
 
 1. Repository in das Modulverzeichnis von IP-Symcon kopieren  
