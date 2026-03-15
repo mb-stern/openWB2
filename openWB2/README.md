@@ -62,11 +62,11 @@ Das Modul unterstützt eine automatische Umschaltung zwischen **einphasigem und 
 ---
 
 ## Installation
-
-1. Repository in das Modulverzeichnis von IP-Symcon kopieren  
-2. Modul über den Modul-Store oder als Repository hinzufügen  
-3. Eine Instanz des Moduls **openWB** erstellen  
-4. Den MQTT-Client als Parent-Instanz auswählen  
+ 
+1. Modul über den Modul-Store oder als Repository hinzufügen  
+2. Eine Instanz des Moduls **openWB** erstellen  
+3. Den MQTT-Client als Parent-Instanz auswählen  
+4. In der Instanzenkonfiguration des Clientsockets ist die IP-Adresse und der Port (Standard 1883) der openWB zu wählen
 
 ---
 
