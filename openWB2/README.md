@@ -57,7 +57,7 @@ Folgende Einstellungen können direkt über IP-Symcon gesteuert werden, auch die
 
 ### Automatische Phasenumschaltung
 
-Das Modul unterstützt eine automatische Umschaltung zwischen **einphasigem und dreiphasigem Laden** abhängig von der gewünschten Ladeleistung im Sofort-Lademodus verfügbar. Diese Umschaltung wir auutomatisch abhängig von der Sollleistung ausgelöst.
+Das Modul unterstützt eine automatische Umschaltung zwischen **einphasigem und dreiphasigem Laden** abhängig von der gewünschten Ladeleistung und ist im Sofort-Lademodus verfügbar. Diese Umschaltung wir automatisch abhängig von der Sollleistung ausgelöst.
 
 ---
 
