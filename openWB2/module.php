@@ -11,7 +11,7 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterPropertyInteger('ChargeTemplateID', 0);
         $this->RegisterPropertyInteger('MinCurrentPerPhase', 6);
         $this->RegisterPropertyInteger('MaxCurrentPerPhase', 16);
-        $this->RegisterPropertyInteger('PhaseSwitchLockTime', 60);
+        $this->RegisterPropertyInteger('PhaseSwitchLockTime', 120);
         $this->RegisterPropertyString('SelectedVariables', '[]');
 
         $this->RegisterProfiles();

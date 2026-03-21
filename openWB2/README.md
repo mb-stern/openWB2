@@ -173,7 +173,8 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 ## Version
 
 Version 1.1 (21.3.26)
-- Blockieren der Phasenumschaltung behoben.
+- Sporadisches Blockieren der Phasenumschaltung durch anpassen des zugehörigen Timers auf 500ms behoben.
+- Voreingstellte Sperre nach Phasenumschaltung auf 120sec erhöht.
 
 Version 1.0 (15.3.26)
 - Initale Version
