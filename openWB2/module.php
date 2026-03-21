@@ -647,7 +647,7 @@ class openWB2 extends IPSModuleStrict
                         $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
                     }
 
-                    // nach Phasenwechsel immer kurz warten
+                    // nach Phasenwechsel immer kurz warten damit die Änderung nicht sofort wieder überschrieben wird.
                     $this->SetTimerInterval('ApplyChargeCurrentTimer', 500);
                 } else {
                     // gleiche Phase -> Strom direkt senden

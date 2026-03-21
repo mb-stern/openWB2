@@ -173,7 +173,7 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 ## Version
 
 Version 1.1 (21.3.26)
-- Fehler behoben dass Phasen nicht merh umgeschaltet werden konnten
+- Blockieren der Phasenumschaltung behoben.
 
 Version 1.0 (15.3.26)
 - Initale Version
