@@ -1284,7 +1284,7 @@ class openWB2 extends IPSModuleStrict
 
     private function GetEffectiveVoltage(): float
     {
-        $voltage = 230.0;
+        $voltage = 235.0;
 
         /*
 
