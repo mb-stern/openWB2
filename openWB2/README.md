@@ -175,7 +175,7 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 Version 1.1 (21.3.26)
 - Sporadisches Blockieren der Phasenumschaltung durch anpassen des zugehörigen Timers auf 500ms behoben.
 - Voreingstellte Sperre nach Phasenumschaltung auf 120sec erhöht.
-- Zum berechnen der Leistung wird nun fix 230V verwendet da sonst die gefordert Ampereleistung zu gering ist.
+- Zum berechnen der Leistung wird nun fix 235V verwendet da sonst die gefordert Ampereleistung zu gering ist.
 
 Version 1.0 (15.3.26)
 - Initale Version
