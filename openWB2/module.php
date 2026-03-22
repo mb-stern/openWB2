@@ -1289,6 +1289,7 @@ class openWB2 extends IPSModuleStrict
         /*
 
         Zum berechnen des Stroms (Ampere) aus der Soll-Leistung wird nun fix 235V verwendet, da sonst der geforderte Strom nicht erreicht wird.
+        Darum ist diese Funktion deaktiviert.
 
         $id = $this->GetIDForIdentSafe('Voltage1');
         if ($id > 0) {
