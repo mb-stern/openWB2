@@ -1287,6 +1287,8 @@ class openWB2 extends IPSModuleStrict
         $voltage = 230.0;
 
         /*
+        
+        Effektive Berechnung deaktiviert da sonst nicht die maximal Ampereleistung gefordert wird. Es wird fix mit 230V gerechnet.
 
         $id = $this->GetIDForIdentSafe('Voltage1');
         if ($id > 0) {
