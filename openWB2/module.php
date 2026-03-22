@@ -1286,6 +1286,8 @@ class openWB2 extends IPSModuleStrict
     {
         $voltage = 230.0;
 
+        /*
+
         $id = $this->GetIDForIdentSafe('Voltage1');
         if ($id > 0) {
             $value = GetValue($id);
@@ -1296,6 +1298,8 @@ class openWB2 extends IPSModuleStrict
                 }
             }
         }
+            
+        */
 
         return $voltage;
     }
