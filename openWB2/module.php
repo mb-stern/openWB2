@@ -84,7 +84,7 @@ class openWB2 extends IPSModuleStrict
             'elements' => [
                [
                     'type'    => 'ExpansionPanel',
-                    'caption' => 'SOC Datenpunkte',
+                    'caption' => 'openWB Konfiguration',
                     'items'   => [
                         [
                             'name'    => 'BaseTopic',
