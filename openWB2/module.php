@@ -98,6 +98,11 @@ class openWB2 extends IPSModuleStrict
                     'caption' => 'Ladepunkt-Profil ID'
                 ],
                 [
+                    'name'    => 'VehicleMQTTID',
+                    'type'    => 'NumberSpinner',
+                    'caption' => 'Fahrzeug ID'
+                ],
+                [
                     'name'    => 'MinCurrentPerPhase',
                     'type'    => 'NumberSpinner',
                     'caption' => 'Minimalstrom pro Phase (A)'
@@ -111,11 +116,6 @@ class openWB2 extends IPSModuleStrict
                     'name'    => 'PhaseSwitchLockTime',
                     'type'    => 'NumberSpinner',
                     'caption' => 'Sperrzeit Phasenumschaltung (Sekunden)'
-                ],
-                [
-                    'name'    => 'VehicleMQTTID',
-                    'type'    => 'NumberSpinner',
-                    'caption' => 'openWB Fahrzeug-ID'
                 ],
                 [
                     'name'    => 'SocVariableID',
