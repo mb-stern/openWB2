@@ -13,6 +13,10 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterPropertyInteger('MaxCurrentPerPhase', 16);
         $this->RegisterPropertyInteger('PhaseSwitchLockTime', 120);
         $this->RegisterPropertyString('SelectedVariables', '[]');
+        $this->RegisterPropertyInteger('VehicleMQTTID', 0);
+        $this->RegisterPropertyInteger('SocVariableID', 0);
+        $this->RegisterPropertyInteger('SocTimestampVariableID', 0);
+        $this->RegisterPropertyInteger('RangeVariableID', 0);
 
         $this->RegisterProfiles();
 
@@ -60,6 +64,18 @@ class openWB2 extends IPSModuleStrict
 
         $this->SyncVariables();
         $this->UpdateDynamicProfiles();
+        
+        $ids = [
+            (int) $this->ReadPropertyInteger('SocVariableID'),
+            (int) $this->ReadPropertyInteger('SocTimestampVariableID'),
+            (int) $this->ReadPropertyInteger('RangeVariableID')
+        ];
+
+        foreach ($ids as $id) {
+            if ($id > 0 && IPS_ObjectExists($id)) {
+                $this->RegisterMessage($id, VM_UPDATE);
+            }
+        }
     }
 
     public function GetConfigurationForm(): string
@@ -95,6 +111,30 @@ class openWB2 extends IPSModuleStrict
                     'name'    => 'PhaseSwitchLockTime',
                     'type'    => 'NumberSpinner',
                     'caption' => 'Sperrzeit Phasenumschaltung (Sekunden)'
+                ],
+                [
+                    'type'    => 'Label',
+                    'caption' => 'Fahrzeugdaten an openWB senden'
+                ],
+                [
+                    'name'    => 'VehicleMQTTID',
+                    'type'    => 'NumberSpinner',
+                    'caption' => 'openWB Fahrzeug-ID'
+                ],
+                [
+                    'name'    => 'SocVariableID',
+                    'type'    => 'SelectVariable',
+                    'caption' => 'EV-SoC Datenpunkt'
+                ],
+                [
+                    'name'    => 'SocTimestampVariableID',
+                    'type'    => 'SelectVariable',
+                    'caption' => 'SoC Zeitstempel Datenpunkt (optional)'
+                ],
+                [
+                    'name'    => 'RangeVariableID',
+                    'type'    => 'SelectVariable',
+                    'caption' => 'Reichweite Datenpunkt (optional)'
                 ],
                 [
                     'type'    => 'Label',
@@ -1474,7 +1514,66 @@ class openWB2 extends IPSModuleStrict
         $this->SetValueSafe($ident, $value);
     }
 
-     private function GetVariableDefinitions(): array
+    public function PublishLinkedVehicleData(): void
+    {
+        $vehicleID   = max(0, (int) $this->ReadPropertyInteger('VehicleMQTTID'));
+        $baseTopic   = 'set/mqtt/vehicle/' . $vehicleID . '/get';
+
+        $socID       = (int) $this->ReadPropertyInteger('SocVariableID');
+        $timestampID = (int) $this->ReadPropertyInteger('SocTimestampVariableID');
+        $rangeID     = (int) $this->ReadPropertyInteger('RangeVariableID');
+
+        if ($socID > 0 && IPS_ObjectExists($socID)) {
+            $soc = GetValue($socID);
+            if (is_numeric($soc)) {
+                $soc = max(0.0, min(100.0, (float) $soc));
+                $payload = rtrim(rtrim(number_format($soc, 1, '.', ''), '0'), '.');
+                $this->MQTTCommand($baseTopic . '/soc', $payload);
+                $this->SendDebug('PublishVehicleData', 'SoC gesendet: ' . $payload, 0);
+            }
+        }
+
+        $timestamp = time();
+        if ($timestampID > 0 && IPS_ObjectExists($timestampID)) {
+            $value = GetValue($timestampID);
+            if (is_numeric($value)) {
+                $timestamp = max(0, (int) $value);
+            }
+        }
+
+        $this->MQTTCommand($baseTopic . '/soc_timestamp', (string) $timestamp);
+        $this->SendDebug('PublishVehicleData', 'Zeitstempel gesendet: ' . $timestamp, 0);
+
+        if ($rangeID > 0 && IPS_ObjectExists($rangeID)) {
+            $range = GetValue($rangeID);
+            if (is_numeric($range)) {
+                $range = max(0.0, (float) $range);
+                $payload = rtrim(rtrim(number_format($range, 1, '.', ''), '0'), '.');
+                $this->MQTTCommand($baseTopic . '/range', $payload);
+                $this->SendDebug('PublishVehicleData', 'Reichweite gesendet: ' . $payload, 0);
+            }
+        }
+    }
+
+    public function MessageSink($TimeStamp, $SenderID, $Message, $Data): void
+    {
+        parent::MessageSink($TimeStamp, $SenderID, $Message, $Data);
+
+        if ($Message !== VM_UPDATE) {
+            return;
+        }
+
+        if (in_array($SenderID, [
+            (int) $this->ReadPropertyInteger('SocVariableID'),
+            (int) $this->ReadPropertyInteger('SocTimestampVariableID'),
+            (int) $this->ReadPropertyInteger('RangeVariableID')
+        ], true)) {
+            $this->SendDebug('MessageSink', 'Fahrzeugdaten geändert, sende an openWB', 0);
+            $this->PublishLinkedVehicleData();
+        }
+    }
+
+    private function GetVariableDefinitions(): array
     {
         return [
             // Status / Read
