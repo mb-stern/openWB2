@@ -1530,15 +1530,6 @@ class openWB2 extends IPSModuleStrict
         $this->SetTimerInterval('PublishVehicleDataTimer', 0);
 
         $this->SendDebug('VehicleMQTT', '--- PublishLinkedSOCData gestartet ---', 0);
-        
-        $vehicleID   = max(0, (int) $this->ReadPropertyInteger('VehicleMQTTID'));
-        $baseTopic   = 'set/mqtt/vehicle/' . $vehicleID . '/get';
-
-        $socID       = (int) $this->ReadPropertyInteger('SocVariableID');
-        $timestampID = (int) $this->ReadPropertyInteger('SocTimestampVariableID');
-        $rangeID     = (int) $this->ReadPropertyInteger('RangeVariableID');
-
-        $this->SendDebug('VehicleMQTT', '--- PublishLinkedSOCData gestartet ---', 0);
         $this->SendDebug('VehicleMQTT', 'VehicleMQTTID=' . $vehicleID, 0);
         $this->SendDebug('VehicleMQTT', 'BaseTopic=' . $baseTopic, 0);
         $this->SendDebug('VehicleMQTT', 'SocVariableID=' . $socID, 0);
