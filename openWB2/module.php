@@ -1519,36 +1519,78 @@ class openWB2 extends IPSModuleStrict
         $timestampID = (int) $this->ReadPropertyInteger('SocTimestampVariableID');
         $rangeID     = (int) $this->ReadPropertyInteger('RangeVariableID');
 
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedVehicleData gestartet ---', 0);
+        $this->SendDebug('VehicleMQTT', 'VehicleMQTTID=' . $vehicleID, 0);
+        $this->SendDebug('VehicleMQTT', 'BaseTopic=' . $baseTopic, 0);
+        $this->SendDebug('VehicleMQTT', 'SocVariableID=' . $socID, 0);
+        $this->SendDebug('VehicleMQTT', 'SocTimestampVariableID=' . $timestampID, 0);
+        $this->SendDebug('VehicleMQTT', 'RangeVariableID=' . $rangeID, 0);
+
+        // SoC
         if ($socID > 0 && IPS_ObjectExists($socID)) {
             $soc = GetValue($socID);
+            $this->SendDebug('VehicleMQTT', 'SoC Rohwert=' . var_export($soc, true), 0);
+
             if (is_numeric($soc)) {
                 $soc = max(0.0, min(100.0, (float) $soc));
                 $payload = rtrim(rtrim(number_format($soc, 1, '.', ''), '0'), '.');
+
+                $this->SendDebug('VehicleMQTT', 'Sende Topic=' . $baseTopic . '/soc', 0);
+                $this->SendDebug('VehicleMQTT', 'Sende Payload=' . $payload, 0);
+
                 $this->MQTTCommand($baseTopic . '/soc', $payload);
-                $this->SendDebug('PublishVehicleData', 'SoC gesendet: ' . $payload, 0);
+            } else {
+                $this->SendDebug('VehicleMQTT', 'SoC nicht numerisch, wird nicht gesendet', 0);
             }
+        } else {
+            $this->SendDebug('VehicleMQTT', 'SoC Datenpunkt ungültig oder nicht vorhanden', 0);
         }
 
+        // Timestamp
         $timestamp = time();
+        $timestampSource = 'time()';
+
         if ($timestampID > 0 && IPS_ObjectExists($timestampID)) {
             $value = GetValue($timestampID);
+            $this->SendDebug('VehicleMQTT', 'Timestamp Rohwert=' . var_export($value, true), 0);
+
             if (is_numeric($value)) {
                 $timestamp = max(0, (int) $value);
+                $timestampSource = 'Variable';
+            } else {
+                $this->SendDebug('VehicleMQTT', 'Timestamp nicht numerisch, aktueller Zeitstempel wird verwendet', 0);
             }
+        } else {
+            $this->SendDebug('VehicleMQTT', 'Kein Timestamp-Datenpunkt vorhanden, aktueller Zeitstempel wird verwendet', 0);
         }
 
-        $this->MQTTCommand($baseTopic . '/soc_timestamp', (string) $timestamp);
-        $this->SendDebug('PublishVehicleData', 'Zeitstempel gesendet: ' . $timestamp, 0);
+        $this->SendDebug('VehicleMQTT', 'Timestamp Quelle=' . $timestampSource, 0);
+        $this->SendDebug('VehicleMQTT', 'Sende Topic=' . $baseTopic . '/soc_timestamp', 0);
+        $this->SendDebug('VehicleMQTT', 'Sende Payload=' . (string) $timestamp, 0);
 
+        $this->MQTTCommand($baseTopic . '/soc_timestamp', (string) $timestamp);
+
+        // Range
         if ($rangeID > 0 && IPS_ObjectExists($rangeID)) {
             $range = GetValue($rangeID);
+            $this->SendDebug('VehicleMQTT', 'Range Rohwert=' . var_export($range, true), 0);
+
             if (is_numeric($range)) {
                 $range = max(0.0, (float) $range);
                 $payload = rtrim(rtrim(number_format($range, 1, '.', ''), '0'), '.');
+
+                $this->SendDebug('VehicleMQTT', 'Sende Topic=' . $baseTopic . '/range', 0);
+                $this->SendDebug('VehicleMQTT', 'Sende Payload=' . $payload, 0);
+
                 $this->MQTTCommand($baseTopic . '/range', $payload);
-                $this->SendDebug('PublishVehicleData', 'Reichweite gesendet: ' . $payload, 0);
+            } else {
+                $this->SendDebug('VehicleMQTT', 'Range nicht numerisch, wird nicht gesendet', 0);
             }
+        } else {
+            $this->SendDebug('VehicleMQTT', 'Range Datenpunkt ungültig oder nicht vorhanden', 0);
         }
+
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedVehicleData beendet ---', 0);
     }
 
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data): void
