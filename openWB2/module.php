@@ -136,7 +136,8 @@ class openWB2 extends IPSModuleStrict
                             'type'    => 'SelectVariable',
                             'caption' => 'Reichweite Datenpunkt (optional)'
                         ],
-                    ]
+                    ],
+                ],
                 [
                     'type'    => 'Label',
                     'caption' => 'Auswahl der anzulegenden Variablen'
