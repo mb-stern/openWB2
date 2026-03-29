@@ -29,6 +29,8 @@ class openWB2 extends IPSModuleStrict
 
         $this->RegisterTimer('ApplyChargeCurrentTimer', 0, 'OWB_ApplyPendingChargeCurrent($_IPS["TARGET"]);');
         $this->SetBuffer('PendingChargeCurrent', '0');
+
+        $this->RegisterTimer('PublishVehicleDataTimer', 0, 'OWB_PublishLinkedSOCData($_IPS["TARGET"]);');
     }
 
     public function GetCompatibleParents(): string
@@ -1524,6 +1526,11 @@ class openWB2 extends IPSModuleStrict
 
     public function PublishLinkedSOCData(): void
     {
+        // Timer sofort stoppen (sonst Loop)
+        $this->SetTimerInterval('PublishVehicleDataTimer', 0);
+
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedSOCData gestartet ---', 0);
+        
         $vehicleID   = max(0, (int) $this->ReadPropertyInteger('VehicleMQTTID'));
         $baseTopic   = 'set/mqtt/vehicle/' . $vehicleID . '/get';
 
@@ -1613,13 +1620,25 @@ class openWB2 extends IPSModuleStrict
             return;
         }
 
-        if (in_array($SenderID, [
-            (int) $this->ReadPropertyInteger('SocVariableID'),
-            (int) $this->ReadPropertyInteger('SocTimestampVariableID'),
-            (int) $this->ReadPropertyInteger('RangeVariableID')
-        ], true)) {
-            $this->SendDebug('MessageSink', 'Fahrzeugdaten geändert, sende an openWB', 0);
-            $this->PublishLinkedSOCData();
+        $socID       = (int) $this->ReadPropertyInteger('SocVariableID');
+        $timestampID = (int) $this->ReadPropertyInteger('SocTimestampVariableID');
+        $rangeID     = (int) $this->ReadPropertyInteger('RangeVariableID');
+
+        if (in_array($SenderID, [$socID, $timestampID, $rangeID], true)) {
+
+            $source = 'unbekannt';
+            if ($SenderID === $socID) {
+                $source = 'SoC';
+            } elseif ($SenderID === $timestampID) {
+                $source = 'Timestamp';
+            } elseif ($SenderID === $rangeID) {
+                $source = 'Range';
+            }
+
+            $this->SendDebug('MessageSink', 'VM_UPDATE von ID=' . $SenderID . ' Quelle=' . $source . ' -> verzögert senden', 0);
+
+            // 🔥 wichtig: Timer statt Direktaufruf
+            $this->SetTimerInterval('PublishVehicleDataTimer', 300);
         }
     }
 
