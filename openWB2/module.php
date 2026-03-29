@@ -113,10 +113,6 @@ class openWB2 extends IPSModuleStrict
                     'caption' => 'Sperrzeit Phasenumschaltung (Sekunden)'
                 ],
                 [
-                    'type'    => 'Label',
-                    'caption' => 'Fahrzeugdaten an openWB senden'
-                ],
-                [
                     'name'    => 'VehicleMQTTID',
                     'type'    => 'NumberSpinner',
                     'caption' => 'openWB Fahrzeug-ID'
