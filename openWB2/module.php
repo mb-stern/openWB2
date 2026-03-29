@@ -1522,7 +1522,7 @@ class openWB2 extends IPSModuleStrict
         $this->SetValueSafe($ident, $value);
     }
 
-    public function PublishLinkedVehicleData(): void
+    public function PublishLinkedSOCData(): void
     {
         $vehicleID   = max(0, (int) $this->ReadPropertyInteger('VehicleMQTTID'));
         $baseTopic   = 'set/mqtt/vehicle/' . $vehicleID . '/get';
@@ -1531,7 +1531,7 @@ class openWB2 extends IPSModuleStrict
         $timestampID = (int) $this->ReadPropertyInteger('SocTimestampVariableID');
         $rangeID     = (int) $this->ReadPropertyInteger('RangeVariableID');
 
-        $this->SendDebug('VehicleMQTT', '--- PublishLinkedVehicleData gestartet ---', 0);
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedSOCData gestartet ---', 0);
         $this->SendDebug('VehicleMQTT', 'VehicleMQTTID=' . $vehicleID, 0);
         $this->SendDebug('VehicleMQTT', 'BaseTopic=' . $baseTopic, 0);
         $this->SendDebug('VehicleMQTT', 'SocVariableID=' . $socID, 0);
@@ -1602,7 +1602,7 @@ class openWB2 extends IPSModuleStrict
             $this->SendDebug('VehicleMQTT', 'Range Datenpunkt ungültig oder nicht vorhanden', 0);
         }
 
-        $this->SendDebug('VehicleMQTT', '--- PublishLinkedVehicleData beendet ---', 0);
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedSOCData beendet ---', 0);
     }
 
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data): void
@@ -1619,7 +1619,7 @@ class openWB2 extends IPSModuleStrict
             (int) $this->ReadPropertyInteger('RangeVariableID')
         ], true)) {
             $this->SendDebug('MessageSink', 'Fahrzeugdaten geändert, sende an openWB', 0);
-            $this->PublishLinkedVehicleData();
+            $this->PublishLinkedSOCData();
         }
     }
 
