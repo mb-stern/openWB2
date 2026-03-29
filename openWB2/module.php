@@ -9,10 +9,14 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterPropertyString('BaseTopic', 'openWB');
         $this->RegisterPropertyInteger('ChargePointID', 0);
         $this->RegisterPropertyInteger('ChargeTemplateID', 0);
+        $this->RegisterPropertyInteger('VehicleMQTTID', 0);
         $this->RegisterPropertyInteger('MinCurrentPerPhase', 6);
         $this->RegisterPropertyInteger('MaxCurrentPerPhase', 16);
-        $this->RegisterPropertyInteger('PhaseSwitchLockTime', 60);
+        $this->RegisterPropertyInteger('PhaseSwitchLockTime', 120);
         $this->RegisterPropertyString('SelectedVariables', '[]');
+        $this->RegisterPropertyInteger('SocVariableID', 0);
+        $this->RegisterPropertyInteger('SocTimestampVariableID', 0);
+        $this->RegisterPropertyInteger('RangeVariableID', 0);
 
         $this->RegisterProfiles();
 
@@ -60,41 +64,85 @@ class openWB2 extends IPSModuleStrict
 
         $this->SyncVariables();
         $this->UpdateDynamicProfiles();
+        
+        $ids = [
+            (int) $this->ReadPropertyInteger('SocVariableID'),
+            (int) $this->ReadPropertyInteger('SocTimestampVariableID'),
+            (int) $this->ReadPropertyInteger('RangeVariableID')
+        ];
+
+        foreach ($ids as $id) {
+            if ($id > 0 && IPS_ObjectExists($id)) {
+                $this->RegisterMessage($id, VM_UPDATE);
+            }
+        }
     }
 
     public function GetConfigurationForm(): string
     {
         $form = [
             'elements' => [
-                [
-                    'name'    => 'BaseTopic',
-                    'type'    => 'ValidationTextBox',
-                    'caption' => 'MQTT Topic'
+               [
+                    'type'    => 'ExpansionPanel',
+                    'caption' => 'openWB Konfiguration',
+                    'items'   => [
+                        [
+                            'name'    => 'BaseTopic',
+                            'type'    => 'ValidationTextBox',
+                            'caption' => 'MQTT Topic'
+                        ],
+                        [
+                            'name'    => 'ChargePointID',
+                            'type'    => 'NumberSpinner',
+                            'caption' => 'Ladepunkt ID'
+                        ],
+                        [
+                            'name'    => 'ChargeTemplateID',
+                            'type'    => 'NumberSpinner',
+                            'caption' => 'Ladepunkt-Profil ID'
+                        ],
+                        [
+                            'name'    => 'VehicleMQTTID',
+                            'type'    => 'NumberSpinner',
+                            'caption' => 'Fahrzeug ID'
+                        ],
+                        [
+                            'name'    => 'MinCurrentPerPhase',
+                            'type'    => 'NumberSpinner',
+                            'caption' => 'Minimalstrom pro Phase (A)'
+                        ],
+                        [
+                            'name'    => 'MaxCurrentPerPhase',
+                            'type'    => 'NumberSpinner',
+                            'caption' => 'Maximalstrom pro Phase (A)'
+                        ],
+                        [
+                            'name'    => 'PhaseSwitchLockTime',
+                            'type'    => 'NumberSpinner',
+                            'caption' => 'Sperrzeit Phasenumschaltung (Sekunden)'
+                        ],
+                    ],
                 ],
                 [
-                    'name'    => 'ChargePointID',
-                    'type'    => 'NumberSpinner',
-                    'caption' => 'Ladepunkt ID'
-                ],
-                [
-                    'name'    => 'ChargeTemplateID',
-                    'type'    => 'NumberSpinner',
-                    'caption' => 'Ladepunkt-Profil ID'
-                ],
-                [
-                    'name'    => 'MinCurrentPerPhase',
-                    'type'    => 'NumberSpinner',
-                    'caption' => 'Minimalstrom pro Phase (A)'
-                ],
-                [
-                    'name'    => 'MaxCurrentPerPhase',
-                    'type'    => 'NumberSpinner',
-                    'caption' => 'Maximalstrom pro Phase (A)'
-                ],
-                [
-                    'name'    => 'PhaseSwitchLockTime',
-                    'type'    => 'NumberSpinner',
-                    'caption' => 'Sperrzeit Phasenumschaltung (Sekunden)'
+                    'type'    => 'ExpansionPanel',
+                    'caption' => 'SOC Datenpunkte',
+                    'items'   => [
+                        [
+                            'name'    => 'SocVariableID',
+                            'type'    => 'SelectVariable',
+                            'caption' => 'EV-SoC Datenpunkt'
+                        ],
+                        [
+                            'name'    => 'SocTimestampVariableID',
+                            'type'    => 'SelectVariable',
+                            'caption' => 'SoC Zeitstempel Datenpunkt (optional)'
+                        ],
+                        [
+                            'name'    => 'RangeVariableID',
+                            'type'    => 'SelectVariable',
+                            'caption' => 'Reichweite Datenpunkt (optional)'
+                        ],
+                    ],
                 ],
                 [
                     'type'    => 'Label',
@@ -482,7 +530,7 @@ class openWB2 extends IPSModuleStrict
                     return '';
                 
                 
-                //Ab hier die Daten für die Variblen mit AKtion
+                //Ab hier die Daten für die Variablen mit Aktion
                 
                 case $cpBase . '/manual_lock':
                     //$this->SendDebug('Match', 'manual_lock', 0);
@@ -647,8 +695,8 @@ class openWB2 extends IPSModuleStrict
                         $this->SetTimerInterval('PhaseSwitchLockTimer', $lockTimeSeconds * 1000);
                     }
 
-                    // nach Phasenwechsel immer kurz warten
-                    $this->SetTimerInterval('ApplyChargeCurrentTimer', 200);
+                    // nach Phasenwechsel immer kurz warten damit die Änderung nicht sofort wieder überschrieben wird.
+                    $this->SetTimerInterval('ApplyChargeCurrentTimer', 500);
                 } else {
                     // gleiche Phase -> Strom direkt senden
                     $this->ApplyPendingChargeCurrent();
@@ -761,8 +809,8 @@ class openWB2 extends IPSModuleStrict
         ]);
 
         $this->RegisterProfileBooleanEx('OWB.ChargePointEnabled', 'Car', '', '', [
-            [false, 'Nein', '', 0x00FF00],
-            [true, 'Ja', '', 0xFF0000]
+            [false, 'Nein', '', 0xFF0000],
+            [true, 'Ja', '', 0x00FF00]
         ]);
 
         $this->RegisterProfileIntegerEx('OWB.LPState', 'Information', '', '', [
@@ -1284,7 +1332,12 @@ class openWB2 extends IPSModuleStrict
 
     private function GetEffectiveVoltage(): float
     {
-        $voltage = 230.0;
+        $voltage = 235.0;
+
+        /*
+
+        Zum berechnen des Stroms (Ampere) aus der Soll-Leistung wird nun fix 235V verwendet, da sonst der geforderte Strom nicht erreicht wird.
+        Darum ist diese Funktion deaktiviert.
 
         $id = $this->GetIDForIdentSafe('Voltage1');
         if ($id > 0) {
@@ -1296,6 +1349,8 @@ class openWB2 extends IPSModuleStrict
                 }
             }
         }
+            
+        */
 
         return $voltage;
     }
@@ -1467,7 +1522,139 @@ class openWB2 extends IPSModuleStrict
         $this->SetValueSafe($ident, $value);
     }
 
-     private function GetVariableDefinitions(): array
+    public function MessageSink($TimeStamp, $SenderID, $Message, $Data): void
+    {
+        parent::MessageSink($TimeStamp, $SenderID, $Message, $Data);
+
+        if ($Message !== VM_UPDATE) {
+            return;
+        }
+
+        $socID       = (int) $this->ReadPropertyInteger('SocVariableID');
+        $timestampID = (int) $this->ReadPropertyInteger('SocTimestampVariableID');
+        $rangeID     = (int) $this->ReadPropertyInteger('RangeVariableID');
+
+        if ($SenderID === $socID) {
+            $this->SendDebug('MessageSink', 'SoC geändert -> sende SoC', 0);
+            $this->PublishLinkedSOC();
+            return;
+        }
+
+        if ($SenderID === $timestampID) {
+            $this->SendDebug('MessageSink', 'Timestamp geändert -> sende Timestamp', 0);
+            $this->PublishLinkedSOCTimestamp();
+            return;
+        }
+
+        if ($SenderID === $rangeID) {
+            $this->SendDebug('MessageSink', 'Range geändert -> sende Range', 0);
+            $this->PublishLinkedRange();
+            return;
+        }
+    }
+
+    public function PublishLinkedSOC(): void
+    {
+        $vehicleID = max(0, (int) $this->ReadPropertyInteger('VehicleMQTTID'));
+        $topic     = 'set/mqtt/vehicle/' . $vehicleID . '/get/soc';
+        $socID     = (int) $this->ReadPropertyInteger('SocVariableID');
+
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedSOC gestartet ---', 0);
+        $this->SendDebug('VehicleMQTT', 'VehicleMQTTID=' . $vehicleID, 0);
+        $this->SendDebug('VehicleMQTT', 'SocVariableID=' . $socID, 0);
+
+        if ($socID <= 0 || !IPS_ObjectExists($socID)) {
+            $this->SendDebug('VehicleMQTT', 'SoC Datenpunkt ungültig oder nicht vorhanden', 0);
+            return;
+        }
+
+        $soc = GetValue($socID);
+        $this->SendDebug('VehicleMQTT', 'SoC Rohwert=' . var_export($soc, true), 0);
+
+        if (!is_numeric($soc)) {
+            $this->SendDebug('VehicleMQTT', 'SoC nicht numerisch, wird nicht gesendet', 0);
+            return;
+        }
+
+        $soc = max(0.0, min(100.0, (float) $soc));
+        $payload = rtrim(rtrim(number_format($soc, 1, '.', ''), '0'), '.');
+
+        $this->SendDebug('VehicleMQTT', 'Sende Topic=' . $topic, 0);
+        $this->SendDebug('VehicleMQTT', 'Sende Payload=' . $payload, 0);
+
+        $this->MQTTCommand($topic, $payload);
+
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedSOC beendet ---', 0);
+    }
+
+    public function PublishLinkedSOCTimestamp(): void
+    {
+        $vehicleID   = max(0, (int) $this->ReadPropertyInteger('VehicleMQTTID'));
+        $topic       = 'set/mqtt/vehicle/' . $vehicleID . '/get/soc_timestamp';
+        $timestampID = (int) $this->ReadPropertyInteger('SocTimestampVariableID');
+
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedSOCTimestamp gestartet ---', 0);
+        $this->SendDebug('VehicleMQTT', 'VehicleMQTTID=' . $vehicleID, 0);
+        $this->SendDebug('VehicleMQTT', 'SocTimestampVariableID=' . $timestampID, 0);
+
+        if ($timestampID <= 0 || !IPS_ObjectExists($timestampID)) {
+            $this->SendDebug('VehicleMQTT', 'Timestamp Datenpunkt ungültig oder nicht vorhanden', 0);
+            return;
+        }
+
+        $timestamp = GetValue($timestampID);
+        $this->SendDebug('VehicleMQTT', 'Timestamp Rohwert=' . var_export($timestamp, true), 0);
+
+        if (!is_numeric($timestamp)) {
+            $this->SendDebug('VehicleMQTT', 'Timestamp nicht numerisch, wird nicht gesendet', 0);
+            return;
+        }
+
+        $payload = (string) max(0, (int) $timestamp);
+
+        $this->SendDebug('VehicleMQTT', 'Sende Topic=' . $topic, 0);
+        $this->SendDebug('VehicleMQTT', 'Sende Payload=' . $payload, 0);
+
+        $this->MQTTCommand($topic, $payload);
+
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedSOCTimestamp beendet ---', 0);
+    }
+
+    public function PublishLinkedRange(): void
+    {
+        $vehicleID = max(0, (int) $this->ReadPropertyInteger('VehicleMQTTID'));
+        $topic     = 'set/mqtt/vehicle/' . $vehicleID . '/get/range';
+        $rangeID   = (int) $this->ReadPropertyInteger('RangeVariableID');
+
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedRange gestartet ---', 0);
+        $this->SendDebug('VehicleMQTT', 'VehicleMQTTID=' . $vehicleID, 0);
+        $this->SendDebug('VehicleMQTT', 'RangeVariableID=' . $rangeID, 0);
+
+        if ($rangeID <= 0 || !IPS_ObjectExists($rangeID)) {
+            $this->SendDebug('VehicleMQTT', 'Range Datenpunkt ungültig oder nicht vorhanden', 0);
+            return;
+        }
+
+        $range = GetValue($rangeID);
+        $this->SendDebug('VehicleMQTT', 'Range Rohwert=' . var_export($range, true), 0);
+
+        if (!is_numeric($range)) {
+            $this->SendDebug('VehicleMQTT', 'Range nicht numerisch, wird nicht gesendet', 0);
+            return;
+        }
+
+        $range = max(0.0, (float) $range);
+        $payload = rtrim(rtrim(number_format($range, 1, '.', ''), '0'), '.');
+
+        $this->SendDebug('VehicleMQTT', 'Sende Topic=' . $topic, 0);
+        $this->SendDebug('VehicleMQTT', 'Sende Payload=' . $payload, 0);
+
+        $this->MQTTCommand($topic, $payload);
+
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedRange beendet ---', 0);
+    }
+
+    private function GetVariableDefinitions(): array
     {
         return [
             // Status / Read

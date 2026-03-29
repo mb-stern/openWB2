@@ -57,23 +57,16 @@ Folgende Einstellungen können direkt über IP-Symcon gesteuert werden, auch die
 
 ### Automatische Phasenumschaltung
 
-Das Modul unterstützt eine automatische Umschaltung zwischen **einphasigem und dreiphasigem Laden** abhängig von der gewünschten Ladeleistung im Sofort-Lademodus verfügbar. Diese Umschaltung wir auutomatisch abhängig von der Sollleistung ausgelöst.
-
----
-
-## Voraussetzungen
-
-- **IP-Symcon 8.1 oder neuer**
-- **openWB ab 2.1.9**
+Das Modul unterstützt eine automatische Umschaltung zwischen **einphasigem und dreiphasigem Laden** abhängig von der gewünschten Ladeleistung und ist im Sofort-Lademodus verfügbar. Diese Umschaltung wir automatisch abhängig von der Sollleistung ausgelöst.
 
 ---
 
 ## Installation
-
-1. Repository in das Modulverzeichnis von IP-Symcon kopieren  
-2. Modul über den Modul-Store oder als Repository hinzufügen  
-3. Eine Instanz des Moduls **openWB** erstellen  
-4. Den MQTT-Client als Parent-Instanz auswählen  
+ 
+1. Modul über den Modul-Store oder als Repository hinzufügen  
+2. Eine Instanz des Moduls **openWB** erstellen  
+3. Den MQTT-Client als Parent-Instanz auswählen  
+4. In der Instanzenkonfiguration des Clientsockets ist die IP-Adresse und der Port (Standard 1883) der openWB zu wählen
 
 ---
 
@@ -84,6 +77,10 @@ Das Modul unterstützt eine automatische Umschaltung zwischen **einphasigem und 
 | MQTT Topic | Basis-Topic der openWB - Standard ist 'openWB'.  |
 | Ladepunkt ID | ID des Ladepunktes - Diese ID findet man unter Konfiguration - Ladepunkte und wird zur Kommunikation mit dem Ladepunkt (Wallbox) benötig. |
 | Ladepunkt-Profil ID | ID des Charge Templates - Diese ID findet man unter Konfiguration - Ladepunkte und wird zur korrekten Erstellung des Templates benötig. |
+| Fahrzeug ID | ID des Fahrzeugs - Diese ID findet man unter Konfiguration - Fahrzeuge und ist für das Standard-Fahrzeug meist 0. Diese ID wird zur korrekten Übermittlung der SOC-Daten an die openWB benötigt. |
+| EV-SoC Datenpunkt | Fahrzeug-SoC mit Nachkommastellen (Float) oder Ganzzahl. Der Empfang dieser Daten muss in der openWB unter Konfiguration - Fahrzeuge unter dem Menupunkt 'SoC-Modul des Fahrzeugs' als MQTT konfiguriert werden.|
+| SoC Zeitstempel Datenpunkt | Zeitstempel des SoCs in s als Unix-Zeitstempel. Diese Info ist optional. Wird kein Wert für das Topic veröffentlicht, wird bei der Abfrage automatisch der aktuelle Zeitstempel gesetzt. |
+| Reichweite Datenpunkt | Reichweite des Fahrzeugs in km mit Nachkommastellen (Float) oder Ganzzahl. Diese Info ist optional.. |
 | Minimalstrom pro Phase | minimaler Ladestrom - Diese Einstellung wirkt sich direkt auf das Variablenprofil OWB.TargetPower.<Instanz-ID> und OWB.Ampere.<Instanz-ID> aus,um aus, um den Regelbereich für die vorgegebene Sollleistung und Ampere-Bereich festzulegen.  |
 | Maximalstrom pro Phase | maximaler Ladestrom - Diese Einstellung wirkt sich direkt auf das Variablenprofil OWB.TargetPower.<Instanz-ID> und OWB.Ampere.<Instanz-ID> aus,um aus, um den Regelbereich für die vorgegebene Sollleistung und Ampere-Bereich festzulegen. |
 | Sperrzeit Phasenumschaltung | Zeit in Sekunden, während der kein erneuter Phasenwechsel erlaubt ist - Der Grund hier ist, eine Störmeldung des angeschlossenen Farhrezuges zu verhindern. Voreingestellt sind 60 sec |
@@ -109,7 +106,7 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 
 ---
 
-## Einstellungen
+## Sollwerte
 
 | Variable | Beschreibung |
 |----------|--------------|
@@ -123,7 +120,7 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 | Höchstpreis Eco | Nur ab openWB Revision 2 unterstützt - Maximaler Preis für das ECO Laden |
 | LadePriorität |
 | Begrenzung | Nur ab openWB Revision 2 unterstützt - Setzt den Typ der Ladebegrenzung für das Sofortladen |
-| SoC-Limit für das Fahrzeug | Nur ab openWB Revision 2 unterstützt - Setzt die SoC-Grenze für das Sofortladen (aktiv wenn Limit-Typ „EV-SoC“ ist) |
+| SoC-Limit für das Fahrzeug | Nur ab openWB Revision 2 unterstützt - Setzt die SoC-Grenze für das Sofortladen (aktiv wenn Limit-Typ „EV-SoC“ ist) und bedingt das Einbinden der SOC-Datenpunkte, falls die openWB diese Info nicht direkt vom Fahrzeug beziehen kann|
 | Energie Limit | Nur ab openWB Revision 2 unterstützt - Setzt die Energiegrenze für das Sofortladen (aktiv wenn Limit-Typ „Energie“ ist) |
 
 ---
@@ -178,6 +175,12 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 ---
 
 ## Version
+
+Version 1.1 (29.3.26)
+- Sporadisches Blockieren der Phasenumschaltung durch anpassen des zugehörigen Timers auf 500ms behoben.
+- Voreingstellte Sperre nach Phasenumschaltung auf 120sec erhöht.
+- Zum berechnen des Stroms (Ampere) aus der Soll-Leistung wird nun fix 235V verwendet, da sonst der geforderte Strom nicht erreicht wird.
+- Der SOC kann nun der openWB durch Einbinden der entsprechenden Datenpunkte mitgeteilt werden.
 
 Version 1.0 (15.3.26)
 - Initale Version
