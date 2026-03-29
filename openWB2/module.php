@@ -29,8 +29,6 @@ class openWB2 extends IPSModuleStrict
 
         $this->RegisterTimer('ApplyChargeCurrentTimer', 0, 'OWB_ApplyPendingChargeCurrent($_IPS["TARGET"]);');
         $this->SetBuffer('PendingChargeCurrent', '0');
-
-        $this->RegisterTimer('PublishVehicleDataTimer', 0, 'OWB_PublishLinkedSOCData($_IPS["TARGET"]);');
     }
 
     public function GetCompatibleParents(): string
@@ -1524,92 +1522,6 @@ class openWB2 extends IPSModuleStrict
         $this->SetValueSafe($ident, $value);
     }
 
-   public function PublishLinkedSOCData(): void
-    {
-        // Timer sofort stoppen
-        $this->SetTimerInterval('PublishVehicleDataTimer', 0);
-
-        $vehicleID   = max(0, (int) $this->ReadPropertyInteger('VehicleMQTTID'));
-        $baseTopic   = 'set/mqtt/vehicle/' . $vehicleID . '/get';
-
-        $socID       = (int) $this->ReadPropertyInteger('SocVariableID');
-        $timestampID = (int) $this->ReadPropertyInteger('SocTimestampVariableID');
-        $rangeID     = (int) $this->ReadPropertyInteger('RangeVariableID');
-
-        $this->SendDebug('VehicleMQTT', '--- PublishLinkedSOCData gestartet ---', 0);
-        $this->SendDebug('VehicleMQTT', 'VehicleMQTTID=' . $vehicleID, 0);
-        $this->SendDebug('VehicleMQTT', 'BaseTopic=' . $baseTopic, 0);
-        $this->SendDebug('VehicleMQTT', 'SocVariableID=' . $socID, 0);
-        $this->SendDebug('VehicleMQTT', 'SocTimestampVariableID=' . $timestampID, 0);
-        $this->SendDebug('VehicleMQTT', 'RangeVariableID=' . $rangeID, 0);
-
-        // SoC
-        if ($socID > 0 && IPS_ObjectExists($socID)) {
-            $soc = GetValue($socID);
-            $this->SendDebug('VehicleMQTT', 'SoC Rohwert=' . var_export($soc, true), 0);
-
-            if (is_numeric($soc)) {
-                $soc = max(0.0, min(100.0, (float) $soc));
-                $payload = rtrim(rtrim(number_format($soc, 1, '.', ''), '0'), '.');
-
-                $this->SendDebug('VehicleMQTT', 'Sende Topic=' . $baseTopic . '/soc', 0);
-                $this->SendDebug('VehicleMQTT', 'Sende Payload=' . $payload, 0);
-
-                $this->MQTTCommand($baseTopic . '/soc', $payload);
-            } else {
-                $this->SendDebug('VehicleMQTT', 'SoC nicht numerisch, wird nicht gesendet', 0);
-            }
-        } else {
-            $this->SendDebug('VehicleMQTT', 'SoC Datenpunkt ungültig oder nicht vorhanden', 0);
-        }
-
-        // Timestamp
-        $timestamp = time();
-        $timestampSource = 'time()';
-
-        if ($timestampID > 0 && IPS_ObjectExists($timestampID)) {
-            $value = GetValue($timestampID);
-            $this->SendDebug('VehicleMQTT', 'Timestamp Rohwert=' . var_export($value, true), 0);
-
-            if (is_numeric($value)) {
-                $timestamp = max(0, (int) $value);
-                $timestampSource = 'Variable';
-            } else {
-                $this->SendDebug('VehicleMQTT', 'Timestamp nicht numerisch, aktueller Zeitstempel wird verwendet', 0);
-            }
-        } else {
-            $this->SendDebug('VehicleMQTT', 'Kein Timestamp-Datenpunkt vorhanden, aktueller Zeitstempel wird verwendet', 0);
-        }
-
-        $this->SendDebug('VehicleMQTT', 'Timestamp Quelle=' . $timestampSource, 0);
-        $this->SendDebug('VehicleMQTT', 'Sende Topic=' . $baseTopic . '/soc_timestamp', 0);
-        $this->SendDebug('VehicleMQTT', 'Sende Payload=' . (string) $timestamp, 0);
-
-        $this->MQTTCommand($baseTopic . '/soc_timestamp', (string) $timestamp);
-
-        // Range
-        if ($rangeID > 0 && IPS_ObjectExists($rangeID)) {
-            $range = GetValue($rangeID);
-            $this->SendDebug('VehicleMQTT', 'Range Rohwert=' . var_export($range, true), 0);
-
-            if (is_numeric($range)) {
-                $range = max(0.0, (float) $range);
-                $payload = rtrim(rtrim(number_format($range, 1, '.', ''), '0'), '.');
-
-                $this->SendDebug('VehicleMQTT', 'Sende Topic=' . $baseTopic . '/range', 0);
-                $this->SendDebug('VehicleMQTT', 'Sende Payload=' . $payload, 0);
-
-                $this->MQTTCommand($baseTopic . '/range', $payload);
-            } else {
-                $this->SendDebug('VehicleMQTT', 'Range nicht numerisch, wird nicht gesendet', 0);
-            }
-        } else {
-            $this->SendDebug('VehicleMQTT', 'Range Datenpunkt ungültig oder nicht vorhanden', 0);
-        }
-
-        $this->SendDebug('VehicleMQTT', '--- PublishLinkedSOCData beendet ---', 0);
-    }
-
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data): void
     {
         parent::MessageSink($TimeStamp, $SenderID, $Message, $Data);
@@ -1622,22 +1534,124 @@ class openWB2 extends IPSModuleStrict
         $timestampID = (int) $this->ReadPropertyInteger('SocTimestampVariableID');
         $rangeID     = (int) $this->ReadPropertyInteger('RangeVariableID');
 
-        if (in_array($SenderID, [$socID, $timestampID, $rangeID], true)) {
-
-            $source = 'unbekannt';
-            if ($SenderID === $socID) {
-                $source = 'SoC';
-            } elseif ($SenderID === $timestampID) {
-                $source = 'Timestamp';
-            } elseif ($SenderID === $rangeID) {
-                $source = 'Range';
-            }
-
-            $this->SendDebug('MessageSink', 'VM_UPDATE von ID=' . $SenderID . ' Quelle=' . $source . ' -> verzögert senden', 0);
-
-            // 🔥 wichtig: Timer statt Direktaufruf
-            $this->SetTimerInterval('PublishVehicleDataTimer', 300);
+        if ($SenderID === $socID) {
+            $this->SendDebug('MessageSink', 'SoC geändert -> sende SoC', 0);
+            $this->PublishLinkedSOC();
+            return;
         }
+
+        if ($SenderID === $timestampID) {
+            $this->SendDebug('MessageSink', 'Timestamp geändert -> sende Timestamp', 0);
+            $this->PublishLinkedSOCTimestamp();
+            return;
+        }
+
+        if ($SenderID === $rangeID) {
+            $this->SendDebug('MessageSink', 'Range geändert -> sende Range', 0);
+            $this->PublishLinkedRange();
+            return;
+        }
+    }
+
+    public function PublishLinkedSOC(): void
+    {
+        $vehicleID = max(0, (int) $this->ReadPropertyInteger('VehicleMQTTID'));
+        $topic     = 'set/mqtt/vehicle/' . $vehicleID . '/get/soc';
+        $socID     = (int) $this->ReadPropertyInteger('SocVariableID');
+
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedSOC gestartet ---', 0);
+        $this->SendDebug('VehicleMQTT', 'VehicleMQTTID=' . $vehicleID, 0);
+        $this->SendDebug('VehicleMQTT', 'SocVariableID=' . $socID, 0);
+
+        if ($socID <= 0 || !IPS_ObjectExists($socID)) {
+            $this->SendDebug('VehicleMQTT', 'SoC Datenpunkt ungültig oder nicht vorhanden', 0);
+            return;
+        }
+
+        $soc = GetValue($socID);
+        $this->SendDebug('VehicleMQTT', 'SoC Rohwert=' . var_export($soc, true), 0);
+
+        if (!is_numeric($soc)) {
+            $this->SendDebug('VehicleMQTT', 'SoC nicht numerisch, wird nicht gesendet', 0);
+            return;
+        }
+
+        $soc = max(0.0, min(100.0, (float) $soc));
+        $payload = rtrim(rtrim(number_format($soc, 1, '.', ''), '0'), '.');
+
+        $this->SendDebug('VehicleMQTT', 'Sende Topic=' . $topic, 0);
+        $this->SendDebug('VehicleMQTT', 'Sende Payload=' . $payload, 0);
+
+        $this->MQTTCommand($topic, $payload);
+
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedSOC beendet ---', 0);
+    }
+
+    public function PublishLinkedSOCTimestamp(): void
+    {
+        $vehicleID   = max(0, (int) $this->ReadPropertyInteger('VehicleMQTTID'));
+        $topic       = 'set/mqtt/vehicle/' . $vehicleID . '/get/soc_timestamp';
+        $timestampID = (int) $this->ReadPropertyInteger('SocTimestampVariableID');
+
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedSOCTimestamp gestartet ---', 0);
+        $this->SendDebug('VehicleMQTT', 'VehicleMQTTID=' . $vehicleID, 0);
+        $this->SendDebug('VehicleMQTT', 'SocTimestampVariableID=' . $timestampID, 0);
+
+        if ($timestampID <= 0 || !IPS_ObjectExists($timestampID)) {
+            $this->SendDebug('VehicleMQTT', 'Timestamp Datenpunkt ungültig oder nicht vorhanden', 0);
+            return;
+        }
+
+        $timestamp = GetValue($timestampID);
+        $this->SendDebug('VehicleMQTT', 'Timestamp Rohwert=' . var_export($timestamp, true), 0);
+
+        if (!is_numeric($timestamp)) {
+            $this->SendDebug('VehicleMQTT', 'Timestamp nicht numerisch, wird nicht gesendet', 0);
+            return;
+        }
+
+        $payload = (string) max(0, (int) $timestamp);
+
+        $this->SendDebug('VehicleMQTT', 'Sende Topic=' . $topic, 0);
+        $this->SendDebug('VehicleMQTT', 'Sende Payload=' . $payload, 0);
+
+        $this->MQTTCommand($topic, $payload);
+
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedSOCTimestamp beendet ---', 0);
+    }
+
+    public function PublishLinkedRange(): void
+    {
+        $vehicleID = max(0, (int) $this->ReadPropertyInteger('VehicleMQTTID'));
+        $topic     = 'set/mqtt/vehicle/' . $vehicleID . '/get/range';
+        $rangeID   = (int) $this->ReadPropertyInteger('RangeVariableID');
+
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedRange gestartet ---', 0);
+        $this->SendDebug('VehicleMQTT', 'VehicleMQTTID=' . $vehicleID, 0);
+        $this->SendDebug('VehicleMQTT', 'RangeVariableID=' . $rangeID, 0);
+
+        if ($rangeID <= 0 || !IPS_ObjectExists($rangeID)) {
+            $this->SendDebug('VehicleMQTT', 'Range Datenpunkt ungültig oder nicht vorhanden', 0);
+            return;
+        }
+
+        $range = GetValue($rangeID);
+        $this->SendDebug('VehicleMQTT', 'Range Rohwert=' . var_export($range, true), 0);
+
+        if (!is_numeric($range)) {
+            $this->SendDebug('VehicleMQTT', 'Range nicht numerisch, wird nicht gesendet', 0);
+            return;
+        }
+
+        $range = max(0.0, (float) $range);
+        $payload = rtrim(rtrim(number_format($range, 1, '.', ''), '0'), '.');
+
+        $this->SendDebug('VehicleMQTT', 'Sende Topic=' . $topic, 0);
+        $this->SendDebug('VehicleMQTT', 'Sende Payload=' . $payload, 0);
+
+        $this->MQTTCommand($topic, $payload);
+
+        $this->SendDebug('VehicleMQTT', '--- PublishLinkedRange beendet ---', 0);
     }
 
     private function GetVariableDefinitions(): array
