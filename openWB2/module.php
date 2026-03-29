@@ -118,20 +118,25 @@ class openWB2 extends IPSModuleStrict
                     'caption' => 'Sperrzeit Phasenumschaltung (Sekunden)'
                 ],
                 [
-                    'name'    => 'SocVariableID',
-                    'type'    => 'SelectVariable',
-                    'caption' => 'EV-SoC Datenpunkt'
-                ],
-                [
-                    'name'    => 'SocTimestampVariableID',
-                    'type'    => 'SelectVariable',
-                    'caption' => 'SoC Zeitstempel Datenpunkt (optional)'
-                ],
-                [
-                    'name'    => 'RangeVariableID',
-                    'type'    => 'SelectVariable',
-                    'caption' => 'Reichweite Datenpunkt (optional)'
-                ],
+                    'type'    => 'ExpansionPanel',
+                    'caption' => 'SOC Datenpunkte',
+                    'items'   => [
+                        [
+                            'name'    => 'SocVariableID',
+                            'type'    => 'SelectVariable',
+                            'caption' => 'EV-SoC Datenpunkt'
+                        ],
+                        [
+                            'name'    => 'SocTimestampVariableID',
+                            'type'    => 'SelectVariable',
+                            'caption' => 'SoC Zeitstempel Datenpunkt (optional)'
+                        ],
+                        [
+                            'name'    => 'RangeVariableID',
+                            'type'    => 'SelectVariable',
+                            'caption' => 'Reichweite Datenpunkt (optional)'
+                        ],
+                    ],
                 [
                     'type'    => 'Label',
                     'caption' => 'Auswahl der anzulegenden Variablen'

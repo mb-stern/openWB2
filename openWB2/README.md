@@ -172,10 +172,11 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 
 ## Version
 
-Version 1.1 (21.3.26)
+Version 1.1 (29.3.26)
 - Sporadisches Blockieren der Phasenumschaltung durch anpassen des zugehörigen Timers auf 500ms behoben.
 - Voreingstellte Sperre nach Phasenumschaltung auf 120sec erhöht.
 - Zum berechnen des Stroms (Ampere) aus der Soll-Leistung wird nun fix 235V verwendet, da sonst der geforderte Strom nicht erreicht wird.
+- Der SOC kann nun der openWB durch Einbinden der entsprechenden Datenpunkte mitgeteilt werden.
 
 Version 1.0 (15.3.26)
 - Initale Version
