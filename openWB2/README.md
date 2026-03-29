@@ -120,7 +120,7 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 | Höchstpreis Eco | Nur ab openWB Revision 2 unterstützt - Maximaler Preis für das ECO Laden |
 | LadePriorität |
 | Begrenzung | Nur ab openWB Revision 2 unterstützt - Setzt den Typ der Ladebegrenzung für das Sofortladen |
-| SoC-Limit für das Fahrzeug | Nur ab openWB Revision 2 unterstützt - Setzt die SoC-Grenze für das Sofortladen (aktiv wenn Limit-Typ „EV-SoC“ ist) |
+| SoC-Limit für das Fahrzeug | Nur ab openWB Revision 2 unterstützt - Setzt die SoC-Grenze für das Sofortladen (aktiv wenn Limit-Typ „EV-SoC“ ist) und bedingt das Einbinden der SOC-Datenpunkte, falls die openWB diese Info nicht direkt vom Fahrezug beziehen kann|
 | Energie Limit | Nur ab openWB Revision 2 unterstützt - Setzt die Energiegrenze für das Sofortladen (aktiv wenn Limit-Typ „Energie“ ist) |
 
 ---
