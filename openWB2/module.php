@@ -82,40 +82,46 @@ class openWB2 extends IPSModuleStrict
     {
         $form = [
             'elements' => [
-                [
-                    'name'    => 'BaseTopic',
-                    'type'    => 'ValidationTextBox',
-                    'caption' => 'MQTT Topic'
-                ],
-                [
-                    'name'    => 'ChargePointID',
-                    'type'    => 'NumberSpinner',
-                    'caption' => 'Ladepunkt ID'
-                ],
-                [
-                    'name'    => 'ChargeTemplateID',
-                    'type'    => 'NumberSpinner',
-                    'caption' => 'Ladepunkt-Profil ID'
-                ],
-                [
-                    'name'    => 'VehicleMQTTID',
-                    'type'    => 'NumberSpinner',
-                    'caption' => 'Fahrzeug ID'
-                ],
-                [
-                    'name'    => 'MinCurrentPerPhase',
-                    'type'    => 'NumberSpinner',
-                    'caption' => 'Minimalstrom pro Phase (A)'
-                ],
-                [
-                    'name'    => 'MaxCurrentPerPhase',
-                    'type'    => 'NumberSpinner',
-                    'caption' => 'Maximalstrom pro Phase (A)'
-                ],
-                [
-                    'name'    => 'PhaseSwitchLockTime',
-                    'type'    => 'NumberSpinner',
-                    'caption' => 'Sperrzeit Phasenumschaltung (Sekunden)'
+               [
+                    'type'    => 'ExpansionPanel',
+                    'caption' => 'SOC Datenpunkte',
+                    'items'   => [
+                        [
+                            'name'    => 'BaseTopic',
+                            'type'    => 'ValidationTextBox',
+                            'caption' => 'MQTT Topic'
+                        ],
+                        [
+                            'name'    => 'ChargePointID',
+                            'type'    => 'NumberSpinner',
+                            'caption' => 'Ladepunkt ID'
+                        ],
+                        [
+                            'name'    => 'ChargeTemplateID',
+                            'type'    => 'NumberSpinner',
+                            'caption' => 'Ladepunkt-Profil ID'
+                        ],
+                        [
+                            'name'    => 'VehicleMQTTID',
+                            'type'    => 'NumberSpinner',
+                            'caption' => 'Fahrzeug ID'
+                        ],
+                        [
+                            'name'    => 'MinCurrentPerPhase',
+                            'type'    => 'NumberSpinner',
+                            'caption' => 'Minimalstrom pro Phase (A)'
+                        ],
+                        [
+                            'name'    => 'MaxCurrentPerPhase',
+                            'type'    => 'NumberSpinner',
+                            'caption' => 'Maximalstrom pro Phase (A)'
+                        ],
+                        [
+                            'name'    => 'PhaseSwitchLockTime',
+                            'type'    => 'NumberSpinner',
+                            'caption' => 'Sperrzeit Phasenumschaltung (Sekunden)'
+                        ],
+                    ],
                 ],
                 [
                     'type'    => 'ExpansionPanel',
