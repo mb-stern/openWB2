@@ -9,11 +9,11 @@ class openWB2 extends IPSModuleStrict
         $this->RegisterPropertyString('BaseTopic', 'openWB');
         $this->RegisterPropertyInteger('ChargePointID', 0);
         $this->RegisterPropertyInteger('ChargeTemplateID', 0);
+        $this->RegisterPropertyInteger('VehicleMQTTID', 0);
         $this->RegisterPropertyInteger('MinCurrentPerPhase', 6);
         $this->RegisterPropertyInteger('MaxCurrentPerPhase', 16);
         $this->RegisterPropertyInteger('PhaseSwitchLockTime', 120);
         $this->RegisterPropertyString('SelectedVariables', '[]');
-        $this->RegisterPropertyInteger('VehicleMQTTID', 0);
         $this->RegisterPropertyInteger('SocVariableID', 0);
         $this->RegisterPropertyInteger('SocTimestampVariableID', 0);
         $this->RegisterPropertyInteger('RangeVariableID', 0);
