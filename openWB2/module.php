@@ -1460,7 +1460,7 @@ class openWB2 extends IPSModuleStrict
     {
         $id = $this->GetIDForIdentSafe($ident);
         if ($id > 0 && IPS_ObjectExists($id)) {
-            IPS_DeleteVariable($id);
+            $this->UnregisterVariable($id);
         }
     }
 
