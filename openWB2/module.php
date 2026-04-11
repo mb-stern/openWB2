@@ -1422,7 +1422,7 @@ class openWB2 extends IPSModuleStrict
             }
 
             if (!$enabled && $exists) {
-                $this->UnregisterVariableByIdent($ident);
+                $this->UnregisterVariable($ident);
             }
         }
     }
@@ -1453,14 +1453,6 @@ class openWB2 extends IPSModuleStrict
 
         if ($action) {
             $this->EnableAction($ident);
-        }
-    }
-
-    private function UnregisterVariableByIdent(string $ident): void
-    {
-        $id = $this->GetIDForIdentSafe($ident);
-        if ($id > 0 && IPS_ObjectExists($id)) {
-            IPS_DeleteVariable($id);
         }
     }
 
