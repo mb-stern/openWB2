@@ -176,6 +176,9 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 
 ## Version
 
+Version 1.2 (14.04.26)
+- Anpassung der dynamischen Profile zur Shop-Kompatibilität
+
 Version 1.1 (29.3.26)
 - Sporadisches Blockieren der Phasenumschaltung durch anpassen des zugehörigen Timers auf 500ms behoben.
 - Voreingstellte Sperre nach Phasenumschaltung auf 120sec erhöht.
