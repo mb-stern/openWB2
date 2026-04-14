@@ -1225,24 +1225,23 @@ class openWB2 extends IPSModuleStrict
         IPS_SetVariableProfileText($powerProfile, '', ' W');
         IPS_SetVariableProfileValues($powerProfile, $minPower, $maxPower, 10);
 
-        $id = $this->GetIDForIdentSafe('SetChargeCurrent');
-        if ($id > 0) {
-            IPS_SetVariableCustomProfile($id, $ampereProfile);
+        if ($this->HasIdent('SetChargeCurrent')) {
+            $this->RegisterVariableInteger('SetChargeCurrent', 'Stromstärke', $ampereProfile, 310);
+            $this->EnableAction('SetChargeCurrent');
         }
 
-        $id = $this->GetIDForIdentSafe('ConfiguredCurrent');
-        if ($id > 0) {
-            IPS_SetVariableCustomProfile($id, $ampereProfile);
+        if ($this->HasIdent('ConfiguredCurrent')) {
+            $this->RegisterVariableInteger('ConfiguredCurrent', 'EVSE Aktuell', $ampereProfile, 30);
         }
 
-        $id = $this->GetIDForIdentSafe('SetMinimalPermanentCurrent');
-        if ($id > 0) {
-            IPS_SetVariableCustomProfile($id, $ampereProfile);
+        if ($this->HasIdent('SetMinimalPermanentCurrent')) {
+            $this->RegisterVariableInteger('SetMinimalPermanentCurrent', 'Minimaler Dauerstrom', $ampereProfile, 330);
+            $this->EnableAction('SetMinimalPermanentCurrent');
         }
 
-        $id = $this->GetIDForIdentSafe('SetChargePower');
-        if ($id > 0) {
-            IPS_SetVariableCustomProfile($id, $powerProfile);
+        if ($this->HasIdent('SetChargePower')) {
+            $this->RegisterVariableInteger('SetChargePower', 'Sollleistung', $powerProfile, 312);
+            $this->EnableAction('SetChargePower');
         }
     }
 
