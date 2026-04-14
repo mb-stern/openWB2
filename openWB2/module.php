@@ -1208,39 +1208,36 @@ class openWB2 extends IPSModuleStrict
         $minPower = (int) round($voltage * $minCurrent);
         $maxPower = (int) round($voltage * 3 * $maxCurrent);
 
-        $ampereProfile = 'OWB.Ampere.' . $this->InstanceID;
-        $powerProfile  = 'OWB.TargetPower.' . $this->InstanceID;
-
-        if (!IPS_VariableProfileExists($ampereProfile)) {
-            IPS_CreateVariableProfile($ampereProfile, VARIABLETYPE_INTEGER);
+        if (!IPS_VariableProfileExists('OWB.Ampere')) {
+            IPS_CreateVariableProfile('OWB.Ampere', VARIABLETYPE_INTEGER);
         }
-        IPS_SetVariableProfileIcon($ampereProfile, 'Electricity');
-        IPS_SetVariableProfileText($ampereProfile, '', ' A');
-        IPS_SetVariableProfileValues($ampereProfile, $minCurrent, $maxCurrent, 1);
+        IPS_SetVariableProfileIcon('OWB.Ampere', 'Electricity');
+        IPS_SetVariableProfileText('OWB.Ampere', '', ' A');
+        IPS_SetVariableProfileValues('OWB.Ampere', $minCurrent, $maxCurrent, 1);
 
-        if (!IPS_VariableProfileExists($powerProfile)) {
-            IPS_CreateVariableProfile($powerProfile, VARIABLETYPE_INTEGER);
+        if (!IPS_VariableProfileExists('OWB.TargetPower')) {
+            IPS_CreateVariableProfile('OWB.TargetPower', VARIABLETYPE_INTEGER);
         }
-        IPS_SetVariableProfileIcon($powerProfile, 'Electricity');
-        IPS_SetVariableProfileText($powerProfile, '', ' W');
-        IPS_SetVariableProfileValues($powerProfile, $minPower, $maxPower, 10);
+        IPS_SetVariableProfileIcon('OWB.TargetPower', 'Electricity');
+        IPS_SetVariableProfileText('OWB.TargetPower', '', ' W');
+        IPS_SetVariableProfileValues('OWB.TargetPower', $minPower, $maxPower, 10);
 
         if ($this->HasIdent('SetChargeCurrent')) {
-            $this->RegisterVariableInteger('SetChargeCurrent', 'Stromstärke', $ampereProfile, 310);
+            $this->RegisterVariableInteger('SetChargeCurrent', 'Stromstärke', 'OWB.Ampere', 310);
             $this->EnableAction('SetChargeCurrent');
         }
 
         if ($this->HasIdent('ConfiguredCurrent')) {
-            $this->RegisterVariableInteger('ConfiguredCurrent', 'EVSE Aktuell', $ampereProfile, 30);
+            $this->RegisterVariableInteger('ConfiguredCurrent', 'EVSE Aktuell', 'OWB.Ampere', 30);
         }
 
         if ($this->HasIdent('SetMinimalPermanentCurrent')) {
-            $this->RegisterVariableInteger('SetMinimalPermanentCurrent', 'Minimaler Dauerstrom', $ampereProfile, 330);
+            $this->RegisterVariableInteger('SetMinimalPermanentCurrent', 'Minimaler Dauerstrom', 'OWB.Ampere', 330);
             $this->EnableAction('SetMinimalPermanentCurrent');
         }
 
         if ($this->HasIdent('SetChargePower')) {
-            $this->RegisterVariableInteger('SetChargePower', 'Sollleistung', $powerProfile, 312);
+            $this->RegisterVariableInteger('SetChargePower', 'Sollleistung', 'OWB.TargetPower', 312);
             $this->EnableAction('SetChargePower');
         }
     }
