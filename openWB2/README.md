@@ -182,7 +182,7 @@ Version 1.2 (14.04.26)
 
 Version 1.1 (29.3.26)
 - Sporadisches Blockieren der Phasenumschaltung durch anpassen des zugehörigen Timers auf 500ms behoben.
-- Voreingstellte Sperre nach Phasenumschaltung auf 120sec erhöht.
+- Voreingestellte Sperre nach Phasenumschaltung auf 120sec erhöht.
 - Zum berechnen des Stroms (Ampere) aus der Soll-Leistung wird nun fix 235V verwendet, da sonst der geforderte Strom nicht erreicht wird.
 - Der SOC kann nun der openWB durch Einbinden der entsprechenden Datenpunkte mitgeteilt werden.
 
