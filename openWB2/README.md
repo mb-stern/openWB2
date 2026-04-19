@@ -114,7 +114,7 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 | Lademodus | Lademodus am Ladepunkt ändern |
 | Stromstärke | Ladestrom für das Sofort laden |
 | Phasen Sofortladen | Anzahl Phasen beim Sofort-Laden (1 oder Maximum) |
-| Sollleistung | Vorgegebene Ladeleistung beim Sofortladen. Wir die Vorgabe über diesen Wert gemacht, findet die Phasenumschaltung automatisch statt. Die Sperrzeit für die Phasneunschaltung kann in der Konfiguration definiert werden. Wärenddessen wird die Vorgabe für Phasen und Strom gepuffert und nach Ablauf des Timers gesandt. |
+| Sollleistung | Vorgegebene Ladeleistung beim Sofortladen. Wir die Vorgabe über diesen Wert gemacht, findet die Phasenumschaltung automatisch statt. Die Sperrzeit für die Phasenumschaltung kann in der Konfiguration definiert werden. Wärenddessen wird die Vorgabe für Phasen und Strom gepuffert und nach Ablauf des Timers gesandt. |
 | Mindest SoC für das Fahrzeug | Nur ab openWB Revision 2 unterstützt - Minimaler EV SoC im PV Laden |
 | Minimaler Dauerstrom | Nur ab openWB Revision 2 unterstützt - Minimaler Dauerstrom für das PV Laden |
 | Höchstpreis Eco | Nur ab openWB Revision 2 unterstützt - Maximaler Preis für das ECO Laden |
