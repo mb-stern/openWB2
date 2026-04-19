@@ -178,7 +178,7 @@ openWB/simpleAPI/chargepoint/0/phases_in_use
 
 Version 1.2 (14.04.26)
 - Anpassung der dynamischen Profile zur Shop-Kompatibilität
-- Der Strom und die Anzahl Phasen wird nun wärend der Sperrzeit gepuffert und nach Ablauf des Timers an die Box gesendet
+- Der Strom und die Anzahl Phasen wird nun während der Sperrzeit gepuffert und nach Ablauf des Timers an die Box gesendet
 
 Version 1.1 (29.3.26)
 - Sporadisches Blockieren der Phasenumschaltung durch anpassen des zugehörigen Timers auf 500ms behoben.
