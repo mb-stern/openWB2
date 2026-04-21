@@ -72,6 +72,8 @@ Das Modul unterstützt eine automatische Umschaltung zwischen **einphasigem und 
 
 ## Konfiguration
 
+### openWB Konfiguration
+
 | Einstellung | Beschreibung |
 |-------------|--------------|
 | MQTT Topic | Basis-Topic der openWB - Standard ist 'openWB'.  |
@@ -84,6 +86,15 @@ Das Modul unterstützt eine automatische Umschaltung zwischen **einphasigem und 
 | Minimalstrom pro Phase | minimaler Ladestrom - Diese Einstellung wirkt sich direkt auf das Variablenprofil OWB.TargetPower.<Instanz-ID> und OWB.Ampere.<Instanz-ID> aus,um aus, um den Regelbereich für die vorgegebene Sollleistung und Ampere-Bereich festzulegen.  |
 | Maximalstrom pro Phase | maximaler Ladestrom - Diese Einstellung wirkt sich direkt auf das Variablenprofil OWB.TargetPower.<Instanz-ID> und OWB.Ampere.<Instanz-ID> aus,um aus, um den Regelbereich für die vorgegebene Sollleistung und Ampere-Bereich festzulegen. |
 | Sperrzeit Phasenumschaltung | Zeit in Sekunden, während der kein erneuter Phasenwechsel erlaubt ist - Der Grund hier ist, eine Störmeldung des angeschlossenen Farhrezuges zu verhindern. Voreingestellt sind 60 sec |
+
+
+### SOC Datenpunkte
+
+| Einstellung | Beschreibung |
+|-------------|--------------|
+| EV-SoC Datenpunkt | Fahrzeug-SoC mit Nachkommastellen (Float) oder Ganzzahl. Der Empfang dieser Daten muss in der openWB unter Konfiguration - Fahrzeuge unter dem Menupunkt 'SoC-Modul des Fahrzeugs' als MQTT konfiguriert werden.|
+| SoC Zeitstempel Datenpunkt | Zeitstempel des SoCs in s als Unix-Zeitstempel. Diese Info ist optional. Wird kein Wert für das Topic veröffentlicht, wird von der openWB automatisch der aktuelle Zeitstempel gesetzt. |
+| Reichweite Datenpunkt | Reichweite in km des aktuell ladenden Fahrzeuges. Diese Info ist optional. |
 
 ---
 
